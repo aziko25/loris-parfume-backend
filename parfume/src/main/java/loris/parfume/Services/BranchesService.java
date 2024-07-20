@@ -18,9 +18,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static loris.parfume.DefaultEntitiesService.DELIVERY_RATE;
@@ -127,7 +130,10 @@ public class BranchesService {
 
         double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch);
 
-        return new BranchesDTO(nearestBranch, sumForDelivery, distance);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        DecimalFormat df = new DecimalFormat("#.00", symbols);
+
+        return new BranchesDTO(nearestBranch, Double.valueOf(df.format(sumForDelivery)), Double.valueOf(df.format(distance)));
     }
 
     private Branches findNearestBranch(NearestBranchRequest request, List<Branches> branches) {

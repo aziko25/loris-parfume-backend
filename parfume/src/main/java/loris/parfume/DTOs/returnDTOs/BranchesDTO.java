@@ -1,10 +1,12 @@
 package loris.parfume.DTOs.returnDTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Branches;
 
 import java.time.LocalDateTime;
@@ -28,7 +30,10 @@ public class BranchesDTO {
 
     private String redirectTo;
 
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double deliverySum;
+
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double distance;
 
     public BranchesDTO(Branches branch, Double deliverySum, Double distance) {

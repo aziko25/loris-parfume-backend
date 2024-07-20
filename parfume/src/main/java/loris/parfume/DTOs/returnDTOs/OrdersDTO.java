@@ -1,8 +1,10 @@
 package loris.parfume.DTOs.returnDTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
 
@@ -28,7 +30,10 @@ public class OrdersDTO {
     private String addressLocationLink;
     private Double distance;
 
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double sumForDelivery;
+
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double totalSum;
 
     private String comments;

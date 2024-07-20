@@ -1,6 +1,7 @@
 package loris.parfume.DTOs.returnDTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
 import loris.parfume.Models.Items.Collections_Items;
@@ -12,6 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 
 @Getter
 @Setter
@@ -31,7 +33,10 @@ public class ItemsDTO {
     private String descriptionEng;
 
     private Integer quantity;
+
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double price;
+
     private Integer discountPercent;
     private String imageName;
 

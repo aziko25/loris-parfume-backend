@@ -1,9 +1,11 @@
 package loris.parfume.DTOs.returnDTOs;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Orders.Orders_Items;
 
 @Getter
@@ -24,7 +26,9 @@ public class Orders_Items_DTO {
     private String descriptionRu;
     private String descriptionEng;
 
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double totalPrice;
+
     private Integer quantity;
 
     private Long collectionId;

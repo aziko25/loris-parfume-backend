@@ -133,7 +133,10 @@ public class BranchesService {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.00", symbols);
 
-        return new BranchesDTO(nearestBranch, Double.valueOf(df.format(sumForDelivery)), Double.valueOf(df.format(distance)));
+        double formattedDistance = Double.parseDouble(df.format(distance));
+        double formattedSumForDelivery = Double.parseDouble(df.format(sumForDelivery));
+
+        return new BranchesDTO(nearestBranch, formattedSumForDelivery, formattedDistance);
     }
 
     private Branches findNearestBranch(NearestBranchRequest request, List<Branches> branches) {

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 import loris.parfume.Models.Items.Sizes_Items;
 

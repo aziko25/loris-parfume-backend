@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import loris.parfume.Models.Items.Items;
-import loris.parfume.Models.Items.Recommended_Items;
 
 import java.util.List;
 import java.util.stream.Collectors;

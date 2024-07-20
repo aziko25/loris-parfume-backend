@@ -3,6 +3,7 @@ package loris.parfume.Controllers.Items;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Filters.ItemFilters;
 import loris.parfume.DTOs.Requests.Items.ItemsRequest;
 import loris.parfume.Services.Items.ItemsService;
@@ -19,7 +20,7 @@ public class ItemsController {
 
     private final ItemsService itemsService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestParam(value = "media") MultipartFile media,
                                     @RequestParam("item") String itemJson) throws JsonProcessingException {
@@ -41,6 +42,7 @@ public class ItemsController {
         return ResponseEntity.ok(itemsService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
                                     @RequestParam(value = "media") MultipartFile media,
@@ -51,6 +53,7 @@ public class ItemsController {
         return ResponseEntity.ok(itemsService.update(id, media, itemsRequest));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

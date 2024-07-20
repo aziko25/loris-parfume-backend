@@ -1,6 +1,7 @@
 package loris.parfume.Controllers.Items;
 
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Requests.Items.RecommendedItemsRequest;
 import loris.parfume.Services.Items.Recommended_Items_Service;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ public class RecommendedItemsController {
 
     private final Recommended_Items_Service recommendedItemsService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody RecommendedItemsRequest recommendedItemsRequest) {
 
@@ -34,6 +35,7 @@ public class RecommendedItemsController {
         return ResponseEntity.ok(recommendedItemsService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody(required = false) RecommendedItemsRequest recommendedItemsRequest) {
 

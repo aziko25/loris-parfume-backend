@@ -17,7 +17,7 @@ public class BranchesController {
 
     private final BranchesService branchesService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody BranchesRequest branchesRequest) {
 
@@ -42,12 +42,14 @@ public class BranchesController {
         return ResponseEntity.ok(branchesService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody(required = false) BranchesRequest branchesRequest) {
 
         return ResponseEntity.ok(branchesService.update(id, branchesRequest));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

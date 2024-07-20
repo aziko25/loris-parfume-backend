@@ -1,6 +1,7 @@
 package loris.parfume.Controllers.Items;
 
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Requests.Items.CollectionsRequest;
 import loris.parfume.Services.Items.CollectionsService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ public class CollectionsController {
 
     private final CollectionsService collectionsService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody CollectionsRequest collectionsRequest) {
 
@@ -34,12 +35,14 @@ public class CollectionsController {
         return ResponseEntity.ok(collectionsService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody(required = false) CollectionsRequest collectionsRequest) {
 
         return ResponseEntity.ok(collectionsService.update(id, collectionsRequest));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

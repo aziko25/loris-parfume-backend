@@ -1,6 +1,7 @@
 package loris.parfume.Controllers.Items;
 
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Filters.CategoryFilters;
 import loris.parfume.DTOs.Requests.Items.CategoriesRequest;
 import loris.parfume.Services.Items.CategoriesService;
@@ -16,7 +17,7 @@ public class CategoriesController {
 
     private final CategoriesService categoriesService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody CategoriesRequest categoriesRequest) {
 
@@ -36,12 +37,14 @@ public class CategoriesController {
         return ResponseEntity.ok(categoriesService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CategoriesRequest categoriesRequest) {
 
         return ResponseEntity.ok(categoriesService.update(id, categoriesRequest));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

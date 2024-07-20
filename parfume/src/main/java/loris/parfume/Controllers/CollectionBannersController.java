@@ -22,7 +22,7 @@ public class CollectionBannersController {
 
     private final CollectionBannersService collectionBannersService;
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
                                     @RequestParam("banner") String bannerJson) throws JsonProcessingException {
@@ -45,7 +45,7 @@ public class CollectionBannersController {
         return ResponseEntity.ok(collectionBannersService.getById(id));
     }
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
                                     @RequestParam(value = "media", required = false) List<MultipartFile> media,
@@ -56,7 +56,7 @@ public class CollectionBannersController {
         return ResponseEntity.ok(collectionBannersService.update(id, media, bannersRequest));
     }
 
-    //@Authorization(requiredRoles = {"ADMIN"})
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

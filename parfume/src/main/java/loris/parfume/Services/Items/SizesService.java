@@ -9,11 +9,12 @@ import loris.parfume.DTOs.returnDTOs.SizesDTO;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 import loris.parfume.Models.Items.Sizes_Items;
+import loris.parfume.Models.Orders.Orders_Items;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.SizesRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
+import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +34,7 @@ public class SizesService {
     private final SizesRepository sizesRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
     private final ItemsRepository itemsRepository;
-
-    public static Long DEFAULT_NO_SIZE;
+    private final Orders_Items_Repository ordersItemsRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -50,30 +50,6 @@ public class SizesService {
                 .build();
 
         return new SizesDTO(sizesRepository.save(size));
-    }
-
-    // Creates default no size for items that doesn't have sizes, so it must not be deleted
-    @Bean
-    public void createDefault() {
-
-        System.out.println("Running size default");
-
-        Sizes size = sizesRepository.findByIsDefaultNoSize(true);
-
-        if (size == null) {
-
-            size = Sizes.builder()
-                    .createdTime(LocalDateTime.now())
-                    .nameUz("Razmeri Yo'q")
-                    .nameRu("Нет Размеров")
-                    .nameEng("No Sizes")
-                    .isDefaultNoSize(true)
-                    .build();
-
-            sizesRepository.save(size);
-        }
-
-        DEFAULT_NO_SIZE = size.getId();
     }
 
     @Transactional
@@ -153,7 +129,23 @@ public class SizesService {
 
         Sizes size = sizesRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
 
+        if (size.getIsDefaultNoSize()) {
+
+            throw new IllegalArgumentException("You Can't Delete Default Size!");
+        }
+
+        Sizes defaultSize = sizesRepository.findByIsDefaultNoSize(true);
+
         sizesItemsRepository.deleteAllBySize(size);
+
+        List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllBySize(size);
+        List<Orders_Items> batchUpdateOrderItemsList = new ArrayList<>();
+        for (Orders_Items ordersItem : ordersItemsList) {
+
+            ordersItem.setSize(defaultSize);
+            batchUpdateOrderItemsList.add(ordersItem);
+        }
+        ordersItemsRepository.saveAll(batchUpdateOrderItemsList);
 
         sizesRepository.delete(size);
 

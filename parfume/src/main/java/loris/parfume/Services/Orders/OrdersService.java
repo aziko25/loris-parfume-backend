@@ -204,4 +204,15 @@ public class OrdersService {
         return ordersRepository.findByIdAndUser(id, user).map(OrdersDTO::new)
                 .orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
     }
+
+    public String delete(Long id) {
+
+        Orders order = ordersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
+
+        ordersItemsRepository.deleteAllByOrder(order);
+
+        ordersRepository.delete(order);
+
+        return "Order Successfully Deleted";
+    }
 }

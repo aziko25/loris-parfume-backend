@@ -10,6 +10,7 @@ import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.*;
+import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.WishlistRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ public class ItemsService {
     private final Recommended_Items_Repository recommendedItemsRepository;
     private final WishlistRepository wishlistRepository;
     private final BasketsRepository basketsRepository;
+    private final Orders_Items_Repository ordersItemsRepository;
 
     private final FileUploadUtilService fileUploadUtilService;
 
@@ -169,6 +171,7 @@ public class ItemsService {
         recommendedItemsRepository.deleteAllByItem(item);
         wishlistRepository.deleteAllByItem(item);
         basketsRepository.deleteAllByItem(item);
+        ordersItemsRepository.deleteAllByItem(item);
 
         fileUploadUtilService.handleMediaDeletion(item.getImageName());
 

@@ -6,7 +6,6 @@ import loris.parfume.DTOs.Requests.Orders.DeliveryRatesRequest;
 import loris.parfume.Models.Orders.DeliveryRates;
 import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +22,6 @@ public class DeliveryRatesService {
 
     @Value("${pageSize}")
     private Integer pageSize;
-
-    public static DeliveryRates DELIVERY_RATE;
 
     public DeliveryRates create(DeliveryRatesRequest deliveryRatesRequest) {
 
@@ -48,28 +45,6 @@ public class DeliveryRatesService {
         }
 
         return deliveryRatesRepository.save(deliveryRates);
-    }
-
-    @Bean
-    public void createDefaultRate() {
-
-        DeliveryRates deliveryRate = deliveryRatesRepository.findByIsDefault(true);
-
-        if (deliveryRate == null) {
-
-            deliveryRate = new DeliveryRates();
-
-            deliveryRate.setCreatedTime(LocalDateTime.now());
-            deliveryRate.setName("Дефолтный Тариф");
-            deliveryRate.setIsDefault(true);
-            deliveryRate.setIsFixed(true);
-            deliveryRate.setSumPerKm(2000.0);
-            deliveryRate.setIsActive(true);
-
-            deliveryRatesRepository.save(deliveryRate);
-        }
-
-        DELIVERY_RATE = deliveryRate;
     }
 
     public Page<DeliveryRates> all(Integer page, String search) {

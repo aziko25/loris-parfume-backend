@@ -19,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
-import static loris.parfume.Services.Items.SizesService.DEFAULT_NO_SIZE;
+import static loris.parfume.DefaultEntitiesService.DEFAULT_NO_SIZE;
 
 @Service
 @RequiredArgsConstructor

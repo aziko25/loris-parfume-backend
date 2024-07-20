@@ -7,8 +7,10 @@ import loris.parfume.DTOs.Requests.NearestBranchRequest;
 import loris.parfume.DTOs.returnDTOs.BranchesDTO;
 import loris.parfume.Models.Branches;
 import loris.parfume.Models.Orders.DeliveryRates;
+import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
+import loris.parfume.Repositories.Orders.OrdersRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,10 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static loris.parfume.Services.Orders.DeliveryRatesService.DELIVERY_RATE;
+import static loris.parfume.DefaultEntitiesService.DELIVERY_RATE;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class BranchesService {
 
     private final BranchesRepository branchesRepository;
     private final DeliveryRatesRepository deliveryRatesRepository;
+    private final OrdersRepository ordersRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -75,6 +79,15 @@ public class BranchesService {
     public String delete(Long id) {
 
         Branches branch = getById(id);
+
+        List<Orders> ordersList = ordersRepository.findAllByBranch(branch);
+        List<Orders> batchUpdateOrdersList = new ArrayList<>();
+        for (Orders order : ordersList) {
+
+            order.setBranch(null);
+            batchUpdateOrdersList.add(order);
+        }
+        ordersRepository.saveAll(batchUpdateOrdersList);
 
         branchesRepository.delete(branch);
 

@@ -1,5 +1,6 @@
 package loris.parfume.Repositories.Items;
 
+import loris.parfume.Models.Items.Categories;
 import loris.parfume.Models.Items.Items;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 @Repository
 public interface ItemsRepository extends JpaRepository<Items, Long> {
@@ -31,4 +34,6 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             @Param("firstExpensive") Boolean firstExpensive,
             @Param("firstCheap") Boolean firstCheap,
             Pageable pageable);
+
+    List<Items> findAllByCategory(Categories category);
 }

@@ -1,10 +1,12 @@
 package loris.parfume.Controllers.Orders;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Models.Items.Sizes_Items;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
+import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
@@ -28,6 +30,7 @@ public class ClickOrdersController {
     private final Orders_Items_Repository ordersItemsRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
     private final MainTelegramBot mainTelegramBot;
+    private final ItemsRepository itemsRepository;
 
     @Value("${payment.chat.id}")
     private String chatId;
@@ -49,6 +52,7 @@ public class ClickOrdersController {
         return ResponseEntity.ok(response);
     }
 
+    @Transactional
     @PostMapping("/complete-order")
     public ResponseEntity<Map<String, Object>> completeOrder(@RequestParam Map<String, String> body) {
 
@@ -112,6 +116,9 @@ public class ClickOrdersController {
         response.put("error_note", "Success");
         response.put("merchant_confirm_id", 1);
 
+        order.setIsPaid(true);
+        ordersRepository.save(order);
+
         return ResponseEntity.ok(response);
     }
 
@@ -127,13 +134,29 @@ public class ClickOrdersController {
 
         if (ordersItems.getSize().getIsDefaultNoSize()) {
 
-            return ordersItems.getItem().getQuantity() >= ordersItems.getQuantity();
+            int currentQuantity = ordersItems.getItem().getQuantity();
+
+            if (currentQuantity >= ordersItems.getQuantity()) {
+
+                ordersItems.getItem().setQuantity(currentQuantity - ordersItems.getQuantity());
+                itemsRepository.save(ordersItems.getItem());
+
+                return true;
+            }
         }
         else {
 
             Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(ordersItems.getItem(), ordersItems.getSize());
 
-            return sizesItem != null && sizesItem.getQuantity() >= ordersItems.getQuantity();
+            if (sizesItem != null && sizesItem.getQuantity() >= ordersItems.getQuantity()) {
+
+                sizesItem.setQuantity(sizesItem.getQuantity() - ordersItems.getQuantity());
+                sizesItemsRepository.save(sizesItem);
+
+                return true;
+            }
         }
+
+        return false;
     }
 }

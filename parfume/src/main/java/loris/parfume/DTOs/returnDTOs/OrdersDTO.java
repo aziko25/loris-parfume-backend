@@ -52,6 +52,7 @@ public class OrdersDTO {
     private String branchRedirectTo;
 
     private String paymentLink;
+    private Boolean isPaid;
 
     private List<Orders_Items_DTO> itemsList;
 
@@ -76,6 +77,7 @@ public class OrdersDTO {
         scheduledDeliveryTime = order.getScheduledDeliveryTime();
 
         paymentLink = order.getPaymentLink();
+        isPaid = order.getIsPaid();
 
         if (order.getBranch() != null) {
 

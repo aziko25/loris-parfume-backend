@@ -60,6 +60,8 @@ public class OrdersService {
     @Value("${paymentReturnUrl}")
     private String paymentReturnUrl;
 
+    private static final String[] paymentTypesList = {"CLICK", "CASH"};
+
     @Transactional
     public OrdersDTO create(OrdersRequest ordersRequest) {
 
@@ -69,6 +71,11 @@ public class OrdersService {
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.00", symbols);
+
+        if (!Arrays.asList(paymentTypesList).contains(ordersRequest.getPaymentType().toUpperCase())) {
+
+            throw new IllegalArgumentException("Invalid payment type: " + ordersRequest.getPaymentType());
+        }
 
         Orders order = Orders.builder()
                 .createdTime(LocalDateTime.now())
@@ -168,10 +175,19 @@ public class OrdersService {
 
         order.setItemsList(saveAllOrderItemsList);
 
-        order.setPaymentLink("https://my.click.uz/services/pay?service_id=" + clickServiceId + "&merchant_id=" + clickMerchantId +
-                "&return_url=" + paymentReturnUrl +
-                "&amount=" + order.getTotalSum() +
-                "&transaction_param=" + order.getId());
+        if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
+
+            order.setPaymentLink("https://my.click.uz/services/pay?service_id=" + clickServiceId + "&merchant_id=" + clickMerchantId +
+                    "&return_url=" + paymentReturnUrl +
+                    "&amount=" + order.getTotalSum() +
+                    "&transaction_param=" + order.getId());
+            order.setIsPaid(false);
+        }
+        else if (ordersRequest.getPaymentType().equalsIgnoreCase("CASH")) {
+
+            order.setPaymentLink("CASH");
+            order.setIsPaid(true);
+        }
 
         return new OrdersDTO(order);
     }

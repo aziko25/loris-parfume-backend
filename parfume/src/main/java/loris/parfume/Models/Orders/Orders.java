@@ -45,6 +45,7 @@ public class Orders {
     private LocalDateTime scheduledDeliveryTime;
 
     private String paymentLink;
+    private Boolean isPaid;
 
     @ManyToOne
     @JoinColumn(name = "branch_id")

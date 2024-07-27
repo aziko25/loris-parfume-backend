@@ -40,25 +40,10 @@ public class ClickOrdersController {
 
         String clickTransId = body.get("click_trans_id");
         String merchantTransId = body.get("merchant_trans_id");
-
-        Map<String, String> response = new HashMap<>();
-
-        response.put("click_trans_id", clickTransId);
-        response.put("merchant_trans_id", merchantTransId);
-        response.put("merchant_prepare_id", merchantTransId);
-        response.put("error", "0");
-        response.put("error_note", "Success");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Transactional
-    @PostMapping("/complete-order")
-    public ResponseEntity<Map<String, Object>> completeOrder(@RequestParam Map<String, String> body) {
-
-        String clickTransId = body.get("click_trans_id");
-        String merchantTransId = body.get("merchant_trans_id");
         String error = body.get("error");
+
+        float amountFloat = Float.parseFloat(body.get("amount"));
+        Double amount = (double) amountFloat;
 
         Map<String, Object> response = new HashMap<>();
 
@@ -77,8 +62,50 @@ public class ClickOrdersController {
 
         if (order == null) {
 
-            return createErrorResponse(response, "Заказ Не Найден!");
+            return createErrorResponse(response, -6, "Transaction does not exist");
         }
+
+        isTransactionValid(order, response, amount);
+
+        response.put("merchant_prepare_id", merchantTransId);
+        response.put("error", "0");
+        response.put("error_note", "Success");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Transactional
+    @PostMapping("/complete-order")
+    public ResponseEntity<Map<String, Object>> completeOrder(@RequestParam Map<String, String> body) {
+
+        String clickTransId = body.get("click_trans_id");
+        String merchantTransId = body.get("merchant_trans_id");
+        String error = body.get("error");
+
+        float amountFloat = Float.parseFloat(body.get("amount"));
+        Double amount = (double) amountFloat;
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("click_trans_id", clickTransId);
+        response.put("merchant_trans_id", merchantTransId);
+
+        if (!"0".equals(error)) {
+
+            response.put("merchant_confirm_id", null);
+
+            return ResponseEntity.ok(response);
+        }
+
+        Long orderId = Long.valueOf(merchantTransId);
+        Orders order = ordersRepository.findById(orderId).orElse(null);
+
+        if (order == null) {
+
+            return createErrorResponse(response, -6, "Transaction does not exist");
+        }
+
+        isTransactionValid(order, response, amount);
 
         List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllByOrder(order);
 
@@ -86,31 +113,11 @@ public class ClickOrdersController {
 
             if (!isStockAvailable(ordersItems)) {
 
-                return createErrorResponse(response, "Товар Закончился!");
+                return createErrorResponse(response, -406, "Товар закончился");
             }
         }
 
-        SendMessage sendMessage = new SendMessage();
-
-        sendMessage.setChatId(chatId);
-        String message = "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
-                "\nТелефон: " + order.getPhone() +
-                "\nАдрес: " + order.getAddress() +
-                "\nСсылка на адрес: " + order.getAddressLocationLink() +
-                "\nКомментарий: " + order.getComments() +
-                "\nФилиал: " + order.getBranch().getName() +
-                "\nОбщая Сумма за заказ: " + order.getTotalSum() +
-                "\nСумма за доставку: " + order.getSumForDelivery() +
-                "\nТовары: " + order.getItemsList().stream()
-                .map(ordersItems -> ordersItems.getItem().getNameRu() + " (" + ordersItems.getQuantity() + " шт., размер: " + ordersItems.getSize().getNameRu() + ")")
-                .collect(Collectors.joining(", ")) +
-                "\nТип Заказа: " + (order.getIsDelivery() ? "Доставка" : "Самовывоз") +
-                (order.getIsSoonDeliveryTime() ? "\nДоставка в ближайшее время" : "\nЗапланированное время доставки: " +
-                        (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Не запланировано"));
-
-        sendMessage.setText(message);
-
-        mainTelegramBot.sendMessage(sendMessage);
+        sendOrderDetailsToTelegram(order);
 
         response.put("error", "0");
         response.put("error_note", "Success");
@@ -122,12 +129,17 @@ public class ClickOrdersController {
         return ResponseEntity.ok(response);
     }
 
-    private ResponseEntity<Map<String, Object>> createErrorResponse(Map<String, Object> response, String errorNote) {
+    private void isTransactionValid(Orders order, Map<String, Object> response, Double amount) {
 
-        response.put("error", "-1905");
-        response.put("error_note", errorNote);
+        if (order.getIsPaid()) {
 
-        return ResponseEntity.ok(response);
+            createErrorResponse(response, -4, "Already paid");
+        }
+
+        if (Math.abs(order.getTotalSum() - amount) > 0.00001) {
+
+            createErrorResponse(response, -2, "Incorrect parameter amount");
+        }
     }
 
     private boolean isStockAvailable(Orders_Items ordersItems) {
@@ -158,5 +170,39 @@ public class ClickOrdersController {
         }
 
         return false;
+    }
+
+    private void sendOrderDetailsToTelegram(Orders order) {
+
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setChatId(chatId);
+        String message = "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
+                "\nТелефон: " + order.getPhone() +
+                "\nАдрес: " + order.getAddress() +
+                "\nСсылка на адрес: " + order.getAddressLocationLink() +
+                "\nКомментарий: " + order.getComments() +
+                "\nФилиал: " + order.getBranch().getName() +
+                "\nОбщая Сумма за заказ: " + order.getTotalSum() +
+                "\nСумма за доставку: " + order.getSumForDelivery() +
+                "\nТовары: " + order.getItemsList().stream()
+                .map(ordersItems -> ordersItems.getItem().getNameRu() + " (" + ordersItems.getQuantity() + " шт., размер: " + ordersItems.getSize().getNameRu() + ")")
+                .collect(Collectors.joining(", ")) +
+                "\nТип Заказа: " + (order.getIsDelivery() ? "Доставка" : "Самовывоз") +
+                (order.getIsSoonDeliveryTime() ? "\nДоставка в ближайшее время" : "\nЗапланированное время доставки: " +
+                        (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Не запланировано"));
+
+        sendMessage.setText(message);
+
+        mainTelegramBot.sendMessage(sendMessage);
+    }
+
+    private ResponseEntity<Map<String, Object>> createErrorResponse(Map<String, Object> response,
+                                                                    Integer errorCode, String errorNote) {
+
+        response.put("error", errorCode);
+        response.put("error_note", errorNote);
+
+        return ResponseEntity.ok(response);
     }
 }

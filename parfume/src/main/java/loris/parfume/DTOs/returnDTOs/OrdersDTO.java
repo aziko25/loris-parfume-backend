@@ -54,6 +54,10 @@ public class OrdersDTO {
     private String paymentLink;
     private Boolean isPaid;
 
+    private String paymentResponseUz;
+    private String paymentResponseRu;
+    private String paymentResponseEng;
+
     private List<Orders_Items_DTO> itemsList;
 
     public OrdersDTO(Orders order) {
@@ -78,6 +82,10 @@ public class OrdersDTO {
 
         paymentLink = order.getPaymentLink();
         isPaid = order.getIsPaid();
+
+        paymentResponseUz = order.getPaymentResponseUz();
+        paymentResponseRu = order.getPaymentResponseRu();
+        paymentResponseEng = order.getPaymentResponseEng();
 
         if (order.getBranch() != null) {
 

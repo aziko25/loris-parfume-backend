@@ -47,6 +47,10 @@ public class Orders {
     private String paymentLink;
     private Boolean isPaid;
 
+    private String paymentResponseUz;
+    private String paymentResponseRu;
+    private String paymentResponseEng;
+
     @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branches branch;

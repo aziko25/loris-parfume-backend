@@ -123,6 +123,12 @@ public class ClickOrdersController {
 
             if (!isStockAvailable(ordersItems)) {
 
+                order.setPaymentResponseUz("Sotuvdagidan Ko'proq Miqdor Kiritildi");
+                order.setPaymentResponseRu("Введено количество больше, чем в наличии");
+                order.setPaymentResponseEng("Entered quantity exceeds available stock");
+
+                ordersRepository.save(order);
+
                 return createErrorResponse(response, -406, "Товар закончился");
             }
         }
@@ -142,6 +148,12 @@ public class ClickOrdersController {
     private ResponseEntity<?> isTransactionValid(Orders order, Map<String, Object> response, Double amount) {
 
         if (order.getIsPaid()) {
+
+            order.setPaymentResponseUz("Buyurtma To'lanbogan");
+            order.setPaymentResponseRu("Заказ Уже Оплачен");
+            order.setPaymentResponseEng("Order Was Already Paid");
+
+            ordersRepository.save(order);
 
             return createErrorResponse(response, -4, "Already paid");
         }

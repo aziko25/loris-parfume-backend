@@ -65,7 +65,11 @@ public class ClickOrdersController {
             return createErrorResponse(response, -6, "Transaction does not exist");
         }
 
-        isTransactionValid(order, response, amount);
+        ResponseEntity<?> validationResponse = isTransactionValid(order, response, amount);
+        if (validationResponse != null) {
+
+            return validationResponse;
+        }
 
         response.put("merchant_prepare_id", merchantTransId);
         response.put("error", "0");
@@ -76,7 +80,7 @@ public class ClickOrdersController {
 
     @Transactional
     @PostMapping("/complete-order")
-    public ResponseEntity<Map<String, Object>> completeOrder(@RequestParam Map<String, String> body) {
+    public ResponseEntity<?> completeOrder(@RequestParam Map<String, String> body) {
 
         String clickTransId = body.get("click_trans_id");
         String merchantTransId = body.get("merchant_trans_id");
@@ -105,6 +109,12 @@ public class ClickOrdersController {
             return createErrorResponse(response, -6, "Transaction does not exist");
         }
 
+        ResponseEntity<?> validationResponse = isTransactionValid(order, response, amount);
+        if (validationResponse != null) {
+
+            return validationResponse;
+        }
+
         isTransactionValid(order, response, amount);
 
         List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllByOrder(order);
@@ -129,17 +139,19 @@ public class ClickOrdersController {
         return ResponseEntity.ok(response);
     }
 
-    private void isTransactionValid(Orders order, Map<String, Object> response, Double amount) {
+    private ResponseEntity<?> isTransactionValid(Orders order, Map<String, Object> response, Double amount) {
 
         if (order.getIsPaid()) {
 
-            createErrorResponse(response, -4, "Already paid");
+            return createErrorResponse(response, -4, "Already paid");
         }
 
         if (Math.abs(order.getTotalSum() - amount) > 0.00001) {
 
-            createErrorResponse(response, -2, "Incorrect parameter amount");
+            return createErrorResponse(response, -2, "Incorrect parameter amount");
         }
+
+        return null;
     }
 
     private boolean isStockAvailable(Orders_Items ordersItems) {

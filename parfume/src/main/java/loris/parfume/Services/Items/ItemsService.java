@@ -62,6 +62,7 @@ public class ItemsService {
                 .price(itemsRequest.getPrice())
                 .discountPercent(itemsRequest.getDiscountPercent())
                 .build();
+
         itemsRepository.save(item);
 
         item.setCollectionsItemsList(setItemsCollections(itemsRequest, item));
@@ -103,7 +104,7 @@ public class ItemsService {
 
     public Page<ItemsDTO> all(Integer page, ItemFilters itemFilters) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("name").ascending());
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz").ascending());
 
         if (itemFilters != null) {
 

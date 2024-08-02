@@ -37,11 +37,12 @@ public class Items {
     private Integer discountPercent;
     private Integer quantity;
 
-    private String imageName;
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Categories category;
+
+    @OneToMany(mappedBy = "item")
+    private List<Items_Images> itemsImagesList;
 
     @OneToMany(mappedBy = "item")
     private List<Collections_Items> collectionsItemsList;

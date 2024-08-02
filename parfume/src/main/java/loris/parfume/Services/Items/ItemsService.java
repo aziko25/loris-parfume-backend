@@ -41,6 +41,7 @@ public class ItemsService {
     private final WishlistRepository wishlistRepository;
     private final BasketsRepository basketsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
+    private final Items_Images_Repository itemsImagesRepository;
 
     private final FileUploadUtilService fileUploadUtilService;
 
@@ -48,7 +49,7 @@ public class ItemsService {
     private Integer pageSize;
 
     @Transactional
-    public ItemsDTO create(MultipartFile image, ItemsRequest itemsRequest) {
+    public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = Items.builder()
                 .createdTime(LocalDateTime.now())
@@ -94,9 +95,19 @@ public class ItemsService {
             }
         }
 
-        if (image != null && !image.isEmpty()) {
+        if (images != null && !images.isEmpty()) {
 
-            item.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item", image));
+            int count = 1;
+            for (MultipartFile image : images) {
+
+                Items_Images itemsImage = Items_Images.builder()
+                        .item(item)
+                        .imageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image))
+                        .build();
+
+                itemsImagesRepository.save(itemsImage);
+                count++;
+            }
         }
 
         return new ItemsDTO(itemsRepository.save(item));
@@ -125,7 +136,7 @@ public class ItemsService {
     }
 
     @Transactional
-    public ItemsDTO update(Long id, MultipartFile image, ItemsRequest itemsRequest) {
+    public ItemsDTO update(Long id, List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = itemsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
@@ -163,14 +174,39 @@ public class ItemsService {
             item.setSizesItemsList(setItemsSizes(itemsRequest, item));
         }
 
-        if (image != null && !image.isEmpty()) {
+        if (images != null && !images.isEmpty()) {
 
-            item.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item", image));
+            List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
+
+            List<String> imagesNamesList = itemsImagesList.stream()
+                    .map(Items_Images::getImageName)
+                    .toList();
+
+            fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
+            itemsImagesRepository.deleteAllByItem(item);
+
+            int count = 1;
+            for (MultipartFile image : images) {
+                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image);
+                Items_Images itemsImage = Items_Images.builder()
+                        .item(item)
+                        .imageName(imageName)
+                        .build();
+
+                itemsImagesRepository.save(itemsImage);
+                count++;
+            }
         }
         else {
 
-            fileUploadUtilService.handleMediaDeletion(item.getImageName());
-            item.setImageName(null);
+            List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
+
+            List<String> imagesNamesList = itemsImagesList.stream()
+                    .map(Items_Images::getImageName)
+                    .toList();
+
+            fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
+            itemsImagesRepository.deleteAllByItem(item);
         }
 
         return new ItemsDTO(itemsRepository.save(item));
@@ -188,7 +224,14 @@ public class ItemsService {
         basketsRepository.deleteAllByItem(item);
         ordersItemsRepository.deleteAllByItem(item);
 
-        fileUploadUtilService.handleMediaDeletion(item.getImageName());
+        List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
+
+        List<String> imagesNamesList = itemsImagesList.stream()
+                .map(Items_Images::getImageName)
+                .toList();
+
+        fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
+        itemsImagesRepository.deleteAllByItem(item);
 
         itemsRepository.delete(item);
 

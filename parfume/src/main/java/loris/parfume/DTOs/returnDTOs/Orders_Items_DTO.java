@@ -49,7 +49,11 @@ public class Orders_Items_DTO {
     public Orders_Items_DTO(Orders_Items ordersItem) {
 
         id = ordersItem.getItem().getId();
-        imageName = ordersItem.getItem().getImageName();
+
+        if (!ordersItem.getItem().getItemsImagesList().isEmpty()) {
+
+            imageName = ordersItem.getItem().getItemsImagesList().get(0).getImageName();
+        }
 
         nameUz = ordersItem.getItem().getNameUz();
         nameRu = ordersItem.getItem().getNameRu();

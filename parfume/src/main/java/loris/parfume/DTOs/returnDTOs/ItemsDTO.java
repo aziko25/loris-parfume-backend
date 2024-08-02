@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import loris.parfume.Models.Items.Collections_Items;
 import loris.parfume.Models.Items.Items;
+import loris.parfume.Models.Items.Items_Images;
 import loris.parfume.Models.Items.Sizes_Items;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,8 @@ public class ItemsDTO {
     private Double price;
 
     private Integer discountPercent;
-    private String imageName;
+
+    private List<String> imagesList;
 
     private Long categoryId;
     private String categoryNameUz;
@@ -64,7 +66,17 @@ public class ItemsDTO {
         quantity = item.getQuantity();
         price = item.getPrice();
         discountPercent = item.getDiscountPercent();
-        imageName = item.getImageName();
+
+        imagesList = new ArrayList<>();
+        if (item.getItemsImagesList() != null && !item.getItemsImagesList().isEmpty()) {
+
+            Set<Items_Images> itemsImagesSet = new HashSet<>(item.getItemsImagesList());
+
+            imagesList = itemsImagesSet.stream()
+                    .sorted(Comparator.comparing(Items_Images::getImageName))
+                    .map(Items_Images::getImageName)
+                    .collect(Collectors.toList());
+        }
 
         if (item.getCategory() != null) {
 

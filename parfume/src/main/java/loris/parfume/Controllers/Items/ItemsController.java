@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/items")
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class ItemsController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media") MultipartFile media,
+    public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
                                     @RequestParam("item") String itemJson) throws JsonProcessingException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);
@@ -45,7 +47,7 @@ public class ItemsController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(value = "media") MultipartFile media,
+                                    @RequestParam(value = "media") List<MultipartFile> media,
                                     @RequestParam("item") String itemJson) throws JsonProcessingException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);

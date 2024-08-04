@@ -175,6 +175,7 @@ public class ClickOrdersController {
             if (currentQuantity >= ordersItems.getQuantity()) {
 
                 ordersItems.getItem().setQuantity(currentQuantity - ordersItems.getQuantity());
+
                 itemsRepository.save(ordersItems.getItem());
 
                 return true;
@@ -187,6 +188,9 @@ public class ClickOrdersController {
             if (sizesItem != null && sizesItem.getQuantity() >= ordersItems.getQuantity()) {
 
                 sizesItem.setQuantity(sizesItem.getQuantity() - ordersItems.getQuantity());
+
+                ordersItems.getItem().setQuantity(ordersItems.getItem().getQuantity() - ordersItems.getQuantity());
+
                 sizesItemsRepository.save(sizesItem);
 
                 return true;

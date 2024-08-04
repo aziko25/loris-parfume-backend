@@ -14,4 +14,6 @@ public interface DeliveryRatesRepository extends JpaRepository<DeliveryRates, Lo
     DeliveryRates findFirstByIsActive(Boolean isActive);
 
     DeliveryRates findByIsDefault(boolean b);
+
+    long countByIsActive(boolean b);
 }

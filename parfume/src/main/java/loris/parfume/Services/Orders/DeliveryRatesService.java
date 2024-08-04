@@ -82,6 +82,21 @@ public class DeliveryRatesService {
         }
 
         Optional.ofNullable(deliveryRatesRequest.getName()).ifPresent(deliveryRate::setName);
+
+        Boolean isActive = deliveryRatesRequest.getIsActive();
+
+        if (isActive != null && !isActive) {
+
+            long activeRatesCount = deliveryRatesRepository.countByIsActive(true);
+
+            if (activeRatesCount < 2) {
+
+                throw new IllegalArgumentException("You can't change the status of the only remaining active delivery rate.");
+            }
+
+            deliveryRate.setIsActive(false);
+        }
+
         Optional.ofNullable(deliveryRatesRequest.getIsActive()).ifPresent(deliveryRate::setIsActive);
 
         return deliveryRatesRepository.save(deliveryRate);

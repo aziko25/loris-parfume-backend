@@ -242,6 +242,9 @@ public class ItemsService {
 
         List<Sizes_Items> sizesItemsList = new ArrayList<>();
 
+        int totalItemsQuantity = 0;
+        double cheapestItemPrice = Double.MAX_VALUE;
+
         for (Map<String, Object> map : itemsRequest.getSizesMap()) {
 
             Sizes size = sizesRepository.findById(((Number) map.get("id")).longValue())
@@ -253,16 +256,37 @@ public class ItemsService {
             sizesItem.setItem(item);
             sizesItem.setPrice((Double) map.get("price"));
 
+            if (cheapestItemPrice > sizesItem.getPrice()) {
+
+                cheapestItemPrice = sizesItem.getPrice();
+            }
+
             if (map.get("quantity") != null) {
+
                 sizesItem.setQuantity((Integer) map.get("quantity"));
+                totalItemsQuantity += sizesItem.getQuantity();
+            }
+            else {
+
+                sizesItem.setQuantity(0);
             }
 
             if (map.get("discountPercent") != null) {
+
                 sizesItem.setDiscountPercent((Integer) map.get("discountPercent"));
+            }
+            else {
+
+                sizesItem.setDiscountPercent(0);
             }
 
             sizesItemsList.add(sizesItem);
         }
+
+        item.setPrice(cheapestItemPrice);
+        item.setQuantity(totalItemsQuantity);
+
+        itemsRepository.save(item);
 
         return sizesItemsRepository.saveAll(sizesItemsList);
     }

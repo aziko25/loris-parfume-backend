@@ -24,9 +24,9 @@ public class BasketController {
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page) {
+    public ResponseEntity<?> all() {
 
-        return ResponseEntity.ok(basketService.all(page));
+        return ResponseEntity.ok(basketService.all());
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})

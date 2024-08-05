@@ -1,7 +1,9 @@
 package loris.parfume.Models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 
@@ -31,4 +33,9 @@ public class Basket {
     private Sizes size;
 
     private Integer quantity;
+
+    @JsonSerialize(using = DoubleSerializer.class)
+    private Double price;
+
+    private Integer discountPercent;
 }

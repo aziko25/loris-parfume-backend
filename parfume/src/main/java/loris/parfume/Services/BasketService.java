@@ -3,20 +3,21 @@ package loris.parfume.Services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import loris.parfume.DTOs.returnDTOs.ItemsDTO;
+import loris.parfume.DTOs.returnDTOs.BasketDTO;
 import loris.parfume.Models.Basket;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
+import loris.parfume.Models.Items.Sizes_Items;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.SizesRepository;
+import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.UsersRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
 import static loris.parfume.DefaultEntitiesService.DEFAULT_NO_SIZE;
@@ -30,33 +31,93 @@ public class BasketService {
     private final UsersRepository usersRepository;
     private final ItemsRepository itemsRepository;
     private final SizesRepository sizesRepository;
+    private final Sizes_Items_Repository sizesItemsRepository;
 
-    @Value("${pageSize}")
-    private Integer pageSize;
-
-    public String add(Long itemId, Long sizeId, Integer quantity) {
+    public BasketDTO add(Long itemId, Long sizeId, Integer quantity) {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
         Items item = itemsRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Sizes size;
 
-        Sizes size = sizesRepository.findById(DEFAULT_NO_SIZE).orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
         if (sizeId != null) {
 
-            size = sizesRepository.findById(sizeId).orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
+            size = sizesRepository.findById(sizeId)
+                    .orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
+
+            Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(item, size);
+
+            if (sizesItem == null) {
+
+                throw new EntityNotFoundException("Item With This Size Not Found");
+            }
+
+            Integer totalQuantity = saveBasket(quantity, user, item, size, sizesItem.getPrice(), sizesItem.getDiscountPercent());
+
+            return new BasketDTO(sizesItem, totalQuantity);
         }
+        else {
 
-        basketsRepository.save(new Basket(user, item, size, quantity));
+            if (!item.getSizesItemsList().isEmpty()) {
 
-        return "Successfully Added To Basket";
+                throw new EntityNotFoundException("Select Item's Size!");
+            }
+
+            size = sizesRepository.findById(DEFAULT_NO_SIZE)
+                    .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
+
+            Integer totalQuantity = saveBasket(quantity, user, item, size, item.getPrice(), item.getDiscountPercent());
+
+            Sizes_Items sizesItem = Sizes_Items.builder()
+                    .item(item)
+                    .size(size)
+                    .quantity(totalQuantity)
+                    .price(item.getPrice())
+                    .discountPercent(item.getDiscountPercent())
+                    .build();
+
+            return new BasketDTO(sizesItem, quantity);
+        }
     }
 
-    public Page<ItemsDTO> all(Integer page) {
+    private Integer saveBasket(Integer quantity, Users user, Items item, Sizes size, Double price, Integer discountPercent) {
+
+        Basket basket = basketsRepository.findByUserAndItemAndSize(user, item, size);
+
+        if (basket == null) {
+
+            basket = new Basket(user, item, size, quantity, price, discountPercent);
+        }
+        else {
+
+            basket.setQuantity(basket.getQuantity() + quantity);
+        }
+
+        basketsRepository.save(basket);
+
+        return basket.getQuantity();
+    }
+
+    public List<BasketDTO> all() {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        List<Basket> basketList = basketsRepository.findAllByUser(user);
+        List<BasketDTO> basketDTOList = new ArrayList<>();
 
-        return basketsRepository.findAllByUser(user, pageable).map(basket -> new ItemsDTO(basket.getItem()));
+        for (Basket basket : basketList) {
+
+            Sizes_Items sizesItems = Sizes_Items.builder()
+                    .item(basket.getItem())
+                    .size(basket.getSize())
+                    .quantity(basket.getQuantity())
+                    .price(basket.getPrice())
+                    .discountPercent(basket.getDiscountPercent())
+                    .build();
+
+            basketDTOList.add(new BasketDTO(sizesItems, basket.getQuantity()));
+        }
+
+        return basketDTOList;
     }
 
     @Transactional

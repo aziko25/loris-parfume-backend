@@ -27,8 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -68,9 +66,6 @@ public class OrdersService {
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
         Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
-
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        DecimalFormat df = new DecimalFormat("#.00", symbols);
 
         if (!Arrays.asList(paymentTypesList).contains(ordersRequest.getPaymentType().toUpperCase())) {
 
@@ -169,7 +164,7 @@ public class OrdersService {
             }
         }
 
-        order.setTotalSum(Double.valueOf(df.format(totalSum + ordersRequest.getDeliverySum())));
+        order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
 
         ordersItemsRepository.saveAll(saveAllOrderItemsList);
 
@@ -186,7 +181,7 @@ public class OrdersService {
         else if (ordersRequest.getPaymentType().equalsIgnoreCase("CASH")) {
 
             order.setPaymentLink("CASH");
-            order.setIsPaid(true);
+            order.setIsPaid(false);
         }
 
         return new OrdersDTO(order);

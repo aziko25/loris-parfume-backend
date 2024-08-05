@@ -98,6 +98,8 @@ public class ItemsService {
         if (images != null && !images.isEmpty()) {
 
             int count = 1;
+            List<Items_Images> imagesList = new ArrayList<>();
+
             for (MultipartFile image : images) {
 
                 Items_Images itemsImage = Items_Images.builder()
@@ -105,9 +107,11 @@ public class ItemsService {
                         .imageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image))
                         .build();
 
-                itemsImagesRepository.save(itemsImage);
+                imagesList.add(itemsImage);
                 count++;
             }
+
+            item.setItemsImagesList(itemsImagesRepository.saveAll(imagesList));
         }
 
         return new ItemsDTO(itemsRepository.save(item));

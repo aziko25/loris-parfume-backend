@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static loris.parfume.Configurations.Serializers.DoubleSerializer.getFormattedPrice;
+
 import loris.parfume.Configurations.Serializers.DoubleSerializer;
 
 @Getter
@@ -125,7 +127,7 @@ public class ItemsDTO {
                         map.put("sizeNameEng", size.getSize().getNameEng());
 
                         map.put("quantity", size.getQuantity());
-                        map.put("price", size.getPrice());
+                        map.put("price", getFormattedPrice(size.getPrice()));
                         map.put("discountPercent", size.getDiscountPercent());
 
                         return map;

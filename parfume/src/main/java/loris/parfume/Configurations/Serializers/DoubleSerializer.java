@@ -19,4 +19,12 @@ public class DoubleSerializer extends JsonSerializer<Double> {
         
         gen.writeString(df.format(value));
     }
+
+    public static String getFormattedPrice(Double amount) {
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        DecimalFormat df = new DecimalFormat("#.00", symbols);
+
+        return df.format(amount);
+    }
 }

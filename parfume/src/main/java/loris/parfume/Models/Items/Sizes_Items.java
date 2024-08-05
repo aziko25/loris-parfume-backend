@@ -1,7 +1,9 @@
 package loris.parfume.Models.Items;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
+import loris.parfume.Configurations.Serializers.DoubleSerializer;
 
 @Getter
 @Setter
@@ -23,7 +25,9 @@ public class Sizes_Items {
     @JoinColumn(name = "item_id")
     private Items item;
 
+    @JsonSerialize(using = DoubleSerializer.class)
     private Double price;
+
     private Integer quantity;
     private Integer discountPercent;
 }

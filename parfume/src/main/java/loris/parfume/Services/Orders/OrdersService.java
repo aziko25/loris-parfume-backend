@@ -3,6 +3,7 @@ package loris.parfume.Services.Orders;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Controllers.WebSocketController;
 import loris.parfume.DTOs.Requests.Orders.OrdersRequest;
 import loris.parfume.DTOs.Requests.Orders.Orders_Items_Request;
 import loris.parfume.DTOs.returnDTOs.OrdersDTO;
@@ -45,6 +46,7 @@ public class OrdersService {
     private final Sizes_Items_Repository sizesItemsRepository;
     private final BranchesRepository branchesRepository;
     private final CollectionsRepository collectionsRepository;
+    private final WebSocketController webSocketController;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -184,7 +186,11 @@ public class OrdersService {
             order.setIsPaid(false);
         }
 
-        return new OrdersDTO(order);
+        OrdersDTO orderDTO = new OrdersDTO(order);
+
+        webSocketController.sendOrderUpdate(orderDTO);
+
+        return orderDTO;
     }
 
     public Page<OrdersDTO> all(Integer page) {

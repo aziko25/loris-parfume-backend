@@ -78,18 +78,18 @@ public class ItemsService {
             Categories category = categoriesRepository.findById(itemsRequest.getCategoryId())
                     .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
 
-            boolean catFoundInCollection = false;
+            boolean categoryFoundInCollection = false;
             for (Collections_Items collectionsItem : item.getCollectionsItemsList()) {
 
                 if (category.getCollection().getId().equals(collectionsItem.getCollection().getId())) {
 
                     item.setCategory(category);
-                    catFoundInCollection = true;
+                    categoryFoundInCollection = true;
                     break;
                 }
             }
 
-            if (!catFoundInCollection) {
+            if (!categoryFoundInCollection) {
 
                 throw new EntityNotFoundException("Category Is Not Found In Given Collections");
             }

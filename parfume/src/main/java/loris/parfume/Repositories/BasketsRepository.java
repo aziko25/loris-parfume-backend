@@ -22,4 +22,6 @@ public interface BasketsRepository extends JpaRepository<Basket, Basket_Ids> {
     void deleteAllByItem(Items item);
 
     Basket findByUserAndItemAndSize(Users user, Items item, Sizes size);
+
+    void deleteByUserAndItemAndSize(Users user, Items item, Sizes size);
 }

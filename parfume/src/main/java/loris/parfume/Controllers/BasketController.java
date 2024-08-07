@@ -31,9 +31,9 @@ public class BasketController {
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @DeleteMapping("/remove/{id}")
-    public ResponseEntity<?> remove(@PathVariable Long id) {
+    public ResponseEntity<?> remove(@PathVariable Long id, @RequestParam(required = false) Long sizeId) {
 
-        return ResponseEntity.ok(basketService.remove(id));
+        return ResponseEntity.ok(basketService.remove(id, sizeId));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})

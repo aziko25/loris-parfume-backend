@@ -139,12 +139,14 @@ public class SizesService {
         sizesItemsRepository.deleteAllBySize(size);
 
         List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllBySize(size);
+
         List<Orders_Items> batchUpdateOrderItemsList = new ArrayList<>();
         for (Orders_Items ordersItem : ordersItemsList) {
 
             ordersItem.setSize(defaultSize);
             batchUpdateOrderItemsList.add(ordersItem);
         }
+
         ordersItemsRepository.saveAll(batchUpdateOrderItemsList);
 
         sizesRepository.delete(size);

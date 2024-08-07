@@ -121,12 +121,21 @@ public class BasketService {
     }
 
     @Transactional
-    public String remove(Long itemId) {
+    public String remove(Long itemId, Long sizeId) {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
         Items item = itemsRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
-        basketsRepository.deleteByUserAndItem(user, item);
+        if (sizeId != null) {
+
+            Sizes size = sizesRepository.findById(sizeId).orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
+
+            basketsRepository.deleteByUserAndItemAndSize(user, item, size);
+        }
+        else {
+
+            basketsRepository.deleteByUserAndItem(user, item);
+        }
 
         return "Successfully Deleted";
     }

@@ -13,6 +13,7 @@ import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
 import loris.parfume.Models.Users;
+import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
@@ -47,6 +48,7 @@ public class OrdersService {
     private final BranchesRepository branchesRepository;
     private final CollectionsRepository collectionsRepository;
     private final WebSocketController webSocketController;
+    private final BasketsRepository basketsRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -111,6 +113,11 @@ public class OrdersService {
             Sizes size = sizesRepository.findByIsDefaultNoSize(true);
             double itemPrice = item.getPrice();
 
+            if (!item.getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
+
+                throw new IllegalArgumentException("Specify Item's Size!");
+            }
+
             if (ordersItemsRequest.getSizeId() != null) {
 
                 size = sizesRepository.findById(ordersItemsRequest.getSizeId())
@@ -171,6 +178,8 @@ public class OrdersService {
         ordersItemsRepository.saveAll(saveAllOrderItemsList);
 
         order.setItemsList(saveAllOrderItemsList);
+
+        basketsRepository.deleteAllByUser(user);
 
         if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
 

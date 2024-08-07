@@ -23,7 +23,6 @@ public class OrdersRequest {
     private Double latitude;
 
     private Double deliverySum;
-    private Double totalSum;
     private String paymentType;
 
     private Long branchId;

@@ -97,6 +97,8 @@ public class OrdersService {
         List<Orders_Items> saveAllOrderItemsList = new ArrayList<>();
         double totalSum = 0.0;
 
+        Map<Long, Integer> collectionItemCountMap = new HashMap<>();
+
         for (Orders_Items_Request ordersItemsRequest : ordersRequest.getOrdersItemsList()) {
 
             Items item = itemsRepository.findById(ordersItemsRequest.getItemId())
@@ -139,38 +141,32 @@ public class OrdersService {
                 itemPrice = sizesItem.getPrice();
             }
 
-            Orders_Items ordersItem = new Orders_Items(order, item, size, collection,
-                    itemPrice * ordersItemsRequest.getQuantity(), ordersItemsRequest.getQuantity());
+            collectionItemCountMap.putIfAbsent(collection.getId(), 0);
+            int currentCount = collectionItemCountMap.get(collection.getId());
 
-            totalSum += ordersItem.getTotalPrice();
-            saveAllOrderItemsList.add(ordersItem);
-        }
+            double totalItemPrice = 0.0;
+            int remainingQuantity = ordersItemsRequest.getQuantity();
 
-        Map<Long, List<Orders_Items>> collectionItemsMap = new HashMap<>();
+            while (remainingQuantity > 0) {
 
-        for (Orders_Items_Request ordersItemsRequest : ordersRequest.getOrdersItemsList()) {
+                if (currentCount % 2 == 0) {
 
-            Long collectionId = ordersItemsRequest.getCollectionId();
-
-            collectionItemsMap.computeIfAbsent(collectionId, k -> new ArrayList<>()).add(
-                    saveAllOrderItemsList.stream()
-                            .filter(oi -> oi.getItem().getId().equals(ordersItemsRequest.getItemId()))
-                            .findFirst()
-                            .orElseThrow(() -> new EntityNotFoundException("Orders_Item not found"))
-            );
-        }
-
-        for (List<Orders_Items> ordersItems : collectionItemsMap.values()) {
-
-            if (ordersItems.size() > 1) {
-
-                for (Orders_Items ordersItem : ordersItems) {
-
-                    double discountedPrice = ordersItem.getTotalPrice() * 0.75;
-                    totalSum -= (ordersItem.getTotalPrice() - discountedPrice);
-                    ordersItem.setTotalPrice(discountedPrice);
+                    totalItemPrice += itemPrice;
                 }
+                else {
+
+                    totalItemPrice += itemPrice * 0.5;
+                }
+
+                currentCount++;
+                remainingQuantity--;
             }
+
+            Orders_Items ordersItem = new Orders_Items(order, item, size, collection, totalItemPrice, ordersItemsRequest.getQuantity());
+
+            totalSum += totalItemPrice;
+            saveAllOrderItemsList.add(ordersItem);
+            collectionItemCountMap.put(collection.getId(), currentCount);
         }
 
         order.setTotalSum(totalSum + ordersRequest.getDeliverySum());

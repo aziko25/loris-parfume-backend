@@ -164,7 +164,7 @@ public class BranchesService {
         return nearestBranch;
     }
 
-    private double calculateDeliverySum(NearestBranchRequest request, Branches branch) {
+    public double calculateDeliverySum(NearestBranchRequest request, Branches branch) {
 
         DeliveryRates deliveryRate = deliveryRatesRepository.findFirstByIsActive(true);
 

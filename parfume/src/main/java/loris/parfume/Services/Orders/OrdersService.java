@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Controllers.Orders.WebSocketController;
+import loris.parfume.DTOs.Requests.NearestBranchRequest;
 import loris.parfume.DTOs.Requests.Orders.OrdersRequest;
 import loris.parfume.DTOs.Requests.Orders.Orders_Items_Request;
 import loris.parfume.DTOs.returnDTOs.OrdersDTO;
@@ -22,6 +23,7 @@ import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.UsersRepository;
+import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -49,6 +53,7 @@ public class OrdersService {
     private final CollectionsRepository collectionsRepository;
     private final WebSocketController webSocketController;
     private final BasketsRepository basketsRepository;
+    private final BranchesService branchesService;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -70,6 +75,18 @@ public class OrdersService {
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
         Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
+
+        NearestBranchRequest nearestBranchRequest =
+                new NearestBranchRequest(ordersRequest.getLongitude(), ordersRequest.getLatitude());
+
+        BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expectedSum = BigDecimal.valueOf(ordersRequest.getDeliverySum()).setScale(2, RoundingMode.HALF_UP);
+
+        if (calculatedSum.compareTo(expectedSum) != 0) {
+
+            throw new IllegalArgumentException("Delivery Sum Is Incorrect. It Should Be " +
+                    calculatedSum + " Instead Of " + expectedSum);
+        }
 
         if (!Arrays.asList(paymentTypesList).contains(ordersRequest.getPaymentType().toUpperCase())) {
 

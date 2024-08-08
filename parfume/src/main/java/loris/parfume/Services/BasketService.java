@@ -14,8 +14,10 @@ import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.SizesRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.UsersRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +87,7 @@ public class BasketService {
 
         if (basket == null) {
 
-            basket = new Basket(user, item, size, quantity, price, discountPercent);
+            basket = new Basket(user, item, size, quantity, price, discountPercent, LocalDateTime.now());
         }
         else {
 
@@ -101,7 +103,7 @@ public class BasketService {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
 
-        List<Basket> basketList = basketsRepository.findAllByUser(user);
+        List<Basket> basketList = basketsRepository.findAllByUser(user, Sort.by("addedTime").descending());
         List<BasketDTO> basketDTOList = new ArrayList<>();
 
         for (Basket basket : basketList) {

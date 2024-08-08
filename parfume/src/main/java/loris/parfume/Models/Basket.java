@@ -7,6 +7,8 @@ import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -38,4 +40,6 @@ public class Basket {
     private Double price;
 
     private Integer discountPercent;
+
+    private LocalDateTime addedTime;
 }

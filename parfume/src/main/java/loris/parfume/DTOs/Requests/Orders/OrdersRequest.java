@@ -27,5 +27,7 @@ public class OrdersRequest {
 
     private Long branchId;
 
+    private String returnUrl;
+
     private List<Orders_Items_Request> ordersItemsList;
 }

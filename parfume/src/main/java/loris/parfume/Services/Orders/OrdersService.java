@@ -64,9 +64,6 @@ public class OrdersService {
     @Value("${clickServiceId}")
     private Integer clickServiceId;
 
-    @Value("${paymentReturnUrl}")
-    private String paymentReturnUrl;
-
     private static final String[] paymentTypesList = {"CLICK", "CASH"};
 
     @Transactional
@@ -197,7 +194,7 @@ public class OrdersService {
         if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
 
             order.setPaymentLink("https://my.click.uz/services/pay?service_id=" + clickServiceId + "&merchant_id=" + clickMerchantId +
-                    "&return_url=" + paymentReturnUrl +
+                    "&return_url=" + ordersRequest.getReturnUrl() +
                     "&amount=" + order.getTotalSum() +
                     "&transaction_param=" + order.getId());
             order.setIsPaid(false);

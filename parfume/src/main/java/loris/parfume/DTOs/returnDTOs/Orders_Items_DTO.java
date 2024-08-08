@@ -8,11 +8,17 @@ import lombok.Setter;
 import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Orders.Orders_Items;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Orders_Items_DTO {
+public class Orders_Items_DTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

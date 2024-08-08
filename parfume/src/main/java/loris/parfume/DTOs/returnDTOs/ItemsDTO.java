@@ -9,6 +9,8 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Items_Images;
 import loris.parfume.Models.Items.Sizes_Items;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +22,10 @@ import loris.parfume.Configurations.Serializers.DoubleSerializer;
 
 @Getter
 @Setter
-public class ItemsDTO {
+public class ItemsDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

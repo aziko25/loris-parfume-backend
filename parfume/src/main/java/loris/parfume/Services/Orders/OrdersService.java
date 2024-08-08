@@ -25,6 +25,8 @@ import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -67,6 +69,7 @@ public class OrdersService {
     private static final String[] paymentTypesList = {"CLICK", "CASH"};
 
     @Transactional
+    @CacheEvict(value = "ordersCache", allEntries = true)
     public OrdersDTO create(OrdersRequest ordersRequest) {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
@@ -212,6 +215,10 @@ public class OrdersService {
         return orderDTO;
     }
 
+    @Cacheable(
+            value = "ordersCache",
+            key = "T(String).valueOf('page-').concat(T(String).valueOf(#page))"
+    )
     public Page<OrdersDTO> all(Integer page) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createdTime").descending());
@@ -241,6 +248,7 @@ public class OrdersService {
                 .orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
     }
 
+    @CacheEvict(value = "ordersCache", allEntries = true)
     public String delete(Long id) {
 
         Orders order = ordersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order Not Found"));

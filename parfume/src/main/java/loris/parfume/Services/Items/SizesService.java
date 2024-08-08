@@ -15,6 +15,7 @@ import loris.parfume.Repositories.Items.SizesRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,7 @@ public class SizesService {
     }
 
     @Transactional
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public SizesDTO addItems(Long sizeId, List<Sizes_Items_Request> sizesItemsRequest) {
 
         Sizes size = sizesRepository.findById(sizeId).orElseThrow(() -> new EntityNotFoundException("Size Not Found!"));
@@ -61,6 +63,7 @@ public class SizesService {
     }
 
     @Transactional
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public SizesDTO updateItems(Long sizeId, List<Sizes_Items_Request> sizesItemsRequest) {
 
         Sizes size = sizesRepository.findById(sizeId).orElseThrow(() -> new EntityNotFoundException("Size Not Found!"));
@@ -113,6 +116,7 @@ public class SizesService {
                 .orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
     }
 
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public SizesDTO update(Long id, SizesRequest sizesRequest) {
 
         Sizes size = sizesRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
@@ -125,6 +129,7 @@ public class SizesService {
     }
 
     @Transactional
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public String delete(Long id) {
 
         Sizes size = sizesRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Size Not Found"));

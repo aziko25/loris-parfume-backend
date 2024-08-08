@@ -11,11 +11,12 @@ import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.Collections_Items_Repository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
+import loris.parfume.Services.CacheServiceForAll;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,8 @@ import java.util.Optional;
 public class CollectionsService {
 
     private final CollectionsRepository collectionsRepository;
+    private final CacheServiceForAll cacheServiceForAll;
+
     private final CategoriesRepository categoriesRepository;
     private final Collections_Items_Repository collectionsItemsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
@@ -36,6 +39,7 @@ public class CollectionsService {
     @Value("${pageSize}")
     private Integer pageSize;
 
+    @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
     public Collections create(CollectionsRequest collectionsRequest) {
 
         Collections collection = Collections.builder()
@@ -50,14 +54,14 @@ public class CollectionsService {
 
     public Page<Collections> all(Integer page, String name) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz"));
+        if (name == null) {
 
-        if (name != null) {
-
-            return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable);
+            return cacheServiceForAll.allCollections(page);
         }
 
-        return collectionsRepository.findAll(pageable);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable);
     }
 
     public Collections getById(Long id) {
@@ -65,6 +69,7 @@ public class CollectionsService {
         return collectionsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
     }
 
+    @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
     public Collections update(Long id, CollectionsRequest collectionsRequest) {
 
         Collections collection = getById(id);
@@ -80,6 +85,7 @@ public class CollectionsService {
     }
 
     @Transactional
+    @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
     public String delete(Long id) {
 
         Collections collection = getById(id);

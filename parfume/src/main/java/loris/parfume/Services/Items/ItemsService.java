@@ -12,11 +12,12 @@ import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.WishlistRepository;
+import loris.parfume.Services.CacheServiceForAll;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +32,7 @@ import java.util.Optional;
 public class ItemsService {
 
     private final ItemsRepository itemsRepository;
+    private final CacheServiceForAll cacheServiceForAll;
 
     private final CollectionsRepository collectionsRepository;
     private final Collections_Items_Repository collectionsItemsRepository;
@@ -49,6 +51,7 @@ public class ItemsService {
     private Integer pageSize;
 
     @Transactional
+    @CacheEvict(value = "itemsCache", allEntries = true)
     public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = Items.builder()
@@ -119,18 +122,16 @@ public class ItemsService {
 
     public Page<ItemsDTO> all(Integer page, ItemFilters itemFilters) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz").ascending());
+        if (itemFilters == null) {
 
-        if (itemFilters != null) {
-
-            pageable = PageRequest.of(page - 1, pageSize);
-
-            return itemsRepository.findAllItemsByFilters(itemFilters.getSearch(), itemFilters.getFirstA(),
-                            itemFilters.getFirstZ(), itemFilters.getFirstExpensive(), itemFilters.getFirstCheap(), pageable)
-                    .map(ItemsDTO::new);
+            return cacheServiceForAll.allItems(page);
         }
 
-        return itemsRepository.findAll(pageable).map(ItemsDTO::new);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        return itemsRepository.findAllItemsByFilters(itemFilters.getSearch(), itemFilters.getFirstA(),
+                        itemFilters.getFirstZ(), itemFilters.getFirstExpensive(), itemFilters.getFirstCheap(), pageable)
+                .map(ItemsDTO::new);
     }
 
     public ItemsDTO getById(Long id) {
@@ -140,6 +141,7 @@ public class ItemsService {
     }
 
     @Transactional
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public ItemsDTO update(Long id, List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = itemsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
@@ -217,6 +219,7 @@ public class ItemsService {
     }
 
     @Transactional
+    @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
     public String delete(Long id) {
 
         Items item = itemsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));

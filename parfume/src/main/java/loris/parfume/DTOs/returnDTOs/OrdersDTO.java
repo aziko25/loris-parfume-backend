@@ -8,6 +8,8 @@ import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,10 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 @Getter
 @Setter
-public class OrdersDTO {
+public class OrdersDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

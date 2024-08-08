@@ -9,10 +9,10 @@ import loris.parfume.DTOs.Requests.BannersRequest;
 import loris.parfume.Models.Banners;
 import loris.parfume.Repositories.BannersRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +26,7 @@ import java.util.Optional;
 public class BannersService {
 
     private final BannersRepository bannersRepository;
+    private final CacheServiceForAll cacheServiceForAll;
 
     private final FileUploadUtilService fileUploadUtilService;
 
@@ -33,6 +34,7 @@ public class BannersService {
     private Integer pageSize;
 
     @Transactional
+    @CacheEvict(value = "bannersCache", allEntries = true)
     public Banners create(List<MultipartFile> images, BannersRequest bannersRequest) {
 
         Banners banner = Banners.builder()
@@ -53,14 +55,14 @@ public class BannersService {
 
     public Page<Banners> all(BannerFilters filters, Integer page) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("id").ascending());
+        if (filters == null) {
 
-        if (filters != null) {
-
-            return bannersRepository.findAllByTitleLikeIgnoreCaseOrIsActive(filters.getTitle(), filters.getIsActive(), pageable);
+            return cacheServiceForAll.allBanners(page);
         }
 
-        return bannersRepository.findAll(pageable);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        return bannersRepository.findAllByTitleLikeIgnoreCaseOrIsActive(filters.getTitle(), filters.getIsActive(), pageable);
     }
 
     public Banners getById(Long id) {
@@ -68,6 +70,7 @@ public class BannersService {
         return bannersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Banner Not Found"));
     }
 
+    @CacheEvict(value = "bannersCache", allEntries = true)
     public Banners update(Long id, List<MultipartFile> images, BannersRequest bannersRequest) {
 
         Banners banner = getById(id);
@@ -91,6 +94,7 @@ public class BannersService {
         return bannersRepository.save(banner);
     }
 
+    @CacheEvict(value = "bannersCache", allEntries = true)
     public String delete(Long id) {
 
         Banners banner = getById(id);

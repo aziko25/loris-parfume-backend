@@ -12,11 +12,12 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
+import loris.parfume.Services.CacheServiceForAll;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,12 +30,15 @@ import java.util.Optional;
 public class CategoriesService {
 
     private final CategoriesRepository categoriesRepository;
+    private final CacheServiceForAll cacheServiceForAll;
+
     private final CollectionsRepository collectionsRepository;
     private final ItemsRepository itemsRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
 
+    @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
     public CategoriesDTO create(CategoriesRequest categoriesRequest) {
 
         Collections collection = collectionsRepository.findById(categoriesRequest.getCollectionId())
@@ -53,14 +57,14 @@ public class CategoriesService {
 
     public Page<CategoriesDTO> all(Integer page, CategoryFilters filters) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz"));
+        if (filters == null) {
 
-        if (filters != null) {
-
-            return categoriesRepository.findAllByFilters(filters.getName(), filters.getCollectionId(), pageable).map(CategoriesDTO::new);
+            return cacheServiceForAll.allCategories(page);
         }
 
-        return categoriesRepository.findAll(pageable).map(CategoriesDTO::new);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        return categoriesRepository.findAllByFilters(filters.getName(), filters.getCollectionId(), pageable).map(CategoriesDTO::new);
     }
 
     public CategoriesDTO getById(Long id) {
@@ -69,6 +73,7 @@ public class CategoriesService {
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
     }
 
+    @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
     public CategoriesDTO update(Long id, CategoriesRequest categoriesRequest) {
 
         Categories category = categoriesRepository.findById(id)
@@ -90,6 +95,7 @@ public class CategoriesService {
     }
 
     @Transactional
+    @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
     public String delete(Long id) {
 
         Categories category = categoriesRepository.findById(id)

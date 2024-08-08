@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -14,12 +16,11 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @AllArgsConstructor
 @Builder
 @Entity
-/*@Table(name = "collections",
-        uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name_uz", "name_ru", "name_eng"})
-})*/
 @Table(name = "collections")
-public class Collections {
+public class Collections implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

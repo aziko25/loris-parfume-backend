@@ -5,13 +5,18 @@ import lombok.Getter;
 import lombok.Setter;
 import loris.parfume.Models.Items.Categories;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 @Getter
 @Setter
-public class CategoriesDTO {
+public class CategoriesDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

@@ -87,7 +87,7 @@ public class BasketService {
 
         if (basket == null) {
 
-            basket = new Basket(user, item, size, quantity, price, discountPercent, LocalDateTime.now());
+            basket = new Basket(user, item, size, LocalDateTime.now(), quantity, price, discountPercent);
         }
         else {
 

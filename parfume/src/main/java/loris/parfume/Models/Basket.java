@@ -1,5 +1,6 @@
 package loris.parfume.Models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,8 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 
 import java.time.LocalDateTime;
+
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 @Getter
 @Setter
@@ -34,12 +37,13 @@ public class Basket {
     @JoinColumn(name = "size_id")
     private Sizes size;
 
+    @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime addedTime;
+
     private Integer quantity;
 
     @JsonSerialize(using = DoubleSerializer.class)
     private Double price;
 
     private Integer discountPercent;
-
-    private LocalDateTime addedTime;
 }

@@ -12,7 +12,7 @@ import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.WishlistRepository;
-import loris.parfume.Services.CacheServiceForAll;
+import loris.parfume.Services.CacheForAllService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class ItemsService {
 
     private final ItemsRepository itemsRepository;
-    private final CacheServiceForAll cacheServiceForAll;
+    private final CacheForAllService cacheForAllService;
 
     private final CollectionsRepository collectionsRepository;
     private final Collections_Items_Repository collectionsItemsRepository;
@@ -120,18 +120,25 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
-    public Page<ItemsDTO> all(Integer page, ItemFilters itemFilters) {
-
-        if (itemFilters == null) {
-
-            return cacheServiceForAll.allItems(page);
-        }
+    public Page<ItemsDTO> all(Integer page, Long collectionId, Long categoryId, ItemFilters itemFilters) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        return itemsRepository.findAllItemsByFilters(itemFilters.getSearch(), itemFilters.getFirstA(),
-                        itemFilters.getFirstZ(), itemFilters.getFirstExpensive(), itemFilters.getFirstCheap(), pageable)
-                .map(ItemsDTO::new);
+        if (itemFilters == null) {
+
+            return cacheForAllService.allItems(page, collectionId, categoryId);
+        }
+
+        return itemsRepository.findAllItemsByFilters(
+                itemFilters.getSearch(),
+                itemFilters.getFirstA(),
+                itemFilters.getFirstZ(),
+                itemFilters.getFirstExpensive(),
+                itemFilters.getFirstCheap(),
+                collectionId,
+                categoryId,
+                pageable
+        ).map(ItemsDTO::new);
     }
 
     public ItemsDTO getById(Long id) {

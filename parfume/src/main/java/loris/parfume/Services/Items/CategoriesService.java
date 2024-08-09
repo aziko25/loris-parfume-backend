@@ -13,7 +13,7 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
-import loris.parfume.Services.CacheServiceForAll;
+import loris.parfume.Services.CacheForAllService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public class CategoriesService {
 
     private final CategoriesRepository categoriesRepository;
-    private final CacheServiceForAll cacheServiceForAll;
+    private final CacheForAllService cacheForAllService;
 
     private final CollectionsRepository collectionsRepository;
     private final ItemsRepository itemsRepository;
@@ -69,7 +69,7 @@ public class CategoriesService {
 
         if (filters == null) {
 
-            return cacheServiceForAll.allCategories(page);
+            return cacheForAllService.allCategories(page);
         }
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);

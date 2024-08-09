@@ -27,7 +27,7 @@ import java.util.Optional;
 public class CollectionBannersService {
 
     private final CollectionBannersRepository collectionBannersRepository;
-    private final CacheServiceForAll cacheServiceForAll;
+    private final CacheForAllService cacheForAllService;
 
     private final FileUploadUtilService fileUploadUtilService;
 
@@ -58,7 +58,7 @@ public class CollectionBannersService {
 
         if (filters == null) {
 
-            return cacheServiceForAll.allCollectionsBanners(page);
+            return cacheForAllService.allCollectionsBanners(page);
         }
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("id").ascending());

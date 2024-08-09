@@ -1,11 +1,14 @@
 package loris.parfume.Services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.returnDTOs.CategoriesDTO;
 import loris.parfume.DTOs.returnDTOs.CollectionsDTO;
 import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Banners;
 import loris.parfume.Models.CollectionBanners;
+import loris.parfume.Models.Items.Categories;
+import loris.parfume.Models.Items.Collections;
 import loris.parfume.Repositories.BannersRepository;
 import loris.parfume.Repositories.CollectionBannersRepository;
 import loris.parfume.Repositories.Items.CategoriesRepository;
@@ -21,7 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
-public class CacheServiceForAll {
+public class CacheForAllService {
 
     private final BannersRepository bannersRepository;
     private final ItemsRepository itemsRepository;
@@ -45,13 +48,29 @@ public class CacheServiceForAll {
 
     @Cacheable(
             value = "itemsCache",
-            key = "T(String).valueOf('page-').concat(T(String).valueOf(#page))"
+            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionId-').concat(#collectionId != null ? T(String).valueOf(#collectionId) : '').concat('-categoryId-').concat(#categoryId != null ? T(String).valueOf(#categoryId) : '')"
     )
-    public Page<ItemsDTO> allItems(Integer page) {
+    public Page<ItemsDTO> allItems(Integer page, Long collectionId, Long categoryId) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz").ascending());
 
-        return itemsRepository.findAll(pageable).map(ItemsDTO::new);
+        if (collectionId == null) {
+            return itemsRepository.findAll(pageable).map(ItemsDTO::new);
+        }
+
+        Collections collection = collectionsRepository.findById(collectionId)
+                .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+
+        if (categoryId != null) {
+
+            Categories category = categoriesRepository.findByIdAndCollection(categoryId, collection)
+                    .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
+
+            return itemsRepository.findAllByCollectionsItemsList_CollectionAndCategory(collection, category, pageable)
+                    .map(ItemsDTO::new);
+        }
+
+        return itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable).map(ItemsDTO::new);
     }
 
     @Cacheable(

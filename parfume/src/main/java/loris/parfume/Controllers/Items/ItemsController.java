@@ -33,9 +33,12 @@ public class ItemsController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page, @RequestBody(required = false) ItemFilters itemFilters) {
+    public ResponseEntity<?> all(@RequestParam Integer page,
+                                 @RequestParam(required = false) Long collectionId,
+                                 @RequestParam(required = false) Long categoryId,
+                                 @RequestBody(required = false) ItemFilters itemFilters) {
 
-        return ResponseEntity.ok(itemsService.all(page, itemFilters));
+        return ResponseEntity.ok(itemsService.all(page, collectionId, categoryId, itemFilters));
     }
 
     @GetMapping("/{id}")

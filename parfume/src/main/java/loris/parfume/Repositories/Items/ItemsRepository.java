@@ -1,6 +1,9 @@
 package loris.parfume.Repositories.Items;
 
+import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Items.Categories;
+import loris.parfume.Models.Items.Collections;
+import loris.parfume.Models.Items.Collections_Items;
 import loris.parfume.Models.Items.Items;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +17,7 @@ import java.util.List;
 @Repository
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
-    @Query("SELECT i FROM Items i WHERE " +
+    @Query("SELECT i FROM Items i JOIN i.collectionsItemsList ci WHERE " +
             "(:search IS NULL OR " +
             " i.nameUz ILIKE %:search% OR " +
             " i.nameRu ILIKE %:search% OR " +
@@ -22,6 +25,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             " i.descriptionUz ILIKE %:search% OR " +
             " i.descriptionRu ILIKE %:search% OR " +
             " i.descriptionEng ILIKE %:search%) " +
+            "AND (:collectionId IS NULL OR ci.collection.id = :collectionId) " +
+            "AND (:categoryId IS NULL OR i.category.id = :categoryId) " +
             "ORDER BY " +
             "CASE WHEN :firstA IS NOT NULL AND :firstA = TRUE THEN i.nameUz END ASC, " +
             "CASE WHEN :firstZ IS NOT NULL AND :firstZ = TRUE THEN i.nameUz END DESC, " +
@@ -33,7 +38,13 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             @Param("firstZ") Boolean firstZ,
             @Param("firstExpensive") Boolean firstExpensive,
             @Param("firstCheap") Boolean firstCheap,
+            @Param("collectionId") Long collectionId,
+            @Param("categoryId") Long categoryId,
             Pageable pageable);
 
     List<Items> findAllByCategory(Categories category);
+
+    Page<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category, Pageable pageable);
+
+    Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
 }

@@ -80,6 +80,21 @@ public class AuthenticationService {
         return generateJwt(user);
     }
 
+    public String resendCode(VerifyAuthCodeRequest verifyAuthCodeRequest) {
+
+        Users user = usersRepository.findByPhone(verifyAuthCodeRequest.getPhone());
+
+        if (user == null) {
+
+            throw new EntityNotFoundException("Phone Not Found");
+        }
+
+        user.setAuthVerifyCode(generateVerificationCode());
+        usersRepository.save(user);
+
+        return "Code Successfully Resent";
+    }
+
     public Map<String, Object> login(LoginRequest request) {
 
         Users user = usersRepository.findByPhone(request.getPhone());

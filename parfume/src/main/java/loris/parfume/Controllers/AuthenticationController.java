@@ -29,6 +29,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.verifyCode(verifyAuthCodeRequest));
     }
 
+    @PostMapping("/resendCode")
+    public ResponseEntity<?> resendCode(@RequestBody VerifyAuthCodeRequest verifyAuthCodeRequest) {
+
+        return ResponseEntity.ok(authenticationService.resendCode(verifyAuthCodeRequest));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 

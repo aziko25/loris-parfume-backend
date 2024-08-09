@@ -46,7 +46,7 @@ public class CollectionsDTO {
 
             for (Categories category : sortedCategories) {
 
-                Map<String, Object> categoryMap = new HashMap<>();
+                Map<String, Object> categoryMap = new LinkedHashMap<>();
 
                 categoryMap.put("categoryId", category.getId());
                 categoryMap.put("categoryNameUz", category.getNameUz());

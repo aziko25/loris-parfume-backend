@@ -1,5 +1,7 @@
 package loris.parfume.Controllers.Items;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Requests.Items.CollectionsRequest;
@@ -7,6 +9,7 @@ import loris.parfume.Services.Items.CollectionsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/collections")
@@ -18,9 +21,12 @@ public class CollectionsController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody CollectionsRequest collectionsRequest) {
+    public ResponseEntity<?> create(@RequestParam(value = "media") MultipartFile image,
+                                    @RequestParam("collection") String collectionJson) throws JsonProcessingException {
 
-        return new ResponseEntity<>(collectionsService.create(collectionsRequest), HttpStatus.CREATED);
+        CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
+
+        return new ResponseEntity<>(collectionsService.create(collectionsRequest, image), HttpStatus.CREATED);
     }
 
     @PostMapping("/all")
@@ -37,9 +43,13 @@ public class CollectionsController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody(required = false) CollectionsRequest collectionsRequest) {
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestParam(value = "media") MultipartFile image,
+                                    @RequestParam("collection") String collectionJson) throws JsonProcessingException {
 
-        return ResponseEntity.ok(collectionsService.update(id, collectionsRequest));
+        CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
+
+        return ResponseEntity.ok(collectionsService.update(id, collectionsRequest, image));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

@@ -18,7 +18,7 @@ public class MainImagesController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "image") MultipartFile image, @RequestParam String name) {
+    public ResponseEntity<?> create(@RequestParam(value = "media") MultipartFile image, @RequestParam String name) {
 
         return new ResponseEntity<>(mainImagesService.create(image, name), HttpStatus.CREATED);
     }
@@ -37,7 +37,7 @@ public class MainImagesController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestParam(required = false) MultipartFile image,
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestParam(value = "media", required = false) MultipartFile image,
                                     @RequestParam(required = false) String name) {
 
         return ResponseEntity.ok(mainImagesService.update(id, image, name));

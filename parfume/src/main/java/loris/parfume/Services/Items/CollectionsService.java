@@ -2,7 +2,9 @@ package loris.parfume.Services.Items;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.Images.FileUploadUtilService;
 import loris.parfume.DTOs.Requests.Items.CollectionsRequest;
+import loris.parfume.DTOs.returnDTOs.CollectionsDTO;
 import loris.parfume.Models.Items.Categories;
 import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Items.Collections_Items;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,12 +38,13 @@ public class CollectionsService {
     private final CategoriesRepository categoriesRepository;
     private final Collections_Items_Repository collectionsItemsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
+    private final FileUploadUtilService fileUploadUtilService;
 
     @Value("${pageSize}")
     private Integer pageSize;
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public Collections create(CollectionsRequest collectionsRequest) {
+    public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) {
 
         Collections collection = Collections.builder()
                 .createdTime(LocalDateTime.now())
@@ -49,10 +53,14 @@ public class CollectionsService {
                 .nameEng(collectionsRequest.getNameEng())
                 .build();
 
-        return collectionsRepository.save(collection);
+        collectionsRepository.save(collection);
+
+        collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+
+        return new CollectionsDTO(collectionsRepository.save(collection));
     }
 
-    public Page<Collections> all(Integer page, String name) {
+    public Page<CollectionsDTO> all(Integer page, String name) {
 
         if (name == null) {
 
@@ -61,18 +69,21 @@ public class CollectionsService {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable);
+        return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable).map(CollectionsDTO::new);
     }
 
-    public Collections getById(Long id) {
+    public CollectionsDTO getById(Long id) {
 
-        return collectionsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+        return collectionsRepository.findById(id)
+                .map(CollectionsDTO::new)
+                .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
     }
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public Collections update(Long id, CollectionsRequest collectionsRequest) {
+    public CollectionsDTO update(Long id, CollectionsRequest collectionsRequest, MultipartFile image) {
 
-        Collections collection = getById(id);
+        Collections collection = collectionsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
         if (collectionsRequest != null) {
 
@@ -81,14 +92,24 @@ public class CollectionsService {
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);
         }
 
-        return collectionsRepository.save(collection);
+        fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
+
+        if (image != null && !image.isEmpty()) {
+
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+        }
+
+        return new CollectionsDTO(collectionsRepository.save(collection));
     }
 
     @Transactional
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
     public String delete(Long id) {
 
-        Collections collection = getById(id);
+        Collections collection = collectionsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+
+        fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
 
         List<Categories> categoriesList = categoriesRepository.findAllByCollection(collection);
         List<Categories> batchUpdateCategoriesList = new ArrayList<>();

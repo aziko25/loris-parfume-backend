@@ -2,10 +2,10 @@ package loris.parfume.Services;
 
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.returnDTOs.CategoriesDTO;
+import loris.parfume.DTOs.returnDTOs.CollectionsDTO;
 import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Banners;
 import loris.parfume.Models.CollectionBanners;
-import loris.parfume.Models.Items.Collections;
 import loris.parfume.Repositories.BannersRepository;
 import loris.parfume.Repositories.CollectionBannersRepository;
 import loris.parfume.Repositories.Items.CategoriesRepository;
@@ -58,11 +58,11 @@ public class CacheServiceForAll {
             value = "collectionsCache",
             key = "T(String).valueOf('page-').concat(T(String).valueOf(#page))"
     )
-    public Page<Collections> allCollections(Integer page) {
+    public Page<CollectionsDTO> allCollections(Integer page) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz"));
 
-        return collectionsRepository.findAll(pageable);
+        return collectionsRepository.findAll(pageable).map(CollectionsDTO::new);
     }
 
     @Cacheable(

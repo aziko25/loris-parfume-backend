@@ -7,6 +7,7 @@ import lombok.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -32,4 +33,9 @@ public class Collections implements Serializable {
     private String nameUz;
     private String nameRu;
     private String nameEng;
+
+    private String bannerImage;
+
+    @OneToMany(mappedBy = "collection")
+    private List<Categories> categoriesList;
 }

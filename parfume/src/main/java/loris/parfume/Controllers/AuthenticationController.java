@@ -3,6 +3,7 @@ package loris.parfume.Controllers;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.Authentication.LoginRequest;
 import loris.parfume.DTOs.Requests.Authentication.SignupRequest;
+import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
 import loris.parfume.Services.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verifyCode")
-    public ResponseEntity<?> verifyCode(@RequestParam String phone, @RequestParam String code) {
+    public ResponseEntity<?> verifyCode(@RequestBody VerifyAuthCodeRequest verifyAuthCodeRequest) {
 
-        return ResponseEntity.ok(authenticationService.verifyCode(phone, code));
+        return ResponseEntity.ok(authenticationService.verifyCode(verifyAuthCodeRequest));
     }
 
     @PostMapping("/login")

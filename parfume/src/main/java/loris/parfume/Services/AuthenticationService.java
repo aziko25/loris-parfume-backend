@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.Authentication.LoginRequest;
 import loris.parfume.DTOs.Requests.Authentication.SignupRequest;
+import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,21 +59,22 @@ public class AuthenticationService {
         //return String.format("%06d", new Random().nextInt(999999));
     }
 
-    public Map<String, Object> verifyCode(String phone, String code) {
+    public Map<String, Object> verifyCode(VerifyAuthCodeRequest verifyAuthCodeRequest) {
 
-        Users user = usersRepository.findByPhone(phone);
+        Users user = usersRepository.findByPhone(verifyAuthCodeRequest.getPhone());
 
         if (user == null) {
 
             throw new EntityNotFoundException("Phone Not Found");
         }
 
-        if (!user.getAuthVerifyCode().equals(code)) {
+        if (!user.getAuthVerifyCode().equals(verifyAuthCodeRequest.getCode())) {
 
             throw new IllegalArgumentException("Invalid verification code");
         }
 
         user.setAuthVerifyCode(null);
+        usersRepository.save(user);
 
         return generateJwt(user);
     }

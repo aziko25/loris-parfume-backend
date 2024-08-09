@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,10 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @Builder
 @Entity
 @Table(name = "collections")
-public class Collections implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class Collections {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

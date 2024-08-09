@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -17,10 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @Builder
 @Entity
 @Table(name = "categories")
-public class Categories implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class Categories {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

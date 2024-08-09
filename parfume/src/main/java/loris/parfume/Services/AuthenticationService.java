@@ -13,10 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.getSecretKey;
 
 @Service
@@ -40,15 +38,43 @@ public class AuthenticationService {
             throw new EntityExistsException("Phone Already Exists");
         }
 
+        String verificationCode = generateVerificationCode();
+
         Users user = Users.builder()
                 .registrationTime(LocalDateTime.now())
                 .phone(request.getPhone())
                 .fullName(request.getFullName())
                 .password(request.getPassword())
                 .role("USER")
+                .authVerifyCode(verificationCode)
                 .build();
 
         return usersRepository.save(user);
+    }
+
+    private String generateVerificationCode() {
+
+        return "111111";
+        //return String.format("%06d", new Random().nextInt(999999));
+    }
+
+    public Map<String, Object> verifyCode(String phone, String code) {
+
+        Users user = usersRepository.findByPhone(phone);
+
+        if (user == null) {
+
+            throw new EntityNotFoundException("Phone Not Found");
+        }
+
+        if (!user.getAuthVerifyCode().equals(code)) {
+
+            throw new IllegalArgumentException("Invalid verification code");
+        }
+
+        user.setAuthVerifyCode(null);
+
+        return generateJwt(user);
     }
 
     public Map<String, Object> login(LoginRequest request) {
@@ -57,32 +83,39 @@ public class AuthenticationService {
 
         if (user == null) {
 
-            throw new EntityNotFoundException("User not found");
+            throw new EntityNotFoundException("Phone Not Found");
         }
 
-        if (Objects.equals(user.getPassword(), request.getPassword())) {
-
-            Claims claims = Jwts.claims();
-
-            claims.put("id", user.getId());
-            claims.put("role", user.getRole());
-
-            // Expires in a week
-            Date expiration = new Date(System.currentTimeMillis() + expired);
-
-            Map<String, Object> map = new LinkedHashMap<>();
-
-            map.put("id", user.getId());
-            map.put("phone", user.getPhone());
-            map.put("fullName", user.getFullName());
-            map.put("role", user.getRole());
-            map.put("token", Jwts.builder().setClaims(claims).setExpiration(expiration).signWith(getSecretKey()).compact());
-
-            return map;
-        }
-        else {
+        if (!Objects.equals(user.getPassword(), request.getPassword())) {
 
             throw new IllegalArgumentException("Password Didn't Match!");
         }
+
+        return generateJwt(user);
+    }
+
+    private Map<String, Object> generateJwt(Users user) {
+
+        Claims claims = Jwts.claims().setSubject(user.getPhone());
+        claims.put("id", user.getId());
+        claims.put("role", user.getRole());
+
+        Date expiration = new Date(System.currentTimeMillis() + expired);
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setExpiration(expiration)
+                .signWith(getSecretKey())
+                .compact();
+
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        response.put("id", user.getId());
+        response.put("phone", user.getPhone());
+        response.put("fullName", user.getFullName());
+        response.put("role", user.getRole());
+        response.put("token", token);
+
+        return response;
     }
 }

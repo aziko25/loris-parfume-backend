@@ -22,6 +22,12 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.signUp(signupRequest), HttpStatus.CREATED);
     }
 
+    @PostMapping("/verifyCode")
+    public ResponseEntity<?> verifyCode(@RequestParam String phone, @RequestParam String code) {
+
+        return ResponseEntity.ok(authenticationService.verifyCode(phone, code));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 

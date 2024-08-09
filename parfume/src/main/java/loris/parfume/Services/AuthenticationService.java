@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.Authentication.LoginRequest;
 import loris.parfume.DTOs.Requests.Authentication.SignupRequest;
 import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
+import loris.parfume.DTOs.returnDTOs.UsersDTO;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,7 @@ public class AuthenticationService {
     @Value("${jwt.token.expired}")
     private Long expired;
 
-    public Users signUp(SignupRequest request) {
+    public UsersDTO signUp(SignupRequest request) {
 
         if (!request.getPassword().equals(request.getRePassword())) {
 
@@ -50,7 +51,7 @@ public class AuthenticationService {
                 .authVerifyCode(verificationCode)
                 .build();
 
-        return usersRepository.save(user);
+        return new UsersDTO(usersRepository.save(user));
     }
 
     private String generateVerificationCode() {

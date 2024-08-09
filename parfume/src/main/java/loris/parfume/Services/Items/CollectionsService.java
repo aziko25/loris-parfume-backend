@@ -55,7 +55,9 @@ public class CollectionsService {
 
         collectionsRepository.save(collection);
 
-        collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+        if (image != null && !image.isEmpty()) {
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+        }
 
         return new CollectionsDTO(collectionsRepository.save(collection));
     }

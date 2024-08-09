@@ -21,7 +21,7 @@ public class CollectionsController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media") MultipartFile image,
+    public ResponseEntity<?> create(@RequestParam(value = "media", required = false) MultipartFile image,
                                     @RequestParam("collection") String collectionJson) throws JsonProcessingException {
 
         CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
@@ -44,7 +44,7 @@ public class CollectionsController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(value = "media") MultipartFile image,
+                                    @RequestParam(value = "media", required = false) MultipartFile image,
                                     @RequestParam("collection") String collectionJson) throws JsonProcessingException {
 
         CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);

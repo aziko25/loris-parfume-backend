@@ -33,6 +33,8 @@ public class Categories implements Serializable {
     private String nameRu;
     private String nameEng;
 
+    private String bannerImage;
+
     @ManyToOne
     @JoinColumn(name = "collection_id")
     private Collections collection;

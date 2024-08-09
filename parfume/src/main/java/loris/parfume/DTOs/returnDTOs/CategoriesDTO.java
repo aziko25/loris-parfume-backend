@@ -27,6 +27,8 @@ public class CategoriesDTO implements Serializable {
     private String nameRu;
     private String nameEng;
 
+    private String bannerImage;
+
     private Long collectionId;
     private String collectionNameUz;
     private String collectionNameRu;
@@ -40,6 +42,8 @@ public class CategoriesDTO implements Serializable {
         nameUz = category.getNameUz();
         nameRu = category.getNameRu();
         nameEng = category.getNameEng();
+
+        bannerImage = category.getBannerImage();
 
         collectionId = category.getCollection().getId();
         collectionNameUz = category.getCollection().getNameUz();

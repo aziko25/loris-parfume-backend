@@ -3,6 +3,7 @@ package loris.parfume.Services.Items;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.Images.FileUploadUtilService;
 import loris.parfume.DTOs.Filters.CategoryFilters;
 import loris.parfume.DTOs.Requests.Items.CategoriesRequest;
 import loris.parfume.DTOs.returnDTOs.CategoriesDTO;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,12 +36,13 @@ public class CategoriesService {
 
     private final CollectionsRepository collectionsRepository;
     private final ItemsRepository itemsRepository;
+    private final FileUploadUtilService fileUploadUtilService;
 
     @Value("${pageSize}")
     private Integer pageSize;
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO create(CategoriesRequest categoriesRequest) {
+    public CategoriesDTO create(CategoriesRequest categoriesRequest, MultipartFile image) {
 
         Collections collection = collectionsRepository.findById(categoriesRequest.getCollectionId())
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
@@ -51,6 +54,13 @@ public class CategoriesService {
                 .nameEng(categoriesRequest.getNameEng())
                 .collection(collection)
                 .build();
+
+        categoriesRepository.save(category);
+
+        if (image != null && !image.isEmpty()) {
+
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner", image));
+        }
 
         return new CategoriesDTO(categoriesRepository.save(category));
     }
@@ -74,7 +84,7 @@ public class CategoriesService {
     }
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO update(Long id, CategoriesRequest categoriesRequest) {
+    public CategoriesDTO update(Long id, CategoriesRequest categoriesRequest, MultipartFile image) {
 
         Categories category = categoriesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
@@ -91,6 +101,15 @@ public class CategoriesService {
             category.setCollection(collection);
         }
 
+        if (category.getBannerImage() != null) {
+            fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+        }
+
+        if (image != null && !image.isEmpty()) {
+
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner", image));
+        }
+
         return new CategoriesDTO(categoriesRepository.save(category));
     }
 
@@ -100,6 +119,11 @@ public class CategoriesService {
 
         Categories category = categoriesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
+
+        if (category.getBannerImage() != null) {
+
+            fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+        }
 
         List<Items> itemsList = itemsRepository.findAllByCategory(category);
 

@@ -52,6 +52,7 @@ public class CollectionsDTO {
                 categoryMap.put("categoryNameUz", category.getNameUz());
                 categoryMap.put("categoryNameRu", category.getNameRu());
                 categoryMap.put("categoryNameEng", category.getNameEng());
+                categoryMap.put("categoryBannerImage", category.getBannerImage());
 
                 categoriesList.add(categoryMap);
             }

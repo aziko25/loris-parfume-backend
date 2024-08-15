@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.getSecretKey;
 
@@ -24,6 +25,9 @@ import static loris.parfume.Configurations.JWT.AuthorizationMethods.getSecretKey
 public class AuthenticationService {
 
     private final UsersRepository usersRepository;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
     @Value("${jwt.token.expired}")
     private Long expired;
@@ -51,7 +55,38 @@ public class AuthenticationService {
                 .authVerifyCode(verificationCode)
                 .build();
 
+        usersRepository.save(user);
+
+        scheduleDeletionTask(user);
+        
         return new UsersDTO(usersRepository.save(user));
+    }
+
+    private void scheduleDeletionTask(Users user) {
+
+        cancelDeletionTask(user.getPhone());
+
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> deleteUserIfNotVerified(user), 5, TimeUnit.MINUTES);
+        scheduledTasks.put(user.getPhone(), scheduledTask);
+    }
+
+    private void cancelDeletionTask(String phone) {
+
+        ScheduledFuture<?> scheduledTask = scheduledTasks.remove(phone);
+
+        if (scheduledTask != null) {
+
+            scheduledTask.cancel(false);
+        }
+    }
+
+    private void deleteUserIfNotVerified(Users user) {
+
+        if (user.getAuthVerifyCode() != null) {
+
+            usersRepository.delete(user);
+            scheduledTasks.remove(user.getPhone());
+        }
     }
 
     private String generateVerificationCode() {
@@ -77,6 +112,8 @@ public class AuthenticationService {
         user.setAuthVerifyCode(null);
         usersRepository.save(user);
 
+        cancelDeletionTask(user.getPhone());
+
         return generateJwt(user);
     }
 
@@ -91,6 +128,11 @@ public class AuthenticationService {
 
         user.setAuthVerifyCode(generateVerificationCode());
         usersRepository.save(user);
+
+        cancelDeletionTask(user.getPhone());
+
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> deleteUserIfNotVerified(user), 5, TimeUnit.MINUTES);
+        scheduledTasks.put(user.getPhone(), scheduledTask);
 
         return "Code Successfully Resent";
     }
@@ -115,6 +157,7 @@ public class AuthenticationService {
     private Map<String, Object> generateJwt(Users user) {
 
         Claims claims = Jwts.claims().setSubject(user.getPhone());
+
         claims.put("id", user.getId());
         claims.put("role", user.getRole());
 

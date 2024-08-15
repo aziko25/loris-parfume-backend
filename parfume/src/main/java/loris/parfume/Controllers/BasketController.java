@@ -17,9 +17,10 @@ public class BasketController {
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/add/{id}")
     public ResponseEntity<?> add(@PathVariable Long id, @RequestParam(required = false) Long sizeId,
+                                 @RequestParam Long collectionId,
                                  @RequestParam Integer quantity) {
 
-        return ResponseEntity.ok(basketService.add(id, sizeId, quantity));
+        return ResponseEntity.ok(basketService.add(id, sizeId, collectionId, quantity));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})

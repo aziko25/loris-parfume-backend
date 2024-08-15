@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import loris.parfume.Configurations.Serializers.DoubleSerializer;
+import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Items.Collections_Items;
 import loris.parfume.Models.Items.Items_Images;
 import loris.parfume.Models.Items.Sizes_Items;
@@ -48,6 +49,11 @@ public class BasketDTO {
     private String sizeNameRu;
     private String sizeNameEng;
 
+    private Long collectionId;
+    private String collectionNameUz;
+    private String collectionNameRu;
+    private String collectionNameEng;
+
     private Integer quantity;
 
     @JsonSerialize(using = DoubleSerializer.class)
@@ -57,7 +63,7 @@ public class BasketDTO {
 
     private List<Map<String, Object>> collectionsItemsList;
 
-    public BasketDTO(Sizes_Items sizeItem, Integer quantity) {
+    public BasketDTO(Sizes_Items sizeItem, Integer quantity, Collections collections) {
 
         id = sizeItem.getItem().getId();
         createdTime = sizeItem.getItem().getCreatedTime();
@@ -77,6 +83,14 @@ public class BasketDTO {
             sizeNameUz = sizeItem.getSize().getNameUz();
             sizeNameRu = sizeItem.getSize().getNameRu();
             sizeNameEng = sizeItem.getSize().getNameEng();
+        }
+
+        if (collections != null) {
+
+            collectionId = collections.getId();
+            collectionNameUz = collections.getNameUz();
+            collectionNameRu = collections.getNameRu();
+            collectionNameEng = collections.getNameEng();
         }
 
         imagesList = new ArrayList<>();

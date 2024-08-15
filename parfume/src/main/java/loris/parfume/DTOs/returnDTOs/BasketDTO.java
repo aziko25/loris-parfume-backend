@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import loris.parfume.Configurations.Serializers.DoubleSerializer;
 import loris.parfume.Models.Items.Collections;
-import loris.parfume.Models.Items.Collections_Items;
 import loris.parfume.Models.Items.Items_Images;
 import loris.parfume.Models.Items.Sizes_Items;
 
@@ -61,8 +60,6 @@ public class BasketDTO {
 
     private Integer discountPercent;
 
-    private List<Map<String, Object>> collectionsItemsList;
-
     public BasketDTO(Sizes_Items sizeItem, Integer quantity, Collections collections) {
 
         id = sizeItem.getItem().getId();
@@ -110,27 +107,6 @@ public class BasketDTO {
             categoryNameUz = sizeItem.getItem().getCategory().getNameUz();
             categoryNameRu = sizeItem.getItem().getCategory().getNameRu();
             categoryNameEng = sizeItem.getItem().getCategory().getNameEng();
-        }
-
-        collectionsItemsList = new ArrayList<>();
-        if (sizeItem.getItem().getCollectionsItemsList() != null && !sizeItem.getItem().getCollectionsItemsList().isEmpty()) {
-
-            Set<Collections_Items> collectionsItems = new HashSet<>(sizeItem.getItem().getCollectionsItemsList());
-            collectionsItemsList = collectionsItems.stream()
-                    .sorted(Comparator.comparing((Collections_Items pm) -> pm.getCollection().getId())
-                            .thenComparing(pm -> pm.getCollection().getNameUz()))
-                    .map(collection -> {
-
-                        Map<String, Object> map = new LinkedHashMap<>();
-
-                        map.put("collectionId", collection.getCollection().getId());
-
-                        map.put("collectionNameUz", collection.getCollection().getNameUz());
-                        map.put("collectionNameRu", collection.getCollection().getNameRu());
-                        map.put("collectionNameEng", collection.getCollection().getNameEng());
-
-                        return map;
-                    }).collect(Collectors.toList());
         }
     }
 }

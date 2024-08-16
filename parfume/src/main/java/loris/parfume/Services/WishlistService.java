@@ -65,7 +65,7 @@ public class WishlistService {
             }
 
             wishlist.setSize(size);
-            wishlistRepository.save(wishlist);
+            saveWishlist(wishlist);
 
             return new WishlistDTO(sizesItem, collection);
         }
@@ -80,7 +80,7 @@ public class WishlistService {
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
 
             wishlist.setSize(size);
-            wishlistRepository.save(wishlist);
+            saveWishlist(wishlist);
 
             Sizes_Items sizesItem = Sizes_Items.builder()
                     .item(item)
@@ -90,6 +90,17 @@ public class WishlistService {
                     .build();
 
             return new WishlistDTO(sizesItem, collection);
+        }
+    }
+
+    public void saveWishlist(Wishlist wishlist) {
+
+        Wishlist wishlistExists = wishlistRepository.findByUserAndCollectionAndItemAndSize(
+                wishlist.getUser(), wishlist.getCollection(), wishlist.getItem(), wishlist.getSize());
+
+        if (wishlistExists == null) {
+
+            wishlistRepository.save(wishlist);
         }
     }
 

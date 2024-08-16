@@ -1,5 +1,6 @@
 package loris.parfume.Repositories;
 
+import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 import loris.parfume.Models.Users;
@@ -25,4 +26,6 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Wishlist_Ids
     void deleteByUserAndItemAndSize(Users user, Items item, Sizes size);
 
     void deleteAllBySize(Sizes size);
+
+    Wishlist findByUserAndCollectionAndItemAndSize(Users user, Collections collection, Items item, Sizes size);
 }

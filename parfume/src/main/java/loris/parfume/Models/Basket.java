@@ -46,9 +46,4 @@ public class Basket {
     private LocalDateTime addedTime;
 
     private Integer quantity;
-
-    @JsonSerialize(using = DoubleSerializer.class)
-    private Double price;
-
-    private Integer discountPercent;
 }

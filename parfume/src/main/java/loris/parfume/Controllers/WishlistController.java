@@ -16,23 +16,25 @@ public class WishlistController {
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/add/{id}")
-    public ResponseEntity<?> add(@PathVariable Long id) {
+    public ResponseEntity<?> add(@PathVariable Long id,
+                                 @RequestParam Long collectionId,
+                                 @RequestParam(required = false) Long sizeId) {
 
-        return ResponseEntity.ok(wishlistService.add(id));
+        return ResponseEntity.ok(wishlistService.add(id, collectionId, sizeId));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page) {
+    public ResponseEntity<?> all() {
 
-        return ResponseEntity.ok(wishlistService.all(page));
+        return ResponseEntity.ok(wishlistService.all());
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @DeleteMapping("/remove/{id}")
-    public ResponseEntity<?> remove(@PathVariable Long id) {
+    public ResponseEntity<?> remove(@PathVariable Long id, @RequestParam(required = false) Long sizeId) {
 
-        return ResponseEntity.ok(wishlistService.remove(id));
+        return ResponseEntity.ok(wishlistService.remove(id, sizeId));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})

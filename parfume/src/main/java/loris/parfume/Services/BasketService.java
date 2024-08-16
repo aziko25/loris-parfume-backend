@@ -57,7 +57,7 @@ public class BasketService {
                 throw new EntityNotFoundException("Item With This Size Not Found");
             }
 
-            Integer totalQuantity = saveBasket(quantity, user, item, size, collection, sizesItem.getPrice(), sizesItem.getDiscountPercent());
+            Integer totalQuantity = saveBasket(quantity, user, item, size, collection);
 
             return new BasketDTO(sizesItem, totalQuantity, collection);
         }
@@ -71,7 +71,7 @@ public class BasketService {
             size = sizesRepository.findById(DEFAULT_NO_SIZE)
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
 
-            Integer totalQuantity = saveBasket(quantity, user, item, size, collection, item.getPrice(), item.getDiscountPercent());
+            Integer totalQuantity = saveBasket(quantity, user, item, size, collection);
 
             Sizes_Items sizesItem = Sizes_Items.builder()
                     .item(item)
@@ -85,13 +85,13 @@ public class BasketService {
         }
     }
 
-    private Integer saveBasket(Integer quantity, Users user, Items item, Sizes size, Collections collection, Double price, Integer discountPercent) {
+    private Integer saveBasket(Integer quantity, Users user, Items item, Sizes size, Collections collection) {
 
         Basket basket = basketsRepository.findByUserAndItemAndSize(user, item, size);
 
         if (basket == null) {
 
-            basket = new Basket(user, item, size, collection, LocalDateTime.now(), quantity, price, discountPercent);
+            basket = new Basket(user, item, size, collection, LocalDateTime.now(), quantity);
         }
         else {
 
@@ -112,15 +112,9 @@ public class BasketService {
 
         for (Basket basket : basketList) {
 
-            Sizes_Items sizesItems = Sizes_Items.builder()
-                    .item(basket.getItem())
-                    .size(basket.getSize())
-                    .quantity(basket.getQuantity())
-                    .price(basket.getPrice())
-                    .discountPercent(basket.getDiscountPercent())
-                    .build();
+            Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(basket.getItem(), basket.getSize());
 
-            basketDTOList.add(new BasketDTO(sizesItems, basket.getQuantity(), basket.getCollection()));
+            basketDTOList.add(new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection()));
         }
 
         return basketDTOList;

@@ -10,10 +10,12 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Sizes;
 import loris.parfume.Models.Items.Sizes_Items;
 import loris.parfume.Models.Orders.Orders_Items;
+import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.SizesRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
+import loris.parfume.Repositories.WishlistRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -34,8 +36,11 @@ public class SizesService {
 
     private final SizesRepository sizesRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
+
     private final ItemsRepository itemsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
+    private final BasketsRepository basketsRepository;
+    private final WishlistRepository wishlistRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -142,6 +147,8 @@ public class SizesService {
         Sizes defaultSize = sizesRepository.findByIsDefaultNoSize(true);
 
         sizesItemsRepository.deleteAllBySize(size);
+        wishlistRepository.deleteAllBySize(size);
+        basketsRepository.deleteAllBySize(size);
 
         List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllBySize(size);
 

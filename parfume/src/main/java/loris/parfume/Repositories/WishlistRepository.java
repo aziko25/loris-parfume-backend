@@ -23,4 +23,6 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Wishlist_Ids
     void deleteAllByItem(Items item);
 
     void deleteByUserAndItemAndSize(Users user, Items item, Sizes size);
+
+    void deleteAllBySize(Sizes size);
 }

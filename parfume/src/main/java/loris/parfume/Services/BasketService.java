@@ -114,7 +114,14 @@ public class BasketService {
 
             Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(basket.getItem(), basket.getSize());
 
-            basketDTOList.add(new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection()));
+            if (sizesItem != null) {
+
+                basketDTOList.add(new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection()));
+            }
+            else {
+
+                basketsRepository.delete(basket);
+            }
         }
 
         return basketDTOList;

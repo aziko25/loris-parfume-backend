@@ -115,7 +115,14 @@ public class WishlistService {
 
             Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(wishlist.getItem(), wishlist.getSize());
 
-            wishlistDTOList.add(new WishlistDTO(sizesItem, wishlist.getCollection()));
+            if (sizesItem != null) {
+
+                wishlistDTOList.add(new WishlistDTO(sizesItem, wishlist.getCollection()));
+            }
+            else {
+
+                wishlistRepository.delete(wishlist);
+            }
         }
 
         return wishlistDTOList;

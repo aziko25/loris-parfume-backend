@@ -3,6 +3,7 @@ package loris.parfume.Services.Orders;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Controllers.Orders.WebSocketController;
 import loris.parfume.DTOs.Requests.NearestBranchRequest;
 import loris.parfume.DTOs.Requests.Orders.OrdersRequest;
@@ -13,6 +14,7 @@ import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
+import loris.parfume.Models.Orders.Uzum_Nasiya_Clients;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.BranchesRepository;
@@ -22,6 +24,7 @@ import loris.parfume.Repositories.Items.SizesRepository;
 import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
+import loris.parfume.Repositories.Orders.Uzum_Nasiya_Clients_Repository;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,6 +62,8 @@ public class OrdersService {
     private final WebSocketController webSocketController;
     private final BasketsRepository basketsRepository;
     private final BranchesService branchesService;
+    private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
+    private final MainTelegramBot mainTelegramBot;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -66,7 +74,10 @@ public class OrdersService {
     @Value("${clickServiceId}")
     private Integer clickServiceId;
 
-    private static final String[] paymentTypesList = {"CLICK", "CASH"};
+    @Value("${payment.chat.id}")
+    private String paymentChatId;
+
+    private static final String[] paymentTypesList = {"CLICK", "CASH", "UZUM NASIYA"};
 
     @Transactional
     @CacheEvict(value = "ordersCache", allEntries = true)
@@ -193,6 +204,7 @@ public class OrdersService {
         order.setItemsList(saveAllOrderItemsList);
 
         basketsRepository.deleteAllByUser(user);
+        ordersRepository.save(order);
 
         if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
 
@@ -207,6 +219,49 @@ public class OrdersService {
             order.setPaymentLink("CASH");
             order.setIsPaid(false);
         }
+        else if (ordersRequest.getPaymentType().equalsIgnoreCase("UZUM NASIYA")) {
+
+            order.setPaymentLink("UZUM NASIYA");
+            order.setIsPaid(false);
+
+            Uzum_Nasiya_Clients uzumNasiyaClient = Uzum_Nasiya_Clients.builder()
+                    .phone(ordersRequest.getPhone())
+                    .user(user)
+                    .order(order)
+                    .sum(order.getTotalSum())
+                    .build();
+
+            uzumNasiyaClientsRepository.save(uzumNasiyaClient);
+
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(paymentChatId);
+            sendMessage.setText("UZUM NASIYA\n----------------\nOrder ID: " + order.getId() +
+                    "\nPhone: " + order.getPhone() + "\nFull Name: " + user.getFullName() +
+                    "\nOrder Sum: " + order.getTotalSum());
+
+            InlineKeyboardButton confirmButton = new InlineKeyboardButton();
+            confirmButton.setText("Подтвердить");
+            confirmButton.setCallbackData("confirm_" + order.getId());
+
+            InlineKeyboardButton rejectButton = new InlineKeyboardButton();
+            rejectButton.setText("Отказать");
+            rejectButton.setCallbackData("reject_" + order.getId());
+
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+            keyboardButtonsRow1.add(confirmButton);
+            keyboardButtonsRow1.add(rejectButton);
+
+            List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>();
+            keyboardRows.add(keyboardButtonsRow1);
+
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+            inlineKeyboardMarkup.setKeyboard(keyboardRows);
+            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+
+            mainTelegramBot.sendMessage(sendMessage);
+        }
+
+        ordersRepository.save(order);
 
         OrdersDTO orderDTO = new OrdersDTO(order);
 
@@ -252,6 +307,15 @@ public class OrdersService {
     public String delete(Long id) {
 
         Orders order = ordersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
+
+        Uzum_Nasiya_Clients uzumNasiyaClient = uzumNasiyaClientsRepository.findByOrder(order)
+                .orElse(null);
+
+        if (uzumNasiyaClient != null) {
+
+            uzumNasiyaClient.setOrder(null);
+            uzumNasiyaClientsRepository.save(uzumNasiyaClient);
+        }
 
         ordersItemsRepository.deleteAllByOrder(order);
 

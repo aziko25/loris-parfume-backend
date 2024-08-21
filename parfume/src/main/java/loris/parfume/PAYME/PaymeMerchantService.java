@@ -110,7 +110,7 @@ public class PaymeMerchantService {
         throw new UnableCompleteException("Unable to complete operation", -31008, "transaction");
     }
 
-    public void ifTransactionWasSuccessfullyPerformed() {
+    public void ifTransactionWasSuccessfullyPerformed(Orders order) {
 
         String orderMessage = "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
                 "\nТелефон: " + order.getPhone() +
@@ -160,7 +160,7 @@ public class PaymeMerchantService {
                     Map<String, PerformTransactionResult> result = new HashMap<>();
                     result.put("result", performTransactionResult);
 
-                    ifTransactionWasSuccessfullyPerformed();
+                    ifTransactionWasSuccessfullyPerformed(transaction.getOrder());
 
                     return result;
                 }

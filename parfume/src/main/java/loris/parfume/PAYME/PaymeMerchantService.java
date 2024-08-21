@@ -23,9 +23,6 @@ public class PaymeMerchantService {
     private final TransactionRepository transactionRepository;
     private final MainTelegramBot mainTelegramBot;
 
-    @Value("${paymeBusinessId}")
-    private String paymeBusinessId;
-
     @Value("${payment.chat.id}")
     private String paymentChatId;
 
@@ -59,7 +56,7 @@ public class PaymeMerchantService {
             throw new UnableCompleteException("Unable to complete operation", -31050, "transaction");
         }
 
-        if (transaction != null && !Objects.equals(transaction.getOrder().getTotalSum(), amount)) {
+        if (transaction != null && Math.abs(order.getTotalSum() - amount) > 0.00001) {
 
             throw new UnableCompleteException("Wrong amount", -31001, "transaction");
         }

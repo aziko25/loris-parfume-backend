@@ -44,12 +44,7 @@ public class PaymeOrdersController {
 
             String[] values = credentials.split(":");
 
-            if (values.length == 2) {
-
-                String username = values[0];
-                String password = values[1];
-            }
-            else {
+            if (values.length != 2) {
 
                 throw new UnableCompleteException("Corrupted headers", -32504, "authorization");
             }
@@ -65,12 +60,13 @@ public class PaymeOrdersController {
         Account account;
 
         String id;
+        double amount;
 
         switch (method) {
 
             case "CheckPerformTransaction":
 
-                double amount = params.get("amount").doubleValue();
+                amount = params.get("amount").doubleValue();
 
                 if (!accountJson.isEmpty()) {
                     account = new Account(accountJson.get("orderId").asText());

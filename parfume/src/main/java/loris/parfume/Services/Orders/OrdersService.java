@@ -74,10 +74,13 @@ public class OrdersService {
     @Value("${clickServiceId}")
     private Integer clickServiceId;
 
+    @Value("${paymeBusinessId}")
+    private String paymeBusinessId;
+
     @Value("${payment.chat.id}")
     private String paymentChatId;
 
-    private static final String[] paymentTypesList = {"CLICK", "CASH", "UZUM NASIYA"};
+    private static final String[] paymentTypesList = {"CLICK", "PAYME", "CASH", "UZUM NASIYA"};
 
     @Transactional
     @CacheEvict(value = "ordersCache", allEntries = true)
@@ -213,16 +216,36 @@ public class OrdersService {
                     "&amount=" + order.getTotalSum() +
                     "&transaction_param=" + order.getId());
             order.setIsPaid(false);
+            order.setPaymentType("CLICK");
+        }
+        else if (ordersRequest.getPaymentType().equalsIgnoreCase("PAYME")) {
+
+            order.setIsPaid(false);
+            order.setPaymentType("PAYME");
+
+            String paymeUrl = "https://checkout.paycom.uz";
+            long amount = (long) (order.getTotalSum() * 100); // тиины
+
+            String orderId = order.getId().toString();
+
+            String data = "m=" + paymeBusinessId + ";ac.orderId=" + orderId + ";a=" + amount + ";c=" + ordersRequest.getReturnUrl();
+            String encodedData = Base64.getEncoder().encodeToString(data.getBytes());
+
+            String url = paymeUrl + "/" + encodedData;
+
+            order.setPaymentLink(url);
         }
         else if (ordersRequest.getPaymentType().equalsIgnoreCase("CASH")) {
 
             order.setPaymentLink("CASH");
             order.setIsPaid(false);
+            order.setPaymentType("CASH");
         }
         else if (ordersRequest.getPaymentType().equalsIgnoreCase("UZUM NASIYA")) {
 
             order.setPaymentLink("UZUM NASIYA");
             order.setIsPaid(false);
+            order.setPaymentType("UZUM NASIYA");
 
             Uzum_Nasiya_Clients uzumNasiyaClient = Uzum_Nasiya_Clients.builder()
                     .phone(ordersRequest.getPhone())

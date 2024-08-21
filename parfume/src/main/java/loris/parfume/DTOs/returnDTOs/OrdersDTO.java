@@ -57,6 +57,7 @@ public class OrdersDTO implements Serializable {
     private String branchRedirectTo;
 
     private String paymentLink;
+    private String paymentType;
     private Boolean isPaid;
 
     private String paymentResponseUz;
@@ -86,6 +87,7 @@ public class OrdersDTO implements Serializable {
         scheduledDeliveryTime = order.getScheduledDeliveryTime();
 
         paymentLink = order.getPaymentLink();
+        paymentType = order.getPaymentType();
         isPaid = order.getIsPaid();
 
         paymentResponseUz = order.getPaymentResponseUz();

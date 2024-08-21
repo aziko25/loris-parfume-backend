@@ -8,6 +8,7 @@ import lombok.Setter;
 public class BranchesRequest {
 
     private String name;
+    private String phone;
 
     private Double longitude;
     private Double latitude;

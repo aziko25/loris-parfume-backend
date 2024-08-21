@@ -45,6 +45,7 @@ public class Orders {
     private LocalDateTime scheduledDeliveryTime;
 
     private String paymentLink;
+    private String paymentType;
     private Boolean isPaid;
 
     private String paymentResponseUz;

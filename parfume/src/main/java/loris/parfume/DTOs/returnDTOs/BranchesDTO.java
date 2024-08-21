@@ -25,6 +25,8 @@ public class BranchesDTO {
     private LocalDateTime createdTime;
 
     private String name;
+    private String phone;
+
     private Double longitude;
     private Double latitude;
 
@@ -41,6 +43,7 @@ public class BranchesDTO {
         this.id = branch.getId();
         this.createdTime = branch.getCreatedTime();
         this.name = branch.getName();
+        this.phone = branch.getPhone();
         this.longitude = branch.getLongitude();
         this.latitude = branch.getLatitude();
         this.redirectTo = branch.getRedirectTo();

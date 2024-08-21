@@ -25,6 +25,7 @@ public class Branches {
     private LocalDateTime createdTime;
 
     private String name;
+    private String phone;
 
     private Double longitude;
     private Double latitude;

@@ -44,6 +44,7 @@ public class BranchesService {
         Branches branch = Branches.builder()
                 .createdTime(LocalDateTime.now())
                 .name(branchesRequest.getName())
+                .phone(branchesRequest.getPhone())
                 .longitude(branchesRequest.getLongitude())
                 .latitude(branchesRequest.getLatitude())
                 .redirectTo(branchesRequest.getRedirectTo())
@@ -74,6 +75,7 @@ public class BranchesService {
         Branches branch = getById(id);
 
         Optional.ofNullable(branchesRequest.getName()).ifPresent(branch::setName);
+        Optional.ofNullable(branchesRequest.getPhone()).ifPresent(branch::setPhone);
         Optional.ofNullable(branchesRequest.getLongitude()).ifPresent(branch::setLongitude);
         Optional.ofNullable(branchesRequest.getLatitude()).ifPresent(branch::setLatitude);
         Optional.ofNullable(branchesRequest.getRedirectTo()).ifPresent(branch::setRedirectTo);

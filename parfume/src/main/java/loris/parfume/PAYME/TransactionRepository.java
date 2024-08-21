@@ -1,5 +1,6 @@
 package loris.parfume.PAYME;
 
+import loris.parfume.Models.Orders.Orders;
 import loris.parfume.PAYME.Result.OrderTransaction;
 import loris.parfume.PAYME.Result.TransactionState;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,8 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<OrderTransaction, Long> {
 
-    OrderTransaction findByPaycomId(Long id);
+    OrderTransaction findByPaycomId(String id);
+    OrderTransaction findByOrder(Orders order);
 
     @Query("select o from OrderTransaction o " +
             "where o.paycomTime between ?1 and ?2 and o.state = ?3 ORDER BY o.paycomTime ASC")

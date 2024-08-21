@@ -91,19 +91,19 @@ public class PaymeOrdersController {
                     account = new Account("1");
                 }
 
-                return ResponseEntity.ok(merchantService.createTransaction(Long.valueOf(id), transactionDate, amount, Long.valueOf(account.getOrderId())));
+                return ResponseEntity.ok(merchantService.createTransaction(id, transactionDate, amount, Long.valueOf(account.getOrderId())));
 
             case "CheckTransaction":
 
                 id = params.get("id").asText();
 
-                return ResponseEntity.ok(merchantService.checkTransaction(Long.valueOf(id)));
+                return ResponseEntity.ok(merchantService.checkTransaction(id));
 
             case "PerformTransaction":
 
                 id = params.get("id").asText();
 
-                return ResponseEntity.ok(merchantService.performTransaction(Long.valueOf(id)));
+                return ResponseEntity.ok(merchantService.performTransaction(id));
 
             case "CancelTransaction":
 
@@ -112,7 +112,7 @@ public class PaymeOrdersController {
 
                 OrderCancelReason reason = OrderCancelReason.fromCode(reasonCode);
 
-                return ResponseEntity.ok(merchantService.cancelTransaction(Long.valueOf(id), reason));
+                return ResponseEntity.ok(merchantService.cancelTransaction(id, reason));
 
             case "GetStatement":
 

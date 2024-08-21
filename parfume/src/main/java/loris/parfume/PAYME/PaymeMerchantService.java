@@ -47,9 +47,9 @@ public class PaymeMerchantService {
         return result;
     }
 
-    public Map<String, CreateTransactionResult> createTransaction(Long id, Date time, Double amount, Long orderId) throws UnableCompleteException, OrderNotExistsException, WrongAmountException {
+    public Map<String, CreateTransactionResult> createTransaction(String id, Date time, Double amount, Long orderId) throws UnableCompleteException, OrderNotExistsException, WrongAmountException {
 
-        OrderTransaction transaction = transactionRepository.findByPaycomId(orderId);
+        OrderTransaction transaction = transactionRepository.findByOrder(order);
 
         if (transaction != null && !Objects.equals(id, transaction.getPaycomId())) {
 
@@ -79,7 +79,7 @@ public class PaymeMerchantService {
 
                 transactionRepository.save(newTransaction);
 
-                CreateTransactionResult createTransactionResult = new CreateTransactionResult(newTransaction.getCreateTime(), newTransaction.getPaycomId().toString(), newTransaction.getState().getCode());
+                CreateTransactionResult createTransactionResult = new CreateTransactionResult(newTransaction.getCreateTime(), newTransaction.getPaycomId(), newTransaction.getState().getCode());
                 Map<String, CreateTransactionResult> result = new HashMap<>();
                 result.put("result", createTransactionResult);
 
@@ -95,7 +95,7 @@ public class PaymeMerchantService {
 
                 } else {
 
-                    CreateTransactionResult createTransactionResult = new CreateTransactionResult(transaction.getCreateTime(), transaction.getPaycomId().toString(), transaction.getState().getCode());
+                    CreateTransactionResult createTransactionResult = new CreateTransactionResult(transaction.getCreateTime(), transaction.getPaycomId(), transaction.getState().getCode());
                     Map<String, CreateTransactionResult> result = new HashMap<>();
                     result.put("result", createTransactionResult);
 
@@ -135,7 +135,7 @@ public class PaymeMerchantService {
         mainTelegramBot.sendMessage(message);
     }
 
-    public Map<String, PerformTransactionResult> performTransaction(Long id) throws TransactionNotFoundException, UnableCompleteException {
+    public Map<String, PerformTransactionResult> performTransaction(String id) throws TransactionNotFoundException, UnableCompleteException {
 
         OrderTransaction transaction = transactionRepository.findByPaycomId(id);
 
@@ -156,7 +156,7 @@ public class PaymeMerchantService {
                     transaction.setPerformTimes(new Date());
                     transactionRepository.save(transaction);
 
-                    PerformTransactionResult performTransactionResult = new PerformTransactionResult(transaction.getPaycomId().toString(), transaction.getPerformTime(), transaction.getState().getCode());
+                    PerformTransactionResult performTransactionResult = new PerformTransactionResult(transaction.getPaycomId(), transaction.getPerformTime(), transaction.getState().getCode());
                     Map<String, PerformTransactionResult> result = new HashMap<>();
                     result.put("result", performTransactionResult);
 
@@ -167,7 +167,7 @@ public class PaymeMerchantService {
             }
             else if (transaction.getState() == TransactionState.STATE_DONE) {
 
-                PerformTransactionResult performTransactionResult = new PerformTransactionResult(transaction.getPaycomId().toString(), transaction.getPerformTime(), transaction.getState().getCode());
+                PerformTransactionResult performTransactionResult = new PerformTransactionResult(transaction.getPaycomId(), transaction.getPerformTime(), transaction.getState().getCode());
                 Map<String, PerformTransactionResult> result = new HashMap<>();
                 result.put("result", performTransactionResult);
 
@@ -184,7 +184,7 @@ public class PaymeMerchantService {
         }
     }
 
-    public Map<String, CancelTransactionResult> cancelTransaction(Long id, OrderCancelReason reason) throws UnableCancelTransactionException, TransactionNotFoundException {
+    public Map<String, CancelTransactionResult> cancelTransaction(String id, OrderCancelReason reason) throws UnableCancelTransactionException, TransactionNotFoundException {
 
         OrderTransaction transaction = transactionRepository.findByPaycomId(id);
 
@@ -226,7 +226,7 @@ public class PaymeMerchantService {
             transaction.setReason(reason);
             transactionRepository.save(transaction);
 
-            CancelTransactionResult cancelTransactionResult = new CancelTransactionResult(transaction.getPaycomId().toString(), transaction.getCancelTime(), transaction.getState().getCode());
+            CancelTransactionResult cancelTransactionResult = new CancelTransactionResult(transaction.getPaycomId(), transaction.getCancelTime(), transaction.getState().getCode());
 
             Map<String, CancelTransactionResult> result = new HashMap<>();
             result.put("result", cancelTransactionResult);
@@ -240,7 +240,7 @@ public class PaymeMerchantService {
     }
 
 
-    public Map<String, CheckTransactionResult> checkTransaction(Long id) throws TransactionNotFoundException {
+    public Map<String, CheckTransactionResult> checkTransaction(String id) throws TransactionNotFoundException {
 
         OrderTransaction transaction = transactionRepository.findByPaycomId(id);
 
@@ -249,7 +249,7 @@ public class PaymeMerchantService {
             CheckTransactionResult checkTransactionResult = new CheckTransactionResult(transaction.getCreateTime(),
                     transaction.getPerformTime(),
                     transaction.getCancelTime(),
-                    transaction.getPaycomId().toString(),
+                    transaction.getPaycomId(),
                     transaction.getState().getCode(),
                     transaction.getReason() != null ? transaction.getReason().getCode() : null);
 
@@ -275,7 +275,7 @@ public class PaymeMerchantService {
 
             results = transactions.stream()
                     .map(transaction -> new GetStatementResult(
-                            transaction.getPaycomId().toString(),
+                            transaction.getPaycomId(),
                             transaction.getPaycomTime(),
                             transaction.getOrder() != null ? transaction.getOrder().getTotalSum() : null,
                             new Account(transaction.getOrder() != null ? transaction.getOrder().getId().toString() : null),

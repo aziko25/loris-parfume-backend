@@ -22,7 +22,7 @@ public class OrderTransaction {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private Long paycomId;
+    private String paycomId;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date paycomTime;

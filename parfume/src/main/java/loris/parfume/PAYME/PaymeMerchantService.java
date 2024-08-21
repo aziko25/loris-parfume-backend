@@ -152,6 +152,8 @@ public class PaymeMerchantService {
                 }
                 else {
 
+                    transaction.getOrder().setIsPaid(true);
+
                     transaction.setState(TransactionState.STATE_DONE);
                     transaction.setPerformTimes(new Date());
                     transactionRepository.save(transaction);
@@ -223,6 +225,12 @@ public class PaymeMerchantService {
                 transaction.setCancelTimes(new Date());
             }
 
+            SendMessage message = new SendMessage();
+            message.setChatId(paymentChatId);
+            message.setText("Заказ Был Отменен Клиентом! ID Заказа: " + transaction.getOrder().getId());
+            mainTelegramBot.sendMessage(message);
+
+            transaction.getOrder().setIsPaid(false);
             transaction.setReason(reason);
             transactionRepository.save(transaction);
 

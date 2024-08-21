@@ -1,9 +1,7 @@
 package loris.parfume.Repositories.Items;
 
-import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Items.Categories;
 import loris.parfume.Models.Items.Collections;
-import loris.parfume.Models.Items.Collections_Items;
 import loris.parfume.Models.Items.Items;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

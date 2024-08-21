@@ -33,7 +33,7 @@ public class PaymeMerchantService {
         order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotExistsException("Order not found", -31050, "order"));
 
-        if (amount != order.getTotalSum()) {
+        if (amount != order.getTotalSum() * 100) {
 
             throw new WrongAmountException("Wrong amount", -31001, "amount");
         }
@@ -56,7 +56,7 @@ public class PaymeMerchantService {
             throw new UnableCompleteException("Unable to complete operation", -31050, "transaction");
         }
 
-        if (transaction != null && Math.abs(order.getTotalSum() - amount) > 0.00001) {
+        if (transaction != null && Math.abs(order.getTotalSum() * 100 - amount) > 0.00001) {
 
             throw new UnableCompleteException("Wrong amount", -31001, "transaction");
         }

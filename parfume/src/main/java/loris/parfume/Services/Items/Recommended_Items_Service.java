@@ -42,8 +42,8 @@ public class Recommended_Items_Service {
                         Collectors.mapping(Recommended_Items::getRecommendedItem, Collectors.toList())
                 ));
 
-        return groupedItems.entrySet().stream()
-                .map(entry -> new Recommended_Items_DTO(entry.getKey(), entry.getValue()))
+        return groupedItems.values().stream()
+                .map(Recommended_Items_DTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -55,7 +55,7 @@ public class Recommended_Items_Service {
                 .stream().map(Recommended_Items::getRecommendedItem)
                 .collect(Collectors.toList());
 
-        return new Recommended_Items_DTO(item, recommendedItemsList);
+        return new Recommended_Items_DTO(recommendedItemsList);
     }
 
     @Transactional
@@ -97,7 +97,7 @@ public class Recommended_Items_Service {
         recommendedItemsRepository.saveAll(recommendedItemsList);
 
         return recommendedItemsList.stream()
-                .map(recommendedItem -> new Recommended_Items_DTO(recommendedItem.getItem(),
+                .map(recommendedItem -> new Recommended_Items_DTO(
                         recommendedItemsList.stream()
                                 .map(Recommended_Items::getRecommendedItem)
                                 .collect(Collectors.toList())))

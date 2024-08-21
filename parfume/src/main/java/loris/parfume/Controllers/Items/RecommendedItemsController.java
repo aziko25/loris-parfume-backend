@@ -24,9 +24,9 @@ public class RecommendedItemsController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page) {
+    public ResponseEntity<?> all() {
 
-        return ResponseEntity.ok(recommendedItemsService.all(page));
+        return ResponseEntity.ok(recommendedItemsService.all());
     }
 
     @GetMapping("/{id}")

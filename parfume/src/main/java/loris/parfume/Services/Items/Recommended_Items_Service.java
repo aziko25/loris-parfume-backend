@@ -9,11 +9,6 @@ import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Recommended_Items;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.Recommended_Items_Repository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,9 +23,6 @@ public class Recommended_Items_Service {
     private final Recommended_Items_Repository recommendedItemsRepository;
     private final ItemsRepository itemsRepository;
 
-    @Value("${pageSize}")
-    private Integer pageSize;
-
     @Transactional
     public List<Recommended_Items_DTO> create(RecommendedItemsRequest recommendedItemsRequest) {
 
@@ -40,23 +32,19 @@ public class Recommended_Items_Service {
         return setRecommendedItems(recommendedItemsRequest, item);
     }
 
-    public Page<Recommended_Items_DTO> all(Integer page) {
+    public List<Recommended_Items_DTO> all() {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        List<Recommended_Items> recommendedItemsPage = recommendedItemsRepository.findAll();
 
-        Page<Recommended_Items> recommendedItemsPage = recommendedItemsRepository.findAll(pageable);
-
-        Map<Items, List<Items>> groupedItems = recommendedItemsPage.getContent().stream()
+        Map<Items, List<Items>> groupedItems = recommendedItemsPage.stream()
                 .collect(Collectors.groupingBy(
                         Recommended_Items::getItem,
                         Collectors.mapping(Recommended_Items::getRecommendedItem, Collectors.toList())
                 ));
 
-        List<Recommended_Items_DTO> dtos = groupedItems.entrySet().stream()
+        return groupedItems.entrySet().stream()
                 .map(entry -> new Recommended_Items_DTO(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, recommendedItemsPage.getTotalElements());
     }
 
     public Recommended_Items_DTO getById(Long itemId) {

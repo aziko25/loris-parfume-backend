@@ -23,7 +23,7 @@ public class RecommendedItemsController {
         return new ResponseEntity<>(recommendedItemsService.create(recommendedItemsRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping("/all")
+    @GetMapping("/all")
     public ResponseEntity<?> all() {
 
         return ResponseEntity.ok(recommendedItemsService.all());

@@ -49,4 +49,6 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
 
     Optional<Items> findBySlug(String slug);
+
+    Optional<Items> findByBarcode(String barcode);
 }

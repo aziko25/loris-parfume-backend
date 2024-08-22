@@ -1,5 +1,6 @@
 package loris.parfume.Services.Items;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,18 @@ public class ItemsService {
     @Transactional
     @CacheEvict(value = "itemsCache", allEntries = true)
     public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) {
+
+        Optional<Items> existingSlug = itemsRepository.findBySlug(itemsRequest.getSlug());
+        if (existingSlug.isPresent()) {
+
+            throw new EntityExistsException("Slug Already Exists!");
+        }
+
+        Optional<Items> existingBarcode = itemsRepository.findByBarcode(itemsRequest.getBarcode());
+        if (existingBarcode.isPresent()) {
+
+            throw new EntityExistsException("Barcode Already Exists!");
+        }
 
         Items item = Items.builder()
                 .slug(itemsRequest.getSlug())
@@ -154,6 +167,24 @@ public class ItemsService {
     public ItemsDTO update(String slug, List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+
+        if (itemsRequest.getSlug() != null) {
+
+            Optional<Items> existingSlug = itemsRepository.findBySlug(itemsRequest.getSlug());
+            if (existingSlug.isPresent()) {
+
+                throw new EntityExistsException("Slug Already Exists!");
+            }
+        }
+
+        if (itemsRequest.getBarcode() != null) {
+
+            Optional<Items> existingBarcode = itemsRepository.findByBarcode(itemsRequest.getBarcode());
+            if (existingBarcode.isPresent()) {
+
+                throw new EntityExistsException("Barcode Already Exists!");
+            }
+        }
 
         Optional.ofNullable(itemsRequest.getSlug()).ifPresent(item::setSlug);
         Optional.ofNullable(itemsRequest.getBarcode()).ifPresent(item::setBarcode);

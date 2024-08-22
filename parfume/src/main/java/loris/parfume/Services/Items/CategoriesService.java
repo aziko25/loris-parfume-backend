@@ -1,5 +1,6 @@
 package loris.parfume.Services.Items;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,12 @@ public class CategoriesService {
         Collections collection = collectionsRepository.findById(categoriesRequest.getCollectionId())
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
+        Optional<Categories> existingSlug = categoriesRepository.findBySlug(categoriesRequest.getSlug());
+        if (existingSlug.isPresent()) {
+
+            throw new EntityExistsException("Slug already exists");
+        }
+
         Categories category = Categories.builder()
                 .slug(categoriesRequest.getSlug())
                 .createdTime(LocalDateTime.now())
@@ -89,6 +96,16 @@ public class CategoriesService {
 
         Categories category = categoriesRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
+
+        if (categoriesRequest.getSlug() != null) {
+
+            Optional<Categories> existingSlug = categoriesRepository.findBySlug(categoriesRequest.getSlug());
+
+            if (existingSlug.isPresent() && !existingSlug.get().getId().equals(category.getId())) {
+
+                throw new EntityExistsException("Slug already exists");
+            }
+        }
 
         Optional.ofNullable(categoriesRequest.getSlug()).ifPresent(category::setSlug);
         Optional.ofNullable(categoriesRequest.getNameUz()).ifPresent(category::setNameUz);

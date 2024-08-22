@@ -1,5 +1,6 @@
 package loris.parfume.Services.Items;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Images.FileUploadUtilService;
@@ -46,6 +47,12 @@ public class CollectionsService {
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
     public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) {
 
+        Optional<Collections> existingSlug = collectionsRepository.findBySlug(collectionsRequest.getSlug());
+        if (existingSlug.isPresent()) {
+
+            throw new EntityExistsException(existingSlug.get().getSlug() + " Already Exists!");
+        }
+
         Collections collection = Collections.builder()
                 .slug(collectionsRequest.getSlug())
                 .createdTime(LocalDateTime.now())
@@ -90,7 +97,15 @@ public class CollectionsService {
 
         if (collectionsRequest != null) {
 
-            Optional.ofNullable(collectionsRequest.getSlug()).ifPresent(collection::setSlug);
+            if (collectionsRequest.getSlug() != null) {
+
+                Optional<Collections> existingSlug = collectionsRepository.findBySlug(collectionsRequest.getSlug());
+                if (existingSlug.isPresent() && !existingSlug.get().getId().equals(collection.getId())) {
+
+                    throw new EntityExistsException(existingSlug.get().getSlug() + " Already Exists!");
+                }
+            }
+
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);
             Optional.ofNullable(collectionsRequest.getNameRu()).ifPresent(collection::setNameRu);
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);

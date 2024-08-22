@@ -8,11 +8,7 @@ import loris.parfume.DTOs.Filters.BannerFilters;
 import loris.parfume.DTOs.Requests.BannersRequest;
 import loris.parfume.Models.Banners;
 import loris.parfume.Repositories.BannersRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,9 +25,6 @@ public class BannersService {
     private final CacheForAllService cacheForAllService;
 
     private final FileUploadUtilService fileUploadUtilService;
-
-    @Value("${pageSize}")
-    private Integer pageSize;
 
     @Transactional
     @CacheEvict(value = "bannersCache", allEntries = true)
@@ -53,16 +46,14 @@ public class BannersService {
         return bannersRepository.save(banner);
     }
 
-    public Page<Banners> all(BannerFilters filters, Integer page) {
+    public List<Banners> all(BannerFilters filters) {
 
         if (filters == null) {
 
-            return cacheForAllService.allBanners(page);
+            return cacheForAllService.allBanners();
         }
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
-
-        return bannersRepository.findAllByTitleLikeIgnoreCaseOrIsActive(filters.getTitle(), filters.getIsActive(), pageable);
+        return bannersRepository.findAllByTitleLikeIgnoreCaseOrIsActive(filters.getTitle(), filters.getIsActive());
     }
 
     public Banners getById(Long id) {

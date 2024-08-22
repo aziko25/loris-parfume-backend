@@ -22,6 +22,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CacheForAllService {
@@ -37,13 +39,11 @@ public class CacheForAllService {
 
     @Cacheable(
             value = "bannersCache",
-            key = "T(String).valueOf('page-').concat(T(String).valueOf(#page))"
+            key = "'allBanners'"
     )
-    public Page<Banners> allBanners(Integer page) {
+    public List<Banners> allBanners() {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("id").ascending());
-
-        return bannersRepository.findAll(pageable);
+        return bannersRepository.findAll(Sort.by("id").descending());
     }
 
     @Cacheable(

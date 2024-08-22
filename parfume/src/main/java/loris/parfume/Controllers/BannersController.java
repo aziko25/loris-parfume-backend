@@ -33,10 +33,9 @@ public class BannersController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestBody(required = false) BannerFilters filters,
-                                 @RequestParam Integer page) {
+    public ResponseEntity<?> all(@RequestBody(required = false) BannerFilters filters) {
 
-        return ResponseEntity.ok(bannersService.all(filters, page));
+        return ResponseEntity.ok(bannersService.all(filters));
     }
 
     @GetMapping("/{id}")

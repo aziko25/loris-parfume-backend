@@ -25,6 +25,9 @@ public class BasketDTO {
 
     private Long id;
 
+    private String slug;
+    private String barcode;
+
     @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdTime;
 
@@ -63,10 +66,12 @@ public class BasketDTO {
     public BasketDTO(Sizes_Items sizeItem, Integer quantity, Collections collections) {
 
         id = sizeItem.getItem().getId();
+        slug = sizeItem.getItem().getSlug();
+        barcode = sizeItem.getItem().getBarcode();
         createdTime = sizeItem.getItem().getCreatedTime();
-        nameUz = sizeItem.getItem().getNameUz();
-        nameRu = sizeItem.getItem().getNameRu();
-        nameEng = sizeItem.getItem().getNameEng();
+        nameUz = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameUz();
+        nameRu = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameRu();
+        nameEng = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameEng();
         descriptionUz = sizeItem.getItem().getDescriptionUz();
         descriptionRu = sizeItem.getItem().getDescriptionRu();
         descriptionEng = sizeItem.getItem().getDescriptionEng();

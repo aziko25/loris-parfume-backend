@@ -5,16 +5,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.returnDTOs.BasketDTO;
 import loris.parfume.Models.Basket;
-import loris.parfume.Models.Items.Collections;
-import loris.parfume.Models.Items.Items;
-import loris.parfume.Models.Items.Sizes;
-import loris.parfume.Models.Items.Sizes_Items;
+import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
-import loris.parfume.Repositories.Items.CollectionsRepository;
-import loris.parfume.Repositories.Items.ItemsRepository;
-import loris.parfume.Repositories.Items.SizesRepository;
-import loris.parfume.Repositories.Items.Sizes_Items_Repository;
+import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.UsersRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -36,13 +30,15 @@ public class BasketService {
     private final ItemsRepository itemsRepository;
     private final SizesRepository sizesRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
-    private final CollectionsRepository collectionsRepository;
+    private final Collections_Items_Repository collectionsItemsRepository;
 
-    public BasketDTO add(Long itemId, Long sizeId, Long collectionId, Integer quantity) {
+    public BasketDTO add(String itemSlug, Long sizeId, String collectionSlug, Integer quantity) {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
-        Items item = itemsRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
-        Collections collection = collectionsRepository.findById(collectionId).orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+        Collections_Items collectionsItem = collectionsItemsRepository
+                .findByCollectionSlugAndItemSlug(collectionSlug, itemSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Item: " + itemSlug + " Does Not Belong To This Collection!"));
+
         Sizes size;
 
         if (sizeId != null) {
@@ -50,20 +46,20 @@ public class BasketService {
             size = sizesRepository.findById(sizeId)
                     .orElseThrow(() -> new EntityNotFoundException("Size Not Found"));
 
-            Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(item, size);
+            Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(collectionsItem.getItem(), size);
 
             if (sizesItem == null) {
 
                 throw new EntityNotFoundException("Item With This Size Not Found");
             }
 
-            Integer totalQuantity = saveBasket(quantity, user, item, size, collection);
+            Integer totalQuantity = saveBasket(quantity, user, collectionsItem.getItem(), size, collectionsItem.getCollection());
 
-            return new BasketDTO(sizesItem, totalQuantity, collection);
+            return new BasketDTO(sizesItem, totalQuantity, collectionsItem.getCollection());
         }
         else {
 
-            if (!item.getSizesItemsList().isEmpty()) {
+            if (!collectionsItem.getItem().getSizesItemsList().isEmpty()) {
 
                 throw new EntityNotFoundException("Select Item's Size!");
             }
@@ -71,16 +67,16 @@ public class BasketService {
             size = sizesRepository.findById(DEFAULT_NO_SIZE)
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
 
-            saveBasket(quantity, user, item, size, collection);
+            saveBasket(quantity, user, collectionsItem.getItem(), size, collectionsItem.getCollection());
 
             Sizes_Items sizesItem = Sizes_Items.builder()
-                    .item(item)
+                    .item(collectionsItem.getItem())
                     .size(size)
-                    .price(item.getPrice())
-                    .discountPercent(item.getDiscountPercent())
+                    .price(collectionsItem.getItem().getPrice())
+                    .discountPercent(collectionsItem.getItem().getDiscountPercent())
                     .build();
 
-            return new BasketDTO(sizesItem, quantity, collection);
+            return new BasketDTO(sizesItem, quantity, collectionsItem.getCollection());
         }
     }
 
@@ -127,10 +123,10 @@ public class BasketService {
     }
 
     @Transactional
-    public String remove(Long itemId, Long sizeId) {
+    public String remove(String itemSlug, Long sizeId) {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
-        Items item = itemsRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Items item = itemsRepository.findBySlug(itemSlug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
         if (sizeId != null) {
 

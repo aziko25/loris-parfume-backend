@@ -117,7 +117,7 @@ public class PaymeMerchantService {
         SendMessage message = new SendMessage();
 
         message.setChatId(paymentChatId);
-        message.setText(orderDetailsMessage(order));
+        message.setText(orderDetailsMessage(order, "PAYME"));
 
         mainTelegramBot.sendMessage(message);
     }

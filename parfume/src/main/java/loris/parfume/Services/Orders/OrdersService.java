@@ -11,17 +11,13 @@ import loris.parfume.DTOs.Requests.Orders.Orders_Items_Request;
 import loris.parfume.DTOs.returnDTOs.OrdersDTO;
 import loris.parfume.Models.Branches;
 import loris.parfume.Models.Items.*;
-import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
 import loris.parfume.Models.Orders.Uzum_Nasiya_Clients;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.BranchesRepository;
-import loris.parfume.Repositories.Items.CollectionsRepository;
-import loris.parfume.Repositories.Items.ItemsRepository;
-import loris.parfume.Repositories.Items.SizesRepository;
-import loris.parfume.Repositories.Items.Sizes_Items_Repository;
+import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.Orders.Uzum_Nasiya_Clients_Repository;
@@ -45,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
+import static loris.parfume.Controllers.Orders.ClickOrdersController.orderDetailsMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -52,13 +49,12 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
 
-    private final ItemsRepository itemsRepository;
+    private final Collections_Items_Repository collectionsItemsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
     private final UsersRepository usersRepository;
     private final SizesRepository sizesRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
     private final BranchesRepository branchesRepository;
-    private final CollectionsRepository collectionsRepository;
     private final WebSocketController webSocketController;
     private final BasketsRepository basketsRepository;
     private final BranchesService branchesService;
@@ -132,16 +128,14 @@ public class OrdersService {
 
         for (Orders_Items_Request ordersItemsRequest : ordersRequest.getOrdersItemsList()) {
 
-            Items item = itemsRepository.findById(ordersItemsRequest.getItemId())
-                    .orElseThrow(() -> new EntityNotFoundException("Item " + ordersItemsRequest.getItemId() + " Not Found"));
-
-            Collections collection = collectionsRepository.findById(ordersItemsRequest.getCollectionId())
-                    .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+            Collections_Items collectionsItem = collectionsItemsRepository
+                    .findByCollectionIdAndItemId(ordersItemsRequest.getCollectionId(), ordersItemsRequest.getItemId())
+                    .orElseThrow(() -> new EntityNotFoundException("Item ID: " + ordersItemsRequest.getItemId() + " Does Not Belong To This Collection!"));
 
             Sizes size = sizesRepository.findByIsDefaultNoSize(true);
-            double itemPrice = item.getPrice();
+            double itemPrice = collectionsItem.getItem().getPrice();
 
-            if (!item.getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
+            if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
 
                 throw new IllegalArgumentException("Specify Item's Size!");
             }
@@ -151,19 +145,19 @@ public class OrdersService {
                 size = sizesRepository.findById(ordersItemsRequest.getSizeId())
                         .orElseThrow(() -> new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() + " Not Found"));
 
-                Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(item, size);
+                Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(collectionsItem.getItem(), size);
 
                 if (sizesItem == null) {
 
                     throw new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() +
-                            " For Item " + item.getId() + " Not Found");
+                            " For Item " + collectionsItem.getItem().getId() + " Not Found");
                 }
 
                 itemPrice = sizesItem.getPrice();
             }
 
-            collectionItemCountMap.putIfAbsent(collection.getId(), 0);
-            int currentCount = collectionItemCountMap.get(collection.getId());
+            collectionItemCountMap.putIfAbsent(collectionsItem.getCollection().getId(), 0);
+            int currentCount = collectionItemCountMap.get(collectionsItem.getCollection().getId());
 
             double totalItemPrice = 0.0;
             int remainingQuantity = ordersItemsRequest.getQuantity();
@@ -183,11 +177,11 @@ public class OrdersService {
                 remainingQuantity--;
             }
 
-            Orders_Items ordersItem = new Orders_Items(order, item, size, collection, totalItemPrice, ordersItemsRequest.getQuantity());
+            Orders_Items ordersItem = new Orders_Items(order, collectionsItem.getItem(), size, collectionsItem.getCollection(), totalItemPrice, ordersItemsRequest.getQuantity());
 
             totalSum += totalItemPrice;
             saveAllOrderItemsList.add(ordersItem);
-            collectionItemCountMap.put(collection.getId(), currentCount);
+            collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
         }
 
         if (totalSum >= 500000) {
@@ -238,6 +232,11 @@ public class OrdersService {
             order.setPaymentLink("CASH");
             order.setIsPaid(false);
             order.setPaymentType("CASH");
+
+            SendMessage message = new SendMessage();
+            message.setChatId(paymentChatId);
+            message.setText(orderDetailsMessage(order, "CASH"));
+            mainTelegramBot.sendMessage(message);
         }
         else if (ordersRequest.getPaymentType().equalsIgnoreCase("UZUM NASIYA")) {
 

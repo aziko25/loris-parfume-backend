@@ -147,14 +147,14 @@ public class ClickOrdersController {
 
         sendMessage.setChatId(chatId);
 
-        sendMessage.setText(orderDetailsMessage(order));
+        sendMessage.setText(orderDetailsMessage(order, "CLICK"));
 
         mainTelegramBot.sendMessage(sendMessage);
     }
 
-    public static String orderDetailsMessage(Orders order) {
+    public static String orderDetailsMessage(Orders order, String paymentType) {
 
-        return  "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
+        return  "Оплата: " + paymentType + "\n-----------\nИмя: " + order.getUser().getFullName() +
                 "\nТелефон: " + order.getPhone() +
                 "\nАдрес: " + order.getAddress() +
                 "\nСсылка на адрес: " + order.getAddressLocationLink() +

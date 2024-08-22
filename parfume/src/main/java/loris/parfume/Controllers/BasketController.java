@@ -15,12 +15,12 @@ public class BasketController {
     private final BasketService basketService;
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
-    @PostMapping("/add/{id}")
-    public ResponseEntity<?> add(@PathVariable Long id, @RequestParam(required = false) Long sizeId,
-                                 @RequestParam Long collectionId,
+    @PostMapping("/add/{itemSlug}")
+    public ResponseEntity<?> add(@PathVariable String itemSlug, @RequestParam(required = false) Long sizeId,
+                                 @RequestParam String collectionSlug,
                                  @RequestParam Integer quantity) {
 
-        return ResponseEntity.ok(basketService.add(id, sizeId, collectionId, quantity));
+        return ResponseEntity.ok(basketService.add(itemSlug, sizeId, collectionSlug, quantity));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
@@ -31,10 +31,10 @@ public class BasketController {
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})
-    @DeleteMapping("/remove/{id}")
-    public ResponseEntity<?> remove(@PathVariable Long id, @RequestParam(required = false) Long sizeId) {
+    @DeleteMapping("/remove/{itemSlug}")
+    public ResponseEntity<?> remove(@PathVariable String itemSlug, @RequestParam(required = false) Long sizeId) {
 
-        return ResponseEntity.ok(basketService.remove(id, sizeId));
+        return ResponseEntity.ok(basketService.remove(itemSlug, sizeId));
     }
 
     @Authorization(requiredRoles = {"ADMIN", "USER"})

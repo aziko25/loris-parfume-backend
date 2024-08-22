@@ -50,7 +50,7 @@ public class ItemsController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{slug}")
     public ResponseEntity<?> update(@PathVariable String slug,
-                                    @RequestParam(value = "media") List<MultipartFile> media,
+                                    @RequestParam(value = "media", required = false) List<MultipartFile> media,
                                     @RequestParam("item") String itemJson) throws JsonProcessingException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);

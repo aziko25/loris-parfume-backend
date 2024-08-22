@@ -22,6 +22,8 @@ public class CollectionsDTO implements Serializable {
 
     private Long id;
 
+    private String slug;
+
     @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdTime;
 
@@ -36,6 +38,7 @@ public class CollectionsDTO implements Serializable {
     public CollectionsDTO(Collections collection) {
 
         id = collection.getId();
+        slug = collection.getSlug();
         createdTime = collection.getCreatedTime();
         nameUz = collection.getNameUz();
         nameRu = collection.getNameRu();

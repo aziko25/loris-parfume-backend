@@ -20,6 +20,8 @@ public class CategoriesDTO implements Serializable {
 
     private Long id;
 
+    private String slug;
+
     @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdTime;
 
@@ -37,6 +39,7 @@ public class CategoriesDTO implements Serializable {
     public CategoriesDTO(Categories category) {
 
         id = category.getId();
+        slug = category.getSlug();
         createdTime = category.getCreatedTime();
 
         nameUz = category.getNameUz();

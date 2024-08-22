@@ -17,7 +17,10 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "items")
+@Table(
+        name = "items",
+        indexes = @Index(name = "idx_slug", columnList = "slug")
+)
 public class Items implements Serializable {
 
     @Serial

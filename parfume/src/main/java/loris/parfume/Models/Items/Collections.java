@@ -15,7 +15,10 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "collections")
+@Table(
+        name = "collections",
+        indexes = @Index(name = "idx_slug", columnList = "slug")
+)
 public class Collections {
 
     @Id

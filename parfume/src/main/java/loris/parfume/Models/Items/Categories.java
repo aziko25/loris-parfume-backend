@@ -16,7 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @Entity
 @Table(
         name = "categories",
-        indexes = @Index(name = "idx_slug", columnList = "slug")
+        indexes = @Index(name = "idx_slug_categories", columnList = "slug")
 )
 public class Categories {
 

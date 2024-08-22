@@ -19,7 +19,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @Entity
 @Table(
         name = "items",
-        indexes = @Index(name = "idx_slug", columnList = "slug")
+        indexes = @Index(name = "idx_slug_items", columnList = "slug")
 )
 public class Items implements Serializable {
 

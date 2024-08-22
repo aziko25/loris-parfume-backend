@@ -17,7 +17,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @Entity
 @Table(
         name = "collections",
-        indexes = @Index(name = "idx_slug", columnList = "slug")
+        indexes = @Index(name = "idx_slug_collections", columnList = "slug")
 )
 public class Collections {
 

@@ -28,6 +28,5 @@ public class Sizes_Items {
     @JsonSerialize(using = DoubleSerializer.class)
     private Double price;
 
-    private Integer quantity;
     private Integer discountPercent;
 }

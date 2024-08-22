@@ -3,20 +3,14 @@ package loris.parfume.Controllers.Orders;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Telegram.MainTelegramBot;
-import loris.parfume.Models.Items.Sizes_Items;
 import loris.parfume.Models.Orders.Orders;
-import loris.parfume.Models.Orders.Orders_Items;
-import loris.parfume.Repositories.Items.ItemsRepository;
-import loris.parfume.Repositories.Items.Sizes_Items_Repository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
-import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,10 +21,7 @@ import java.util.stream.Collectors;
 public class ClickOrdersController {
 
     private final OrdersRepository ordersRepository;
-    private final Orders_Items_Repository ordersItemsRepository;
-    private final Sizes_Items_Repository sizesItemsRepository;
     private final MainTelegramBot mainTelegramBot;
-    private final ItemsRepository itemsRepository;
 
     @Value("${payment.chat.id}")
     private String chatId;
@@ -117,22 +108,6 @@ public class ClickOrdersController {
 
         isTransactionValid(order, response, amount);
 
-        List<Orders_Items> ordersItemsList = ordersItemsRepository.findAllByOrder(order);
-
-        for (Orders_Items ordersItems : ordersItemsList) {
-
-            if (!isStockAvailable(ordersItems)) {
-
-                order.setPaymentResponseUz("Sotuvdagidan Ko'proq Miqdor Kiritildi");
-                order.setPaymentResponseRu("Введено количество больше, чем в наличии");
-                order.setPaymentResponseEng("Entered quantity exceeds available stock");
-
-                ordersRepository.save(order);
-
-                return createErrorResponse(response, -406, "Товар закончился");
-            }
-        }
-
         sendOrderDetailsToTelegram(order);
 
         response.put("error", "0");
@@ -166,46 +141,20 @@ public class ClickOrdersController {
         return null;
     }
 
-    private boolean isStockAvailable(Orders_Items ordersItems) {
-
-        if (ordersItems.getSize().getIsDefaultNoSize()) {
-
-            int currentQuantity = ordersItems.getItem().getQuantity();
-
-            if (currentQuantity >= ordersItems.getQuantity()) {
-
-                ordersItems.getItem().setQuantity(currentQuantity - ordersItems.getQuantity());
-
-                itemsRepository.save(ordersItems.getItem());
-
-                return true;
-            }
-        }
-        else {
-
-            Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(ordersItems.getItem(), ordersItems.getSize());
-
-            if (sizesItem != null && sizesItem.getQuantity() >= ordersItems.getQuantity()) {
-
-                sizesItem.setQuantity(sizesItem.getQuantity() - ordersItems.getQuantity());
-
-                ordersItems.getItem().setQuantity(ordersItems.getItem().getQuantity() - ordersItems.getQuantity());
-
-                sizesItemsRepository.save(sizesItem);
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void sendOrderDetailsToTelegram(Orders order) {
 
         SendMessage sendMessage = new SendMessage();
 
         sendMessage.setChatId(chatId);
-        String message = "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
+
+        sendMessage.setText(orderDetailsMessage(order));
+
+        mainTelegramBot.sendMessage(sendMessage);
+    }
+
+    public static String orderDetailsMessage(Orders order) {
+
+        return  "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
                 "\nТелефон: " + order.getPhone() +
                 "\nАдрес: " + order.getAddress() +
                 "\nСсылка на адрес: " + order.getAddressLocationLink() +
@@ -219,10 +168,6 @@ public class ClickOrdersController {
                 "\nТип Заказа: " + (order.getIsDelivery() ? "Доставка" : "Самовывоз") +
                 (order.getIsSoonDeliveryTime() ? "\nДоставка в ближайшее время" : "\nЗапланированное время доставки: " +
                         (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Не запланировано"));
-
-        sendMessage.setText(message);
-
-        mainTelegramBot.sendMessage(sendMessage);
     }
 
     private ResponseEntity<Map<String, Object>> createErrorResponse(Map<String, Object> response,

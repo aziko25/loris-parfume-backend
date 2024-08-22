@@ -13,6 +13,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static loris.parfume.Controllers.Orders.ClickOrdersController.orderDetailsMessage;
+
 @Service
 @RequiredArgsConstructor
 public class PaymeMerchantService {
@@ -112,25 +114,10 @@ public class PaymeMerchantService {
 
     public void ifTransactionWasSuccessfullyPerformed(Orders order) {
 
-        String orderMessage = "Оплата\n-----------\nИмя: " + order.getUser().getFullName() +
-                "\nТелефон: " + order.getPhone() +
-                "\nАдрес: " + order.getAddress() +
-                "\nСсылка на адрес: " + order.getAddressLocationLink() +
-                "\nКомментарий: " + order.getComments() +
-                "\nФилиал: " + order.getBranch().getName() +
-                "\nОбщая Сумма за заказ: " + order.getTotalSum() +
-                "\nСумма за доставку: " + order.getSumForDelivery() +
-                "\nТовары: " + order.getItemsList().stream()
-                .map(ordersItems -> ordersItems.getItem().getNameRu() + " (" + ordersItems.getQuantity() + " шт., размер: " + ordersItems.getSize().getNameRu() + ")")
-                .collect(Collectors.joining(", ")) +
-                "\nТип Заказа: " + (order.getIsDelivery() ? "Доставка" : "Самовывоз") +
-                (order.getIsSoonDeliveryTime() ? "\nДоставка в ближайшее время" : "\nЗапланированное время доставки: " +
-                        (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Не запланировано"));
-
         SendMessage message = new SendMessage();
 
         message.setChatId(paymentChatId);
-        message.setText(orderMessage);
+        message.setText(orderDetailsMessage(order));
 
         mainTelegramBot.sendMessage(message);
     }

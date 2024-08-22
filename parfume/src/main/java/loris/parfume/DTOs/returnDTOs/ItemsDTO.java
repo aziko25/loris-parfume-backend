@@ -43,8 +43,6 @@ public class ItemsDTO implements Serializable {
     private String descriptionRu;
     private String descriptionEng;
 
-    private Integer quantity;
-
     @JsonSerialize(using = DoubleSerializer.class)
     private Double price;
 
@@ -77,7 +75,6 @@ public class ItemsDTO implements Serializable {
         descriptionRu = item.getDescriptionRu();
         descriptionEng = item.getDescriptionEng();
 
-        quantity = item.getQuantity();
         price = item.getPrice();
         discountPercent = item.getDiscountPercent();
 
@@ -138,7 +135,6 @@ public class ItemsDTO implements Serializable {
                         map.put("sizeNameRu", size.getSize().getNameRu());
                         map.put("sizeNameEng", size.getSize().getNameEng());
 
-                        map.put("quantity", size.getQuantity());
                         map.put("price", getFormattedPrice(size.getPrice()));
                         map.put("discountPercent", size.getDiscountPercent());
 

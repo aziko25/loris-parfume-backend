@@ -49,7 +49,6 @@ public class Items implements Serializable {
 
     private Double price;
     private Integer discountPercent;
-    private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

@@ -87,7 +87,7 @@ public class SizesService {
             Items item = itemsRepository.findById(request.getItemId())
                     .orElseThrow(() -> new EntityNotFoundException("Item " + request.getItemId() + " Not Found!"));
 
-            Sizes_Items sizesItem = new Sizes_Items(size, item, request.getPrice(), request.getQuantity(), request.getDiscountPercent());
+            Sizes_Items sizesItem = new Sizes_Items(size, item, request.getPrice(), request.getDiscountPercent());
 
             saveSizeItemsList.add(sizesItem);
         }

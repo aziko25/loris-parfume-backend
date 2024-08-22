@@ -71,12 +71,11 @@ public class BasketService {
             size = sizesRepository.findById(DEFAULT_NO_SIZE)
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
 
-            Integer totalQuantity = saveBasket(quantity, user, item, size, collection);
+            saveBasket(quantity, user, item, size, collection);
 
             Sizes_Items sizesItem = Sizes_Items.builder()
                     .item(item)
                     .size(size)
-                    .quantity(totalQuantity)
                     .price(item.getPrice())
                     .discountPercent(item.getDiscountPercent())
                     .build();

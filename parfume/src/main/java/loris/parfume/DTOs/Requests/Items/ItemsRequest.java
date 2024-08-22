@@ -21,7 +21,6 @@ public class ItemsRequest {
     private String descriptionRu;
     private String descriptionEng;
 
-    private Integer quantity;
     private Double price;
     private Integer discountPercent;
 

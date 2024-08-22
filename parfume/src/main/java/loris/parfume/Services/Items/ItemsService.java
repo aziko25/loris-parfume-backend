@@ -77,7 +77,6 @@ public class ItemsService {
                 .descriptionUz(itemsRequest.getDescriptionUz())
                 .descriptionRu(itemsRequest.getDescriptionRu())
                 .descriptionEng(itemsRequest.getDescriptionEng())
-                .quantity(itemsRequest.getQuantity())
                 .price(itemsRequest.getPrice())
                 .discountPercent(itemsRequest.getDiscountPercent())
                 .build();
@@ -197,7 +196,6 @@ public class ItemsService {
         Optional.ofNullable(itemsRequest.getDescriptionRu()).ifPresent(item::setDescriptionRu);
         Optional.ofNullable(itemsRequest.getDescriptionEng()).ifPresent(item::setDescriptionEng);
 
-        Optional.ofNullable(itemsRequest.getQuantity()).ifPresent(item::setQuantity);
         Optional.ofNullable(itemsRequest.getPrice()).ifPresent(item::setPrice);
         Optional.ofNullable(itemsRequest.getDiscountPercent()).ifPresent(item::setDiscountPercent);
 
@@ -292,7 +290,6 @@ public class ItemsService {
 
         List<Sizes_Items> sizesItemsList = new ArrayList<>();
 
-        int totalItemsQuantity = 0;
         double cheapestItemPrice = Double.MAX_VALUE;
 
         for (Map<String, Object> map : itemsRequest.getSizesMap()) {
@@ -311,16 +308,6 @@ public class ItemsService {
                 cheapestItemPrice = sizesItem.getPrice();
             }
 
-            if (map.get("quantity") != null) {
-
-                sizesItem.setQuantity((Integer) map.get("quantity"));
-                totalItemsQuantity += sizesItem.getQuantity();
-            }
-            else {
-
-                sizesItem.setQuantity(0);
-            }
-
             if (map.get("discountPercent") != null) {
 
                 sizesItem.setDiscountPercent((Integer) map.get("discountPercent"));
@@ -334,7 +321,6 @@ public class ItemsService {
         }
 
         item.setPrice(cheapestItemPrice);
-        item.setQuantity(totalItemsQuantity);
 
         itemsRepository.save(item);
 

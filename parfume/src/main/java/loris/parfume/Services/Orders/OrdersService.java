@@ -138,11 +138,6 @@ public class OrdersService {
             Collections collection = collectionsRepository.findById(ordersItemsRequest.getCollectionId())
                     .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
-            if (ordersItemsRequest.getQuantity() <= 0 || ordersItemsRequest.getQuantity() > item.getQuantity()) {
-
-                throw new IllegalArgumentException("Invalid quantity for item " + item.getId());
-            }
-
             Sizes size = sizesRepository.findByIsDefaultNoSize(true);
             double itemPrice = item.getPrice();
 
@@ -162,11 +157,6 @@ public class OrdersService {
 
                     throw new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() +
                             " For Item " + item.getId() + " Not Found");
-                }
-
-                if (ordersItemsRequest.getQuantity() > sizesItem.getQuantity()) {
-
-                    throw new IllegalArgumentException("Invalid quantity for item " + item.getId() + " and size " + sizesItem.getSize().getId());
                 }
 
                 itemPrice = sizesItem.getPrice();
@@ -200,7 +190,15 @@ public class OrdersService {
             collectionItemCountMap.put(collection.getId(), currentCount);
         }
 
-        order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
+        if (totalSum >= 500000) {
+
+            order.setTotalSum(totalSum);
+        }
+        else {
+
+            order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
+            order.setSumForDelivery(0.0);
+        }
 
         ordersItemsRepository.saveAll(saveAllOrderItemsList);
 

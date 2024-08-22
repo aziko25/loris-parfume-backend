@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CollectionsRepository extends JpaRepository<Collections, Long> {
 
@@ -16,4 +18,6 @@ public interface CollectionsRepository extends JpaRepository<Collections, Long> 
             "(:name IS NULL OR c.nameRu ILIKE %:name%) OR " +
             "(:name IS NULL OR c.nameEng ILIKE %:name%)")
     Page<Collections> findAllByAnyNameLikeIgnoreCase(@Param("name") String name, Pageable pageable);
+
+    Optional<Collections> findBySlug(String slug);
 }

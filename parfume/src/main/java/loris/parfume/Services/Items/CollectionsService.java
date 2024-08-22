@@ -47,6 +47,7 @@ public class CollectionsService {
     public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) {
 
         Collections collection = Collections.builder()
+                .slug(collectionsRequest.getSlug())
                 .createdTime(LocalDateTime.now())
                 .nameUz(collectionsRequest.getNameUz())
                 .nameRu(collectionsRequest.getNameRu())
@@ -74,21 +75,22 @@ public class CollectionsService {
         return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable).map(CollectionsDTO::new);
     }
 
-    public CollectionsDTO getById(Long id) {
+    public CollectionsDTO getBySlug(String slug) {
 
-        return collectionsRepository.findById(id)
+        return collectionsRepository.findBySlug(slug)
                 .map(CollectionsDTO::new)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
     }
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public CollectionsDTO update(Long id, CollectionsRequest collectionsRequest, MultipartFile image) {
+    public CollectionsDTO update(String slug, CollectionsRequest collectionsRequest, MultipartFile image) {
 
-        Collections collection = collectionsRepository.findById(id)
+        Collections collection = collectionsRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
         if (collectionsRequest != null) {
 
+            Optional.ofNullable(collectionsRequest.getSlug()).ifPresent(collection::setSlug);
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);
             Optional.ofNullable(collectionsRequest.getNameRu()).ifPresent(collection::setNameRu);
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);
@@ -106,9 +108,9 @@ public class CollectionsService {
 
     @Transactional
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public String delete(Long id) {
+    public String delete(String slug) {
 
-        Collections collection = collectionsRepository.findById(id)
+        Collections collection = collectionsRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
         fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());

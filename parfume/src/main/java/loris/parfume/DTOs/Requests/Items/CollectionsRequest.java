@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class CollectionsRequest {
 
+    private String slug;
+
     private String nameUz;
     private String nameRu;
     private String nameEng;

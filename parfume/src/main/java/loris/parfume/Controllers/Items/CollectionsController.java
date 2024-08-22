@@ -35,27 +35,27 @@ public class CollectionsController {
         return new ResponseEntity<>(collectionsService.all(page, name), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
+    @GetMapping("/{slug}")
+    public ResponseEntity<?> getBySlug(@PathVariable String slug) {
 
-        return ResponseEntity.ok(collectionsService.getById(id));
+        return ResponseEntity.ok(collectionsService.getBySlug(slug));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id,
+    @PutMapping("/update/{slug}")
+    public ResponseEntity<?> update(@PathVariable String slug,
                                     @RequestParam(value = "media", required = false) MultipartFile image,
                                     @RequestParam("collection") String collectionJson) throws JsonProcessingException {
 
         CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
 
-        return ResponseEntity.ok(collectionsService.update(id, collectionsRequest, image));
+        return ResponseEntity.ok(collectionsService.update(slug, collectionsRequest, image));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/delete/{slug}")
+    public ResponseEntity<?> delete(@PathVariable String slug) {
 
-        return ResponseEntity.ok(collectionsService.delete(id));
+        return ResponseEntity.ok(collectionsService.delete(slug));
     }
 }

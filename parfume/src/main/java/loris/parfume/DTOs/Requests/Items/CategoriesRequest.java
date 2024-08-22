@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class CategoriesRequest {
 
+    private String slug;
+
     private String nameUz;
     private String nameRu;
     private String nameEng;

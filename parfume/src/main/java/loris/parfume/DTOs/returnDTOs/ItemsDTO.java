@@ -29,6 +29,9 @@ public class ItemsDTO implements Serializable {
 
     private Long id;
 
+    private String slug;
+    private String barcode;
+
     @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdTime;
 
@@ -60,11 +63,15 @@ public class ItemsDTO implements Serializable {
     public ItemsDTO(Items item) {
 
         id = item.getId();
+
+        slug = item.getSlug();
+        barcode = item.getBarcode();
+
         createdTime = item.getCreatedTime();
 
-        nameUz = item.getNameUz();
-        nameRu = item.getNameRu();
-        nameEng = item.getNameEng();
+        nameUz = item.getBarcode() + " | " + item.getNameUz();
+        nameRu = item.getBarcode() + " | " + item.getNameRu();
+        nameEng = item.getBarcode() + " | " + item.getNameEng();
 
         descriptionUz = item.getDescriptionUz();
         descriptionRu = item.getDescriptionRu();

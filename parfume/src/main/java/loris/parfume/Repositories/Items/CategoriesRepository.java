@@ -28,4 +28,6 @@ public interface CategoriesRepository extends JpaRepository<Categories, Long> {
     List<Categories> findAllByCollection(Collections collection);
 
     Optional<Categories> findByIdAndCollection(Long categoryId, Collections collection);
+
+    Optional<Categories> findBySlug(String slug);
 }

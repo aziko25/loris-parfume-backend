@@ -10,6 +10,9 @@ import java.util.Map;
 @Setter
 public class ItemsRequest {
 
+    private String slug;
+    private String barcode;
+
     private String nameUz;
     private String nameRu;
     private String nameEng;

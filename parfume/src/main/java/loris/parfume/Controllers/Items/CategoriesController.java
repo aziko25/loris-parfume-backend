@@ -37,27 +37,27 @@ public class CategoriesController {
         return ResponseEntity.ok(categoriesService.all(page, categoryFilters));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
+    @GetMapping("/{slug}")
+    public ResponseEntity<?> getBySlug(@PathVariable String slug) {
 
-        return ResponseEntity.ok(categoriesService.getById(id));
+        return ResponseEntity.ok(categoriesService.getBySlug(slug));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id,
+    @PutMapping("/update/{slug}")
+    public ResponseEntity<?> update(@PathVariable String slug,
                                     @RequestParam(value = "media", required = false) MultipartFile image,
                                     @RequestParam("category") String categoryJson) throws JsonProcessingException {
 
         CategoriesRequest categoriesRequest = new ObjectMapper().readValue(categoryJson, CategoriesRequest.class);
 
-        return ResponseEntity.ok(categoriesService.update(id, categoriesRequest, image));
+        return ResponseEntity.ok(categoriesService.update(slug, categoriesRequest, image));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/delete/{slug}")
+    public ResponseEntity<?> delete(@PathVariable String slug) {
 
-        return ResponseEntity.ok(categoriesService.delete(id));
+        return ResponseEntity.ok(categoriesService.delete(slug));
     }
 }

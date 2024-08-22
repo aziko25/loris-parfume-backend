@@ -11,12 +11,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
     @Query("SELECT i FROM Items i JOIN i.collectionsItemsList ci WHERE " +
             "(:search IS NULL OR " +
+            " i.barcode ILIKE %:search% OR " +
             " i.nameUz ILIKE %:search% OR " +
             " i.nameRu ILIKE %:search% OR " +
             " i.nameEng ILIKE %:search% OR " +
@@ -45,4 +47,6 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     Page<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category, Pageable pageable);
 
     Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
+
+    Optional<Items> findBySlug(String slug);
 }

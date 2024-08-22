@@ -55,6 +55,8 @@ public class ItemsService {
     public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) {
 
         Items item = Items.builder()
+                .slug(itemsRequest.getSlug())
+                .barcode(itemsRequest.getBarcode())
                 .createdTime(LocalDateTime.now())
                 .nameUz(itemsRequest.getNameUz())
                 .nameRu(itemsRequest.getNameRu())
@@ -141,17 +143,20 @@ public class ItemsService {
         ).map(ItemsDTO::new);
     }
 
-    public ItemsDTO getById(Long id) {
+    public ItemsDTO getBySlug(String slug) {
 
-        return itemsRepository.findById(id).map(ItemsDTO::new)
+        return itemsRepository.findBySlug(slug).map(ItemsDTO::new)
                 .orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
     }
 
     @Transactional
     @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
-    public ItemsDTO update(Long id, List<MultipartFile> images, ItemsRequest itemsRequest) {
+    public ItemsDTO update(String slug, List<MultipartFile> images, ItemsRequest itemsRequest) {
 
-        Items item = itemsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+
+        Optional.ofNullable(itemsRequest.getSlug()).ifPresent(item::setSlug);
+        Optional.ofNullable(itemsRequest.getBarcode()).ifPresent(item::setBarcode);
 
         Optional.ofNullable(itemsRequest.getNameUz()).ifPresent(item::setNameUz);
         Optional.ofNullable(itemsRequest.getNameRu()).ifPresent(item::setNameRu);
@@ -227,9 +232,9 @@ public class ItemsService {
 
     @Transactional
     @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
-    public String delete(Long id) {
+    public String delete(String slug) {
 
-        Items item = itemsRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
         sizesItemsRepository.deleteAllByItem(item);
         collectionsItemsRepository.deleteAllByItem(item);

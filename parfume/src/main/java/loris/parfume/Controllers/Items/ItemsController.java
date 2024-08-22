@@ -41,27 +41,27 @@ public class ItemsController {
         return ResponseEntity.ok(itemsService.all(page, collectionId, categoryId, itemFilters));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
+    @GetMapping("/{slug}")
+    public ResponseEntity<?> getBySlug(@PathVariable String slug) {
 
-        return ResponseEntity.ok(itemsService.getById(id));
+        return ResponseEntity.ok(itemsService.getBySlug(slug));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id,
+    @PutMapping("/update/{slug}")
+    public ResponseEntity<?> update(@PathVariable String slug,
                                     @RequestParam(value = "media") List<MultipartFile> media,
                                     @RequestParam("item") String itemJson) throws JsonProcessingException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);
 
-        return ResponseEntity.ok(itemsService.update(id, media, itemsRequest));
+        return ResponseEntity.ok(itemsService.update(slug, media, itemsRequest));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/delete/{slug}")
+    public ResponseEntity<?> delete(@PathVariable String slug) {
 
-        return ResponseEntity.ok(itemsService.delete(id));
+        return ResponseEntity.ok(itemsService.delete(slug));
     }
 }

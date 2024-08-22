@@ -48,6 +48,7 @@ public class CategoriesService {
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
         Categories category = Categories.builder()
+                .slug(categoriesRequest.getSlug())
                 .createdTime(LocalDateTime.now())
                 .nameUz(categoriesRequest.getNameUz())
                 .nameRu(categoriesRequest.getNameRu())
@@ -77,18 +78,19 @@ public class CategoriesService {
         return categoriesRepository.findAllByFilters(filters.getName(), filters.getCollectionId(), pageable).map(CategoriesDTO::new);
     }
 
-    public CategoriesDTO getById(Long id) {
+    public CategoriesDTO getBySlug(String slug) {
 
-        return categoriesRepository.findById(id).map(CategoriesDTO::new)
+        return categoriesRepository.findBySlug(slug).map(CategoriesDTO::new)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
     }
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO update(Long id, CategoriesRequest categoriesRequest, MultipartFile image) {
+    public CategoriesDTO update(String slug, CategoriesRequest categoriesRequest, MultipartFile image) {
 
-        Categories category = categoriesRepository.findById(id)
+        Categories category = categoriesRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
 
+        Optional.ofNullable(categoriesRequest.getSlug()).ifPresent(category::setSlug);
         Optional.ofNullable(categoriesRequest.getNameUz()).ifPresent(category::setNameUz);
         Optional.ofNullable(categoriesRequest.getNameRu()).ifPresent(category::setNameRu);
         Optional.ofNullable(categoriesRequest.getNameEng()).ifPresent(category::setNameEng);
@@ -115,9 +117,9 @@ public class CategoriesService {
 
     @Transactional
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public String delete(Long id) {
+    public String delete(String slug) {
 
-        Categories category = categoriesRepository.findById(id)
+        Categories category = categoriesRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
 
         if (category.getBannerImage() != null) {

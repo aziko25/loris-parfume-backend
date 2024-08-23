@@ -1,5 +1,6 @@
 package loris.parfume.Configurations.Exceptions;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.hibernate.PropertyValueException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,11 @@ public class ProjectGlobalExceptionHandler {
     public ResponseEntity<String> handleMissingServletRequestPartException(MissingServletRequestPartException ex) {
 
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
+
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 }

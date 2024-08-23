@@ -117,7 +117,7 @@ public class CataloguesService {
         for (int i = 0; i < files.size(); i++) {
 
             String fileName = fileUploadUtilService.handleMediaUpload(
-                    catalogue.getId() + "_" + (i + 1) + "_banner", files.get(i));
+                    catalogue.getId() + "_" + (i + 1) + "_catalogue", files.get(i));
 
             switch (languages[i]) {
 

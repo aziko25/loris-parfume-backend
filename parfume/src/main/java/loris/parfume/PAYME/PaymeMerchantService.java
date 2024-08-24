@@ -35,7 +35,7 @@ public class PaymeMerchantService {
         order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotExistsException("Order not found", -31050, "order"));
 
-        if (amount != order.getTotalSum() * 100) {
+        if (Math.abs(order.getTotalSum() * 100 - amount) > 0.00001) {
 
             throw new WrongAmountException("Wrong amount", -31001, "amount");
         }

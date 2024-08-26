@@ -48,22 +48,23 @@ public class CacheForAllService {
 
     @Cacheable(
             value = "itemsCache",
-            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionId-').concat(#collectionId != null ? T(String).valueOf(#collectionId) : '').concat('-categoryId-').concat(#categoryId != null ? T(String).valueOf(#categoryId) : '')"
+            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionSlug-').concat(#collectionSlug != null ? T(String).valueOf(#collectionSlug) : '').concat('-categorySlug-').concat(#categorySlug != null ? T(String).valueOf(#categorySlug) : '')"
     )
-    public Page<ItemsDTO> allItems(Integer page, Long collectionId, Long categoryId) {
+    public Page<ItemsDTO> allItems(Integer page, String collectionSlug, String categorySlug) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz").ascending());
 
-        if (collectionId == null) {
+        if (collectionSlug == null) {
+
             return itemsRepository.findAll(pageable).map(ItemsDTO::new);
         }
 
-        Collections collection = collectionsRepository.findById(collectionId)
+        Collections collection = collectionsRepository.findBySlug(collectionSlug)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
 
-        if (categoryId != null) {
+        if (categorySlug != null) {
 
-            Categories category = categoriesRepository.findByIdAndCollection(categoryId, collection)
+            Categories category = categoriesRepository.findBySlugAndCollection(categorySlug, collection)
                     .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
 
             return itemsRepository.findAllByCollectionsItemsList_CollectionAndCategory(collection, category, pageable)

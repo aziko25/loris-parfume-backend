@@ -25,8 +25,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             " i.descriptionUz ILIKE %:search% OR " +
             " i.descriptionRu ILIKE %:search% OR " +
             " i.descriptionEng ILIKE %:search%) " +
-            "AND (:collectionId IS NULL OR ci.collection.id = :collectionId) " +
-            "AND (:categoryId IS NULL OR i.category.id = :categoryId) " +
+            "AND (:collectionSlug IS NULL OR ci.collection.slug = :collectionSlug) " +
+            "AND (:categorySlug IS NULL OR i.category.slug = :categorySlug) " +
             "ORDER BY " +
             "CASE WHEN :firstA IS NOT NULL AND :firstA = TRUE THEN i.nameUz END ASC, " +
             "CASE WHEN :firstZ IS NOT NULL AND :firstZ = TRUE THEN i.nameUz END DESC, " +
@@ -38,8 +38,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             @Param("firstZ") Boolean firstZ,
             @Param("firstExpensive") Boolean firstExpensive,
             @Param("firstCheap") Boolean firstCheap,
-            @Param("collectionId") Long collectionId,
-            @Param("categoryId") Long categoryId,
+            @Param("collectionSlug") String collectionSlug,
+            @Param("categorySlug") String categorySlug,
             Pageable pageable);
 
     List<Items> findAllByCategory(Categories category);

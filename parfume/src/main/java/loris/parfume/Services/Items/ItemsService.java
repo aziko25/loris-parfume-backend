@@ -134,13 +134,13 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
-    public Page<ItemsDTO> all(Integer page, Long collectionId, Long categoryId, ItemFilters itemFilters) {
+    public Page<ItemsDTO> all(Integer page, String collectionSlug, String categorySlug, ItemFilters itemFilters) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         if (itemFilters == null) {
 
-            return cacheForAllService.allItems(page, collectionId, categoryId);
+            return cacheForAllService.allItems(page, collectionSlug, categorySlug);
         }
 
         return itemsRepository.findAllItemsByFilters(
@@ -149,8 +149,8 @@ public class ItemsService {
                 itemFilters.getFirstZ(),
                 itemFilters.getFirstExpensive(),
                 itemFilters.getFirstCheap(),
-                collectionId,
-                categoryId,
+                collectionSlug,
+                categorySlug,
                 pageable
         ).map(ItemsDTO::new);
     }

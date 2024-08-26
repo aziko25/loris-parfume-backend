@@ -16,7 +16,11 @@ import java.util.Optional;
 @Repository
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
-    @Query("SELECT i FROM Items i JOIN i.collectionsItemsList ci WHERE " +
+    @Query("SELECT i FROM Items i " +
+            "JOIN i.collectionsItemsList ci " +
+            "JOIN ci.collection c " +
+            "LEFT JOIN i.category cat " +
+            "WHERE " +
             "(:search IS NULL OR " +
             " i.barcode ILIKE %:search% OR " +
             " i.nameUz ILIKE %:search% OR " +
@@ -25,8 +29,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             " i.descriptionUz ILIKE %:search% OR " +
             " i.descriptionRu ILIKE %:search% OR " +
             " i.descriptionEng ILIKE %:search%) " +
-            "AND (:collectionSlug IS NULL OR ci.collection.slug = :collectionSlug) " +
-            "AND (:categorySlug IS NULL OR i.category.slug = :categorySlug) " +
+            "AND (:collectionSlug IS NULL OR c.slug = :collectionSlug) " +
+            "AND (:categorySlug IS NULL OR cat.slug = :categorySlug) " +
             "ORDER BY " +
             "CASE WHEN :firstA IS NOT NULL AND :firstA = TRUE THEN i.nameUz END ASC, " +
             "CASE WHEN :firstZ IS NOT NULL AND :firstZ = TRUE THEN i.nameUz END DESC, " +

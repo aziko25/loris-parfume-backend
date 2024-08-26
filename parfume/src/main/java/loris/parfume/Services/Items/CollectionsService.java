@@ -54,7 +54,7 @@ public class CollectionsService {
         }
 
         Collections collection = Collections.builder()
-                .slug(collectionsRequest.getSlug())
+                .slug(collectionsRequest.getSlug().replace(" ", "-"))
                 .createdTime(LocalDateTime.now())
                 .nameUz(collectionsRequest.getNameUz())
                 .nameRu(collectionsRequest.getNameRu())
@@ -104,6 +104,8 @@ public class CollectionsService {
 
                     throw new EntityExistsException(existingSlug.get().getSlug() + " Already Exists!");
                 }
+
+                collection.setSlug(collectionsRequest.getSlug().replace(" ", "-"));
             }
 
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);

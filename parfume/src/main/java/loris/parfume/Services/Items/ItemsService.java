@@ -68,7 +68,7 @@ public class ItemsService {
         }
 
         Items item = Items.builder()
-                .slug(itemsRequest.getSlug().replace(" ", "-"))
+                .slug(itemsRequest.getSlug().replace(" ", "-").toLowerCase())
                 .barcode(itemsRequest.getBarcode())
                 .createdTime(LocalDateTime.now())
                 .nameUz(itemsRequest.getNameUz())
@@ -175,7 +175,7 @@ public class ItemsService {
                 throw new EntityExistsException("Slug Already Exists!");
             }
 
-            item.setSlug(itemsRequest.getSlug().replace(" ", "-"));
+            item.setSlug(itemsRequest.getSlug().replace(" ", "-").toLowerCase());
         }
 
         if (itemsRequest.getBarcode() != null) {

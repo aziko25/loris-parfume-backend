@@ -55,7 +55,7 @@ public class CategoriesService {
         }
 
         Categories category = Categories.builder()
-                .slug(categoriesRequest.getSlug().replace(" ", "-"))
+                .slug(categoriesRequest.getSlug().replace(" ", "-").toLowerCase())
                 .createdTime(LocalDateTime.now())
                 .nameUz(categoriesRequest.getNameUz())
                 .nameRu(categoriesRequest.getNameRu())
@@ -106,7 +106,7 @@ public class CategoriesService {
                 throw new EntityExistsException("Slug already exists");
             }
 
-            category.setSlug(categoriesRequest.getSlug().replace(" ", "-"));
+            category.setSlug(categoriesRequest.getSlug().replace(" ", "-").toLowerCase());
         }
 
         Optional.ofNullable(categoriesRequest.getNameUz()).ifPresent(category::setNameUz);

@@ -54,7 +54,7 @@ public class CollectionsService {
         }
 
         Collections collection = Collections.builder()
-                .slug(collectionsRequest.getSlug().replace(" ", "-"))
+                .slug(collectionsRequest.getSlug().replace(" ", "-").toLowerCase())
                 .createdTime(LocalDateTime.now())
                 .nameUz(collectionsRequest.getNameUz())
                 .nameRu(collectionsRequest.getNameRu())
@@ -105,7 +105,7 @@ public class CollectionsService {
                     throw new EntityExistsException(existingSlug.get().getSlug() + " Already Exists!");
                 }
 
-                collection.setSlug(collectionsRequest.getSlug().replace(" ", "-"));
+                collection.setSlug(collectionsRequest.getSlug().replace(" ", "-").toLowerCase());
             }
 
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);

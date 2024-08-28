@@ -42,6 +42,7 @@ public class BasketDTO {
     private List<String> imagesList;
 
     private Long categoryId;
+    private String categorySlug;
     private String categoryNameUz;
     private String categoryNameRu;
     private String categoryNameEng;
@@ -52,6 +53,7 @@ public class BasketDTO {
     private String sizeNameEng;
 
     private Long collectionId;
+    private String collectionSlug;
     private String collectionNameUz;
     private String collectionNameRu;
     private String collectionNameEng;
@@ -90,6 +92,7 @@ public class BasketDTO {
         if (collections != null) {
 
             collectionId = collections.getId();
+            collectionSlug = collections.getSlug();
             collectionNameUz = collections.getNameUz();
             collectionNameRu = collections.getNameRu();
             collectionNameEng = collections.getNameEng();
@@ -109,6 +112,7 @@ public class BasketDTO {
         if (sizeItem.getItem().getCategory() != null) {
 
             categoryId = sizeItem.getItem().getCategory().getId();
+            categorySlug = sizeItem.getItem().getCategory().getSlug();
             categoryNameUz = sizeItem.getItem().getCategory().getNameUz();
             categoryNameRu = sizeItem.getItem().getCategory().getNameRu();
             categoryNameEng = sizeItem.getItem().getCategory().getNameEng();

@@ -76,7 +76,7 @@ public class OrdersService {
     @Value("${payment.chat.id}")
     private String paymentChatId;
 
-    private static final String[] paymentTypesList = {"CLICK", "PAYME", "CASH", "UZUM NASIYA"};
+    private static final String[] paymentTypesList = {"CLICK", "PAYME", "CASH", "UZUM", "UZUM NASIYA"};
 
     @Transactional
     @CacheEvict(value = "ordersCache", allEntries = true)
@@ -134,26 +134,30 @@ public class OrdersService {
 
             Sizes size = sizesRepository.findByIsDefaultNoSize(true);
             double itemPrice = collectionsItem.getItem().getPrice();
+            Integer discountPercent = collectionsItem.getItem().getDiscountPercent();
 
             if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
-
                 throw new IllegalArgumentException("Specify Item's Size!");
             }
 
             if (ordersItemsRequest.getSizeId() != null) {
-
                 size = sizesRepository.findById(ordersItemsRequest.getSizeId())
                         .orElseThrow(() -> new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() + " Not Found"));
 
                 Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(collectionsItem.getItem(), size);
 
                 if (sizesItem == null) {
-
                     throw new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() +
                             " For Item " + collectionsItem.getItem().getId() + " Not Found");
                 }
 
                 itemPrice = sizesItem.getPrice();
+                discountPercent = sizesItem.getDiscountPercent();
+            }
+
+            if (discountPercent != null && discountPercent != 0) {
+
+                itemPrice = itemPrice * (1 - discountPercent / 100.0);
             }
 
             collectionItemCountMap.putIfAbsent(collectionsItem.getCollection().getId(), 0);
@@ -192,6 +196,11 @@ public class OrdersService {
 
             order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
             order.setSumForDelivery(0.0);
+        }
+
+        if (ordersRequest.getTotalSum() != totalSum) {
+
+            throw new IllegalArgumentException("Total Sum Should Be " + totalSum + ", Not " + ordersRequest.getTotalSum());
         }
 
         ordersItemsRepository.saveAll(saveAllOrderItemsList);

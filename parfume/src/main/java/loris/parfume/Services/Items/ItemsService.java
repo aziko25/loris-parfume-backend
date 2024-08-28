@@ -307,7 +307,7 @@ public class ItemsService {
             if (cheapestItemPrice > sizesItem.getPrice()) {
 
                 cheapestItemPrice = sizesItem.getPrice();
-                item.setDiscountPercent(sizesItem.getDiscountPercent());
+                item.setDiscountPercent(sizesItem.getDiscountPercent() != null ? sizesItem.getDiscountPercent() : 0);
             }
 
             if (map.get("discountPercent") != null) {

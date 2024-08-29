@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
-import static loris.parfume.Configurations.Serializers.DoubleSerializer.getFormattedPrice;
 import static loris.parfume.DefaultEntitiesService.DEFAULT_NO_SIZE;
 
 @Service
@@ -99,17 +98,12 @@ public class BasketService {
         return basket.getQuantity();
     }
 
-    public Map<String, Object> all() {
+    public List<BasketDTO> all() {
 
         Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
 
         List<Basket> basketList = basketsRepository.findAllByUser(user, Sort.by("addedTime").descending());
         List<BasketDTO> basketDTOList = new ArrayList<>();
-
-        double totalSum = 0.0;
-        double totalDiscountedSum = 0.0;
-
-        Map<Long, List<BasketDTO>> collectionMap = new HashMap<>();
 
         for (Basket basket : basketList) {
 
@@ -117,63 +111,14 @@ public class BasketService {
 
             if (sizesItem != null) {
 
-                BasketDTO basketDTO = new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection());
+                basketDTOList.add(new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection()));
+            } else {
 
-                basketDTOList.add(basketDTO);
-
-                double itemTotalPrice = basketDTO.getPropPrice() * basketDTO.getQuantity();
-                totalSum += itemTotalPrice;
-
-                if (basketDTO.getCollectionId() != null) {
-                    collectionMap.computeIfAbsent(basketDTO.getCollectionId(), k -> new ArrayList<>()).add(basketDTO);
-                }
-                else {
-                    totalDiscountedSum += itemTotalPrice; // No discount if not part of a collection
-                }
-            }
-            else {
                 basketsRepository.delete(basket);
             }
         }
 
-        // Apply discount logic
-        for (Map.Entry<Long, List<BasketDTO>> entry : collectionMap.entrySet()) {
-            List<BasketDTO> items = entry.getValue();
-            items.sort(Comparator.comparing(BasketDTO::getPropPrice));
-
-            int itemCount = 0;
-
-            for (BasketDTO item : items) {
-                itemCount += item.getQuantity();
-            }
-
-            int discountedItems = itemCount / 2;
-
-            for (BasketDTO item : items) {
-                int currentQuantity = item.getQuantity();
-
-                if (discountedItems > 0) {
-                    if (discountedItems >= currentQuantity) {
-                        totalDiscountedSum += currentQuantity * item.getPropPrice() * 0.5;
-                        discountedItems -= currentQuantity;
-                    } else {
-                        totalDiscountedSum += discountedItems * item.getPropPrice() * 0.5;
-                        totalDiscountedSum += (currentQuantity - discountedItems) * item.getPropPrice();
-                        discountedItems = 0;
-                    }
-                } else {
-                    totalDiscountedSum += currentQuantity * item.getPropPrice();
-                }
-            }
-        }
-
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("basketItems", basketDTOList);
-        response.put("totalSum", getFormattedPrice(totalSum));
-        response.put("totalDiscountedSum", getFormattedPrice(totalDiscountedSum));
-
-        return response;
+        return basketDTOList;
     }
 
     @Transactional

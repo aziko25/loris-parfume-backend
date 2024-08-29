@@ -32,7 +32,7 @@ public class AuthenticationController {
     @PostMapping("/verifyResetPasswordCode")
     public ResponseEntity<?> checkResetPasswordCode(@RequestParam String phone, @RequestParam String code){
 
-        return ResponseEntity.ok(authenticationService.resetPasswordCodeVerify(phone, code));
+        return ResponseEntity.ok(authenticationService.verifyResetPasswordCode(phone, code));
     }
 
     @PostMapping("/resetPassword")

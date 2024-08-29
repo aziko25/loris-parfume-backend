@@ -190,12 +190,14 @@ public class AuthenticationService {
 
         eskizService.sendPasswordResetOtp(phone, code);
 
-        resetPasswordCodes.put(phone, code);
+        resetPasswordCodes.put(code, phone);
+
+        scheduler.schedule(() -> resetPasswordCodes.remove(code), 10, TimeUnit.MINUTES);
 
         return "Reset code sent successfully";
     }
 
-    public String resetPasswordCodeVerify(String phone, String code) {
+    public String verifyResetPasswordCode(String phone, String code) {
 
         if (!phone.startsWith("+")) {
             phone = "+" + phone;

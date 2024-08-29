@@ -36,10 +36,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<?> resetPassword(@RequestParam String phone, @RequestParam String token,
+    public ResponseEntity<?> resetPassword(@RequestParam String phone, @RequestParam String code,
                                            @RequestParam String newPassword, @RequestParam String reNewPassword) {
 
-        return ResponseEntity.ok(authenticationService.resetPassword(phone, token, newPassword, reNewPassword));
+        return ResponseEntity.ok(authenticationService.resetPassword(phone, code, newPassword, reNewPassword));
     }
 
     @PostMapping("/verifyCode")

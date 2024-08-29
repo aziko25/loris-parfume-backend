@@ -1,15 +1,16 @@
 package loris.parfume.SMS_Eskiz;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -33,7 +34,13 @@ public class EskizService {
     @Value("${eskiz.password}")
     private String password;
 
-    @Bean("3")
+    @PostConstruct
+    public void onStartup() {
+
+        getEskizToken();
+    }
+
+    @Scheduled(cron = "0 0 0 * * MON")
     public void getEskizToken() {
 
         String url = "https://notify.eskiz.uz/api/auth/login";

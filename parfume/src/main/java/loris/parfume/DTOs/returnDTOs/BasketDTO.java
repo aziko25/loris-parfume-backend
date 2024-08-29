@@ -61,7 +61,7 @@ public class BasketDTO {
     private Integer quantity;
 
     @JsonSerialize(using = DoubleSerializer.class)
-    private Double propPrice;
+    private Double price;
 
     private Integer discountPercent;
 
@@ -79,10 +79,7 @@ public class BasketDTO {
         descriptionEng = sizeItem.getItem().getDescriptionEng();
         this.quantity = quantity;
 
-        propPrice = (discountPercent != null && discountPercent != 0)
-                ? sizeItem.getPrice() * (1 - discountPercent / 100.0)
-                : sizeItem.getPrice();
-
+        price = sizeItem.getPrice();
         discountPercent = sizeItem.getDiscountPercent();
 
         if (!sizeItem.getSize().getIsDefaultNoSize()) {

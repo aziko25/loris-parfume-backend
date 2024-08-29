@@ -30,15 +30,12 @@ public class AuthenticationService {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
-    private final Map<String, String> resetPasswordTokens = new ConcurrentHashMap<>();
+    private final Map<String, String> resetPasswordCodes = new ConcurrentHashMap<>();
 
     private final EskizService eskizService;
 
     @Value("${jwt.token.expired}")
     private Long expired;
-
-    @Value("${reset-password.url}")
-    private String resetPasswordUrl;
 
     public UsersDTO signUp(SignupRequest request) {
 
@@ -176,7 +173,7 @@ public class AuthenticationService {
         return generateJwt(user);
     }
 
-    public String generateResetLink(String phone) {
+    public String generateResetPasswordCode(String phone) {
 
         if (!phone.startsWith("+")) {
             phone = "+" + phone;
@@ -189,27 +186,49 @@ public class AuthenticationService {
             throw new EntityNotFoundException("Phone Not Found");
         }
 
-        String resetToken = UUID.randomUUID().toString();
-        resetPasswordTokens.put(resetToken, phone);
+        String code = generateVerificationCode();
 
-        String resetLink = String.format("%s?phone=%s&token=%s", resetPasswordUrl, phone, resetToken);
+        eskizService.sendPasswordResetOtp(phone, code);
 
-        eskizService.sendPasswordResetOtp(phone, resetLink);
+        resetPasswordCodes.put(phone, code);
 
-        return "Reset link sent successfully";
+        return "Reset code sent successfully";
     }
 
-    public Map<String, Object> resetPassword(String phone, String token, String newPassword, String reNewPassword) {
+    public String resetPasswordCodeVerify(String phone, String code) {
 
         if (!phone.startsWith("+")) {
             phone = "+" + phone;
         }
 
-        String storedPhone = resetPasswordTokens.get(token);
+        String storedPhone = resetPasswordCodes.get(code);
 
         if (storedPhone == null || !storedPhone.equals(phone)) {
 
-            throw new IllegalArgumentException("Invalid reset link");
+            throw new IllegalArgumentException("Invalid code");
+        }
+
+        Users user = usersRepository.findByPhone(phone);
+
+        if (user == null) {
+
+            throw new EntityNotFoundException("Phone Not Found");
+        }
+
+        return "Success!";
+    }
+
+    public Map<String, Object> resetPassword(String phone, String code, String newPassword, String reNewPassword) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
+
+        String storedPhone = resetPasswordCodes.get(code);
+
+        if (storedPhone == null || !storedPhone.equals(phone)) {
+
+            throw new IllegalArgumentException("Invalid code");
         }
 
         Users user = usersRepository.findByPhone(phone);
@@ -227,7 +246,7 @@ public class AuthenticationService {
         user.setPassword(newPassword);
         usersRepository.save(user);
 
-        resetPasswordTokens.remove(token);
+        resetPasswordCodes.remove(code);
 
         return generateJwt(user);
     }

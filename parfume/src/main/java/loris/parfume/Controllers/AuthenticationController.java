@@ -23,10 +23,16 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.signUp(signupRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping("/generateResetLink")
-    public ResponseEntity<?> generateResetLink(@RequestParam String phone) {
+    @PostMapping("/generateResetPasswordCode")
+    public ResponseEntity<?> generateResetPasswordCode(@RequestParam String phone) {
 
-        return ResponseEntity.ok(authenticationService.generateResetLink(phone));
+        return ResponseEntity.ok(authenticationService.generateResetPasswordCode(phone));
+    }
+
+    @PostMapping("/verifyResetPasswordCode")
+    public ResponseEntity<?> checkResetPasswordCode(@RequestParam String phone, @RequestParam String code){
+
+        return ResponseEntity.ok(authenticationService.resetPasswordCodeVerify(phone, code));
     }
 
     @PostMapping("/resetPassword")

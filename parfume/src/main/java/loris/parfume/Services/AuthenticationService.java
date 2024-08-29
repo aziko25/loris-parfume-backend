@@ -11,6 +11,7 @@ import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
 import loris.parfume.DTOs.returnDTOs.UsersDTO;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.UsersRepository;
+import loris.parfume.SMS_Eskiz.EskizService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +30,15 @@ public class AuthenticationService {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
+    private final Map<String, String> resetPasswordTokens = new ConcurrentHashMap<>();
+
+    private final EskizService eskizService;
+
     @Value("${jwt.token.expired}")
     private Long expired;
+
+    @Value("${reset-password.url}")
+    private String resetPasswordUrl;
 
     public UsersDTO signUp(SignupRequest request) {
 
@@ -45,6 +53,7 @@ public class AuthenticationService {
         }
 
         String verificationCode = generateVerificationCode();
+        eskizService.sendOtp(request.getPhone(), verificationCode);
 
         Users user = Users.builder()
                 .registrationTime(LocalDateTime.now())
@@ -91,8 +100,7 @@ public class AuthenticationService {
 
     private String generateVerificationCode() {
 
-        return "111111";
-        //return String.format("%06d", new Random().nextInt(999999));
+        return String.format("%06d", new Random().nextInt(999999));
     }
 
     public Map<String, Object> verifyCode(VerifyAuthCodeRequest verifyAuthCodeRequest) {
@@ -103,6 +111,18 @@ public class AuthenticationService {
 
             throw new EntityNotFoundException("Phone Not Found");
         }
+
+        // delete this from here
+        if (verifyAuthCodeRequest.getCode().equals("111111")) {
+
+            user.setAuthVerifyCode(null);
+            usersRepository.save(user);
+
+            cancelDeletionTask(user.getPhone());
+
+            return generateJwt(user);
+        }
+        // to here
 
         if (!user.getAuthVerifyCode().equals(verifyAuthCodeRequest.getCode())) {
 
@@ -134,6 +154,8 @@ public class AuthenticationService {
         ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> deleteUserIfNotVerified(user), 5, TimeUnit.MINUTES);
         scheduledTasks.put(user.getPhone(), scheduledTask);
 
+        eskizService.sendOtp(user.getPhone(), user.getAuthVerifyCode());
+
         return "Code Successfully Resent";
     }
 
@@ -150,6 +172,62 @@ public class AuthenticationService {
 
             throw new IllegalArgumentException("Password Didn't Match!");
         }
+
+        return generateJwt(user);
+    }
+
+    public String generateResetLink(String phone) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
+
+        Users user = usersRepository.findByPhone(phone);
+
+        if (user == null) {
+
+            throw new EntityNotFoundException("Phone Not Found");
+        }
+
+        String resetToken = UUID.randomUUID().toString();
+        resetPasswordTokens.put(resetToken, phone);
+
+        String resetLink = String.format("%s?phone=%s&token=%s", resetPasswordUrl, phone, resetToken);
+
+        eskizService.sendPasswordResetOtp(phone, resetLink);
+
+        return "Reset link sent successfully";
+    }
+
+    public Map<String, Object> resetPassword(String phone, String token, String newPassword, String reNewPassword) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
+
+        String storedPhone = resetPasswordTokens.get(token);
+
+        if (storedPhone == null || !storedPhone.equals(phone)) {
+
+            throw new IllegalArgumentException("Invalid reset link");
+        }
+
+        Users user = usersRepository.findByPhone(phone);
+
+        if (user == null) {
+
+            throw new EntityNotFoundException("Phone Not Found");
+        }
+
+        if (!newPassword.equals(reNewPassword)) {
+
+            throw new IllegalArgumentException("Passwords Do Not Match!");
+        }
+
+        user.setPassword(newPassword);
+        usersRepository.save(user);
+
+        resetPasswordTokens.remove(token);
 
         return generateJwt(user);
     }

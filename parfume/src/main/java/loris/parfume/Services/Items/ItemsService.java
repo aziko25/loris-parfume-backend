@@ -78,7 +78,7 @@ public class ItemsService {
                 .descriptionRu(itemsRequest.getDescriptionRu())
                 .descriptionEng(itemsRequest.getDescriptionEng())
                 .price(itemsRequest.getPrice())
-                .discountPercent(itemsRequest.getDiscountPercent())
+                .discountPercent(itemsRequest.getDiscountPercent() != null ? itemsRequest.getDiscountPercent() : 0)
                 .build();
 
         itemsRepository.save(item);

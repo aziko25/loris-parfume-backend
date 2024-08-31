@@ -30,6 +30,7 @@ public class Orders {
     private String address;
     private String addressLocationLink;
     private Double distance;
+    private String fullName;
     private String phone;
 
     private Double sumForDelivery;

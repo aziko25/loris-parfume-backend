@@ -108,6 +108,7 @@ public class OrdersService {
                 .address(ordersRequest.getAddress())
                 .addressLocationLink(ordersRequest.getAddressLocationLink())
                 .distance(ordersRequest.getDistance())
+                .fullName(ordersRequest.getFullName())
                 .phone(ordersRequest.getPhone())
                 .comments(ordersRequest.getComment())
                 .sumForDelivery(ordersRequest.getDeliverySum())

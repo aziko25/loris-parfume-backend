@@ -5,6 +5,7 @@ import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Uzum_Nasiya_Clients;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Uzum_Nasiya_Clients_Repository;
+import loris.parfume.SMS_Eskiz.EskizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class MainTelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
+
+    @Autowired
+    private EskizService eskizService;
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -85,6 +89,8 @@ public class MainTelegramBot extends TelegramLongPollingBot {
 
             message.setText("Nasiya Approved For Order ID: " + order.getId() + "!");
             sendMessage(message);
+
+            //eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), true);
         }
         else if (callbackData.startsWith("reject_")) {
 
@@ -93,6 +99,8 @@ public class MainTelegramBot extends TelegramLongPollingBot {
 
             message.setText("Nasiya Is Not Approved For Order ID: " + order.getId() + "!");
             sendMessage(message);
+
+            //eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), false);
         }
 
         EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();

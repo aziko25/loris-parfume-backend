@@ -76,6 +76,19 @@ public class EskizService {
         sendSms(phone, text);
     }
 
+    public void sendUzumNasiyaOrderStatus(String phone, Long orderId, Boolean isApproved) {
+
+        if (isApproved) {
+
+            sendSms(phone, "Ваша заявка по Uzum Nasiya на заказ: " + orderId + " была одобрена на сайте Loris Parfume." +
+                    "\nПроверьте статус вашего заказа в личном кабинете.");
+        }
+        else {
+
+            sendSms(phone, "Ваша заявка по Uzum Nasiya на заказ: " + orderId + " была отклонена на сайте Loris Parfume.");
+        }
+    }
+
     private void sendSms(String phone, String text) {
 
         String url = "https://notify.eskiz.uz/api/message/sms/send";

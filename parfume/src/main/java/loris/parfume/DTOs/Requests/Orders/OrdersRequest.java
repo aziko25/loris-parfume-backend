@@ -13,6 +13,7 @@ public class OrdersRequest {
     private String address;
     private String addressLocationLink;
     private Double distance;
+    private String fullName;
     private String phone;
     private String comment;
     private Boolean isDelivery;

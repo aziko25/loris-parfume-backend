@@ -72,8 +72,17 @@ public class OrdersDTO implements Serializable {
         createdTime = order.getCreatedTime();
 
         userId = order.getUser().getId();
-        userFullName = order.getUser().getFullName();
+
         phone = order.getUser().getPhone();
+        if (order.getPhone() != null) {
+            phone = order.getPhone();
+        }
+
+        userFullName = order.getUser().getFullName();
+        if (order.getFullName() != null) {
+            userFullName = order.getFullName();
+        }
+
         address = order.getAddress();
         addressLocationLink = order.getAddressLocationLink();
         distance = order.getDistance();

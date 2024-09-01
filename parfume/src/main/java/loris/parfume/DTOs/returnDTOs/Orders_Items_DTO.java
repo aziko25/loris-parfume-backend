@@ -80,6 +80,14 @@ public class Orders_Items_DTO implements Serializable {
             collectionNameEng = ordersItem.getCollection().getNameEng();
         }
 
+        if (ordersItem.getItem().getCategory() != null) {
+
+            categoryId = ordersItem.getItem().getCategory().getId();
+            categoryNameUz = ordersItem.getItem().getCategory().getNameUz();
+            categoryNameRu = ordersItem.getItem().getCategory().getNameRu();
+            categoryNameEng = ordersItem.getItem().getCategory().getNameEng();
+        }
+
         sizeId = ordersItem.getSize().getId();
         sizeNameUz = ordersItem.getSize().getNameUz();
         sizeNameRu = ordersItem.getSize().getNameRu();

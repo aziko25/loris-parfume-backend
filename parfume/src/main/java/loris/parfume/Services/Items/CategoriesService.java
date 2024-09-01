@@ -120,14 +120,22 @@ public class CategoriesService {
 
             category.setCollection(collection);
         }
-
-        if (category.getBannerImage() != null) {
-            fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+        else {
+            category.setCollection(null);
         }
 
         if (image != null && !image.isEmpty()) {
 
+            if (category.getBannerImage() != null) {
+                fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+            }
+
             category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner", image));
+        }
+        else {
+            if (category.getBannerImage() != null) {
+                fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+            }
         }
 
         return new CategoriesDTO(categoriesRepository.save(category));

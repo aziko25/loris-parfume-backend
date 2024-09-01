@@ -206,6 +206,10 @@ public class ItemsService {
 
             item.setCollectionsItemsList(setItemsCollections(itemsRequest, item));
         }
+        else {
+            collectionsItemsRepository.deleteAllByItem(item);
+            item.setCollectionsItemsList(null);
+        }
 
         if (itemsRequest.getCategoryId() != null) {
 
@@ -214,12 +218,19 @@ public class ItemsService {
 
             item.setCategory(category);
         }
+        else {
+            item.setCategory(null);
+        }
 
         if (itemsRequest.getSizesMap() != null && !itemsRequest.getSizesMap().isEmpty()) {
 
             sizesItemsRepository.deleteAllByItem(item);
 
             item.setSizesItemsList(setItemsSizes(itemsRequest, item));
+        }
+        else {
+            sizesItemsRepository.deleteAllByItem(item);
+            item.setSizesItemsList(null);
         }
 
         if (images != null && !images.isEmpty()) {
@@ -235,14 +246,18 @@ public class ItemsService {
 
             int count = 1;
             for (MultipartFile image : images) {
-                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image);
-                Items_Images itemsImage = Items_Images.builder()
-                        .item(item)
-                        .imageName(imageName)
-                        .build();
 
-                itemsImagesRepository.save(itemsImage);
-                count++;
+                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image);
+
+                if (!imagesNamesList.contains(imageName)) {
+
+                    Items_Images itemsImage = Items_Images.builder()
+                            .item(item)
+                            .imageName(imageName)
+                            .build();
+
+                    itemsImagesRepository.save(itemsImage);
+                }
             }
         }
         else {

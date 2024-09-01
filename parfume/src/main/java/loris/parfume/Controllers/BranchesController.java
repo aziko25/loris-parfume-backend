@@ -25,9 +25,9 @@ public class BranchesController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page, @RequestParam(required = false) String search) {
+    public ResponseEntity<?> all(@RequestParam(required = false) String search) {
 
-        return ResponseEntity.ok(branchesService.all(page, search));
+        return ResponseEntity.ok(branchesService.all(search));
     }
 
     @PostMapping("/nearest")

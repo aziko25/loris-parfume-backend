@@ -6,10 +6,12 @@ import loris.parfume.DTOs.returnDTOs.CategoriesDTO;
 import loris.parfume.DTOs.returnDTOs.CollectionsDTO;
 import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Banners;
+import loris.parfume.Models.Branches;
 import loris.parfume.Models.CollectionBanners;
 import loris.parfume.Models.Items.Categories;
 import loris.parfume.Models.Items.Collections;
 import loris.parfume.Repositories.BannersRepository;
+import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.CollectionBannersRepository;
 import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
@@ -33,6 +35,7 @@ public class CacheForAllService {
     private final CollectionsRepository collectionsRepository;
     private final CategoriesRepository categoriesRepository;
     private final CollectionBannersRepository collectionBannersRepository;
+    private final BranchesRepository branchesRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -44,6 +47,15 @@ public class CacheForAllService {
     public List<Banners> allBanners() {
 
         return bannersRepository.findAll(Sort.by("id").descending());
+    }
+
+    @Cacheable(
+            value = "branchesCache",
+            key = "'allBranches'"
+    )
+    public List<Branches> allBranches() {
+
+        return branchesRepository.findAll(Sort.by("createdTime").descending());
     }
 
     @Cacheable(

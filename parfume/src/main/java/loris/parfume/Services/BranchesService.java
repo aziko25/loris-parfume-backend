@@ -11,11 +11,7 @@ import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
@@ -35,10 +31,9 @@ public class BranchesService {
     private final BranchesRepository branchesRepository;
     private final DeliveryRatesRepository deliveryRatesRepository;
     private final OrdersRepository ordersRepository;
+    private final CacheForAllService cacheForAllService;
 
-    @Value("${pageSize}")
-    private Integer pageSize;
-
+    @CacheEvict(value = "branchesCache", allEntries = true)
     public Branches create(BranchesRequest branchesRequest) {
 
         Branches branch = Branches.builder()
@@ -53,16 +48,14 @@ public class BranchesService {
         return branchesRepository.save(branch);
     }
 
-    public Page<Branches> all(Integer page, String name) {
-
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("name"));
+    public List<Branches> all(String name) {
 
         if (name != null) {
 
-            return branchesRepository.findAllByNameLikeIgnoreCase("%" + name + "%", pageable);
+            return branchesRepository.findAllByNameLikeIgnoreCase("%" + name + "%");
         }
 
-        return branchesRepository.findAll(pageable);
+        return cacheForAllService.allBranches();
     }
 
     public Branches getById(Long id) {
@@ -70,6 +63,7 @@ public class BranchesService {
         return branchesRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
     }
 
+    @CacheEvict(value = "branchesCache", allEntries = true)
     public Branches update(Long id, BranchesRequest branchesRequest) {
 
         Branches branch = getById(id);
@@ -83,6 +77,7 @@ public class BranchesService {
         return branchesRepository.save(branch);
     }
 
+    @CacheEvict(value = "branchesCache", allEntries = true)
     public String delete(Long id) {
 
         Branches branch = getById(id);

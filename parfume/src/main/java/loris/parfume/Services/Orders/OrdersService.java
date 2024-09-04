@@ -133,7 +133,6 @@ public class OrdersService {
                     .findByCollectionIdAndItemId(ordersItemsRequest.getCollectionId(), ordersItemsRequest.getItemId())
                     .orElseThrow(() -> new EntityNotFoundException("Item ID: " + ordersItemsRequest.getItemId() + " Does Not Belong To This Collection!"));
 
-            Sizes size = sizesRepository.findByIsDefaultNoSize(true);
             double itemPrice = collectionsItem.getItem().getPrice();
             Integer discountPercent = collectionsItem.getItem().getDiscountPercent();
 
@@ -141,7 +140,10 @@ public class OrdersService {
                 throw new IllegalArgumentException("Specify Item's Size!");
             }
 
+            Sizes size;
+
             if (ordersItemsRequest.getSizeId() != null) {
+
                 size = sizesRepository.findById(ordersItemsRequest.getSizeId())
                         .orElseThrow(() -> new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() + " Not Found"));
 
@@ -154,6 +156,10 @@ public class OrdersService {
 
                 itemPrice = sizesItem.getPrice();
                 discountPercent = sizesItem.getDiscountPercent();
+            }
+            else {
+
+                size = sizesRepository.findByIsDefaultNoSize(true);
             }
 
             if (discountPercent != null && discountPercent != 0) {
@@ -314,6 +320,124 @@ public class OrdersService {
     public OrdersDTO getById(Long id) {
 
         return ordersRepository.findById(id).map(OrdersDTO::new).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+    }
+
+    @Transactional
+    public OrdersDTO update(Long id, OrdersRequest ordersRequest) {
+
+        Orders order = ordersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
+
+        Optional.ofNullable(ordersRequest.getAddress()).ifPresent(order::setAddress);
+        Optional.ofNullable(ordersRequest.getAddressLocationLink()).ifPresent(order::setAddressLocationLink);
+        Optional.ofNullable(ordersRequest.getDistance()).ifPresent(order::setDistance);
+        Optional.ofNullable(ordersRequest.getFullName()).ifPresent(order::setFullName);
+        Optional.ofNullable(ordersRequest.getPhone()).ifPresent(order::setPhone);
+        Optional.ofNullable(ordersRequest.getComment()).ifPresent(order::setComments);
+        Optional.ofNullable(ordersRequest.getIsDelivery()).ifPresent(order::setIsDelivery);
+        Optional.ofNullable(ordersRequest.getIsSoonDeliveryTime()).ifPresent(order::setIsSoonDeliveryTime);
+        Optional.ofNullable(ordersRequest.getScheduledDeliveryTime()).ifPresent(order::setScheduledDeliveryTime);
+        Optional.ofNullable(ordersRequest.getDeliverySum()).ifPresent(order::setSumForDelivery);
+        Optional.ofNullable(ordersRequest.getTotalSum()).ifPresent(order::setTotalSum);
+        Optional.ofNullable(ordersRequest.getPaymentType()).ifPresent(order::setPaymentType);
+
+        if (ordersRequest.getBranchId() != null) {
+
+            Branches branch = branchesRepository.findById(ordersRequest.getBranchId()).orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
+            order.setBranch(branch);
+        }
+
+        if (ordersRequest.getOrdersItemsList() != null && !ordersRequest.getOrdersItemsList().isEmpty()) {
+
+            List<Orders_Items> saveAllOrderItemsList = new ArrayList<>();
+            double totalSum = 0.0;
+
+            Map<Long, Integer> collectionItemCountMap = new HashMap<>();
+
+            ordersItemsRepository.deleteAllByOrder(order);
+
+            for (Orders_Items_Request ordersItemsRequest : ordersRequest.getOrdersItemsList()) {
+
+                Collections_Items collectionsItem = collectionsItemsRepository
+                        .findByCollectionIdAndItemId(ordersItemsRequest.getCollectionId(), ordersItemsRequest.getItemId())
+                        .orElseThrow(() -> new EntityNotFoundException("Item ID: " + ordersItemsRequest.getItemId() + " Does Not Belong To This Collection!"));
+
+                double itemPrice = collectionsItem.getItem().getPrice();
+                Integer discountPercent = collectionsItem.getItem().getDiscountPercent();
+
+                if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
+                    throw new IllegalArgumentException("Specify Item's Size!");
+                }
+
+                Sizes size;
+
+                if (ordersItemsRequest.getSizeId() != null) {
+
+                    size = sizesRepository.findById(ordersItemsRequest.getSizeId())
+                            .orElseThrow(() -> new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() + " Not Found"));
+
+                    Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(collectionsItem.getItem(), size);
+
+                    if (sizesItem == null) {
+                        throw new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() +
+                                " For Item " + collectionsItem.getItem().getId() + " Not Found");
+                    }
+
+                    itemPrice = sizesItem.getPrice();
+                    discountPercent = sizesItem.getDiscountPercent();
+                }
+                else {
+
+                    size = sizesRepository.findByIsDefaultNoSize(true);
+                }
+
+                if (discountPercent != null && discountPercent != 0) {
+
+                    itemPrice = itemPrice * (1 - discountPercent / 100.0);
+                }
+
+                collectionItemCountMap.putIfAbsent(collectionsItem.getCollection().getId(), 0);
+                int currentCount = collectionItemCountMap.get(collectionsItem.getCollection().getId());
+
+                double totalItemPrice = 0.0;
+                int remainingQuantity = ordersItemsRequest.getQuantity();
+
+                while (remainingQuantity > 0) {
+
+                    if (currentCount % 2 == 0) {
+
+                        totalItemPrice += itemPrice;
+                    }
+                    else {
+
+                        totalItemPrice += itemPrice * 0.5;
+                    }
+
+                    currentCount++;
+                    remainingQuantity--;
+                }
+
+                Orders_Items ordersItem = new Orders_Items(order, collectionsItem.getItem(), size, collectionsItem.getCollection(), totalItemPrice, ordersItemsRequest.getQuantity());
+
+                totalSum += totalItemPrice;
+                saveAllOrderItemsList.add(ordersItem);
+                collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
+            }
+
+            ordersItemsRepository.saveAll(saveAllOrderItemsList);
+            order.setItemsList(saveAllOrderItemsList);
+
+            if (totalSum >= 500000) {
+
+                order.setTotalSum(totalSum);
+            }
+            else {
+
+                order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
+                order.setSumForDelivery(0.0);
+            }
+        }
+
+        return new OrdersDTO(ordersRepository.save(order));
     }
 
     public Page<OrdersDTO> myOrders(Integer page) {

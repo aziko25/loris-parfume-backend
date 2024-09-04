@@ -90,7 +90,7 @@ public class MainTelegramBot extends TelegramLongPollingBot {
             message.setText("Nasiya Approved For Order ID: " + order.getId() + "!");
             sendMessage(message);
 
-            //eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), true);
+            eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), true);
         }
         else if (callbackData.startsWith("reject_")) {
 
@@ -100,7 +100,7 @@ public class MainTelegramBot extends TelegramLongPollingBot {
             message.setText("Nasiya Is Not Approved For Order ID: " + order.getId() + "!");
             sendMessage(message);
 
-            //eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), false);
+            eskizService.sendUzumNasiyaOrderStatus(order.getPhone(), order.getId(), false);
         }
 
         EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();

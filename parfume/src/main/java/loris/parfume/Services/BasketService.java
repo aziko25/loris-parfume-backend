@@ -59,13 +59,27 @@ public class BasketService {
         }
         else {
 
-            if (!collectionsItem.getItem().getSizesItemsList().isEmpty()) {
-
-                throw new EntityNotFoundException("Select Item's Size!");
-            }
-
             size = sizesRepository.findById(DEFAULT_NO_SIZE)
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
+
+
+            boolean sizeFound = false;
+
+            if (!collectionsItem.getItem().getSizesItemsList().isEmpty()) {
+
+                for (Sizes_Items sizesItem : collectionsItem.getItem().getSizesItemsList()) {
+
+                    if (sizesItem.getSize().getId().equals(size.getId())) {
+
+                        sizeFound = true;
+                        break;
+                    }
+                }
+
+                if (!sizeFound) {
+                    throw new EntityNotFoundException("Select Item's Size!");
+                }
+            }
 
             saveBasket(quantity, user, collectionsItem.getItem(), size, collectionsItem.getCollection());
 

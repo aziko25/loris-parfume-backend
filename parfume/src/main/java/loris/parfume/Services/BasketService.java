@@ -76,6 +76,8 @@ public class BasketService {
                     .discountPercent(collectionsItem.getItem().getDiscountPercent())
                     .build();
 
+            sizesItemsRepository.save(sizesItem);
+
             return new BasketDTO(sizesItem, quantity, collectionsItem.getCollection());
         }
     }
@@ -112,7 +114,8 @@ public class BasketService {
             if (sizesItem != null) {
 
                 basketDTOList.add(new BasketDTO(sizesItem, basket.getQuantity(), basket.getCollection()));
-            } else {
+            }
+            else {
 
                 basketsRepository.delete(basket);
             }

@@ -62,7 +62,6 @@ public class BasketService {
             size = sizesRepository.findById(DEFAULT_NO_SIZE)
                     .orElseThrow(() -> new EntityNotFoundException("Default Size Not Found"));
 
-
             boolean sizeFound = false;
 
             if (!collectionsItem.getItem().getSizesItemsList().isEmpty()) {

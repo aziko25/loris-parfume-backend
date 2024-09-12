@@ -42,6 +42,7 @@ import java.util.*;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
 import static loris.parfume.Controllers.Orders.ClickOrdersController.orderDetailsMessage;
+import static loris.parfume.DefaultEntitiesService.DEFAULT_NO_SIZE;
 
 @Service
 @RequiredArgsConstructor
@@ -137,7 +138,21 @@ public class OrdersService {
             Integer discountPercent = collectionsItem.getItem().getDiscountPercent();
 
             if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
-                throw new IllegalArgumentException("Specify Item's Size!");
+
+                /*boolean sizeFound = false;
+
+                for (Sizes_Items sizesItem : collectionsItem.getItem().getSizesItemsList()) {
+
+                    if (sizesItem.getSize().getId().equals(DEFAULT_NO_SIZE)) {
+
+                        sizeFound = true;
+                        break;
+                    }
+                }
+
+                if (!sizeFound) {*/
+                    throw new EntityNotFoundException("Select Item's Size!");
+                //}
             }
 
             Sizes size;

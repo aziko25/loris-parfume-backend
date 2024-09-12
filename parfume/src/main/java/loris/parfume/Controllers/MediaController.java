@@ -18,7 +18,7 @@ import java.nio.file.Path;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/images")
+@RequestMapping
 public class MediaController {
 
     @Value("${imagesDir}")

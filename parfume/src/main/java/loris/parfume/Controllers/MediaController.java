@@ -48,6 +48,7 @@ public class MediaController {
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
+                    .header("Cache-Control", "public, max-age=3153600")
                     .body(resource);
 
         } catch (Exception e) {

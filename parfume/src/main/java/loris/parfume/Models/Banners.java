@@ -36,7 +36,11 @@ public class Banners implements Serializable {
     private String redirectTo;
     private Boolean isActive;
 
-    private String imageNameUz;
-    private String imageNameRu;
-    private String imageNameEng;
+    private String desktopImageNameUz;
+    private String desktopImageNameRu;
+    private String desktopImageNameEng;
+
+    private String mobileImageNameUz;
+    private String mobileImageNameRu;
+    private String mobileImageNameEng;
 }

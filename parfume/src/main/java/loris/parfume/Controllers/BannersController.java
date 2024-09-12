@@ -24,12 +24,13 @@ public class BannersController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
+    public ResponseEntity<?> create(@RequestParam(value = "desktopMedia", required = false) List<MultipartFile> desktopMedia,
+                                    @RequestParam(value = "mobileMedia", required = false) List<MultipartFile> mobileMedia,
                                     @RequestParam("banner") String bannerJson) throws JsonProcessingException {
 
         BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
 
-        return new ResponseEntity<>(bannersService.create(media, bannersRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(bannersService.create(desktopMedia, mobileMedia, bannersRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/all")
@@ -47,12 +48,13 @@ public class BannersController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(value = "media", required = false) List<MultipartFile> media,
+                                    @RequestParam(value = "desktopMedia", required = false) List<MultipartFile> desktopMedia,
+                                    @RequestParam(value = "mobileMedia", required = false) List<MultipartFile> mobileMedia,
                                     @RequestParam("banner") String bannerJson) throws JsonProcessingException {
 
         BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
 
-        return ResponseEntity.ok(bannersService.update(id, media, bannersRequest));
+        return ResponseEntity.ok(bannersService.update(id, desktopMedia, mobileMedia, bannersRequest));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

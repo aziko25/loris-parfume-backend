@@ -38,5 +38,8 @@ public class Collections {
     private String bannerImage;
 
     @OneToMany(mappedBy = "collection")
+    private List<Collections_Items> collectionsItemsList;
+
+    @OneToMany(mappedBy = "collection")
     private List<Categories> categoriesList;
 }

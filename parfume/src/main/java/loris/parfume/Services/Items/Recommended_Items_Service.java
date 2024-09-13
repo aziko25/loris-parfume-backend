@@ -5,15 +5,16 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.Items.RecommendedItemsRequest;
 import loris.parfume.DTOs.returnDTOs.Recommended_Items_DTO;
+import loris.parfume.Models.Items.Collections;
 import loris.parfume.Models.Items.Items;
 import loris.parfume.Models.Items.Recommended_Items;
+import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.Recommended_Items_Repository;
+import loris.parfume.Models.Items.Collections_Items;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +23,8 @@ public class Recommended_Items_Service {
 
     private final Recommended_Items_Repository recommendedItemsRepository;
     private final ItemsRepository itemsRepository;
+
+    private final CollectionsRepository collectionsRepository;
 
     @Transactional
     public List<Recommended_Items_DTO> create(RecommendedItemsRequest recommendedItemsRequest) {
@@ -49,10 +52,23 @@ public class Recommended_Items_Service {
 
     public Recommended_Items_DTO getById(Long itemId) {
 
-        Items item = itemsRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        List<Collections> allCollections = collectionsRepository.findAll();
 
-        List<Items> recommendedItemsList = recommendedItemsRepository.findAllByItem(item)
-                .stream().map(Recommended_Items::getRecommendedItem)
+        List<Items> recommendedItemsList = allCollections.stream()
+                .map(collection -> {
+
+                    List<Items> collectionItems = collection.getCollectionsItemsList().stream()
+                            .map(Collections_Items::getItem)
+                            .toList();
+
+                    if (collectionItems.isEmpty()) {
+                        return null;
+                    }
+
+                    return collectionItems.get(new Random().nextInt(collectionItems.size()));
+                })
+                .filter(Objects::nonNull)
+                .distinct()
                 .collect(Collectors.toList());
 
         return new Recommended_Items_DTO(recommendedItemsList);

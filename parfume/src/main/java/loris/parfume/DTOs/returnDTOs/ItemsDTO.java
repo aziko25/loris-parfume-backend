@@ -51,6 +51,7 @@ public class ItemsDTO implements Serializable {
     private List<String> imagesList;
 
     private Long categoryId;
+    private String categorySlug;
     private String categoryNameUz;
     private String categoryNameRu;
     private String categoryNameEng;
@@ -92,6 +93,7 @@ public class ItemsDTO implements Serializable {
         if (item.getCategory() != null) {
 
             categoryId = item.getCategory().getId();
+            categorySlug = item.getCategory().getSlug();
             categoryNameUz = item.getCategory().getNameUz();
             categoryNameRu = item.getCategory().getNameRu();
             categoryNameEng = item.getCategory().getNameEng();
@@ -109,7 +111,7 @@ public class ItemsDTO implements Serializable {
                         Map<String, Object> map = new LinkedHashMap<>();
 
                         map.put("collectionId", collection.getCollection().getId());
-
+                        map.put("collectionSlug", collection.getCollection().getSlug());
                         map.put("collectionNameUz", collection.getCollection().getNameUz());
                         map.put("collectionNameRu", collection.getCollection().getNameRu());
                         map.put("collectionNameEng", collection.getCollection().getNameEng());

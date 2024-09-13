@@ -56,12 +56,12 @@ public class Recommended_Items_Service {
 
         List<Items> recommendedItemsList = allCollections.stream()
                 .map(collection -> {
-
                     List<Items> collectionItems = collection.getCollectionsItemsList().stream()
                             .map(Collections_Items::getItem)
                             .toList();
 
                     if (collectionItems.isEmpty()) {
+
                         return null;
                     }
 

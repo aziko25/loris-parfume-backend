@@ -55,7 +55,7 @@ public class CacheForAllService {
     )
     public List<Branches> allBranches() {
 
-        return branchesRepository.findAll(Sort.by("createdTime").descending());
+        return branchesRepository.findAll(Sort.by("sortOrder").ascending());
     }
 
     @Cacheable(

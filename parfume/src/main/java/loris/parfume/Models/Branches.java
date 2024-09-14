@@ -36,4 +36,6 @@ public class Branches implements Serializable {
     private Double latitude;
 
     private String redirectTo;
+
+    private Integer sortOrder;
 }

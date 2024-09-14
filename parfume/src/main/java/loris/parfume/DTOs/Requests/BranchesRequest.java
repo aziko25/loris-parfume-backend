@@ -14,4 +14,6 @@ public class BranchesRequest {
     private Double latitude;
 
     private String redirectTo;
+
+    private Integer sortOrder;
 }

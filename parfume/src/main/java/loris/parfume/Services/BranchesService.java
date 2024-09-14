@@ -43,6 +43,7 @@ public class BranchesService {
                 .longitude(branchesRequest.getLongitude())
                 .latitude(branchesRequest.getLatitude())
                 .redirectTo(branchesRequest.getRedirectTo())
+                .sortOrder(branchesRequest.getSortOrder())
                 .build();
 
         return branchesRepository.save(branch);
@@ -73,6 +74,7 @@ public class BranchesService {
         Optional.ofNullable(branchesRequest.getLongitude()).ifPresent(branch::setLongitude);
         Optional.ofNullable(branchesRequest.getLatitude()).ifPresent(branch::setLatitude);
         Optional.ofNullable(branchesRequest.getRedirectTo()).ifPresent(branch::setRedirectTo);
+        Optional.ofNullable(branchesRequest.getSortOrder()).ifPresent(branch::setSortOrder);
 
         return branchesRepository.save(branch);
     }

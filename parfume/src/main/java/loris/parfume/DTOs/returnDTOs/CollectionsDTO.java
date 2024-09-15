@@ -33,6 +33,8 @@ public class CollectionsDTO implements Serializable {
 
     private String bannerImage;
 
+    private Integer sortOrder;
+
     private List<Map<String, Object>> categoriesList;
 
     public CollectionsDTO(Collections collection) {
@@ -44,6 +46,7 @@ public class CollectionsDTO implements Serializable {
         nameRu = collection.getNameRu();
         nameEng = collection.getNameEng();
         bannerImage = collection.getBannerImage();
+        sortOrder = collection.getSortOrder();
 
         categoriesList = new ArrayList<>();
         if (collection.getCategoriesList() != null && !collection.getCategoriesList().isEmpty()) {

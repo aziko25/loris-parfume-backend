@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,6 +60,7 @@ public class CollectionsService {
                 .nameUz(collectionsRequest.getNameUz())
                 .nameRu(collectionsRequest.getNameRu())
                 .nameEng(collectionsRequest.getNameEng())
+                .sortOrder(collectionsRequest.getSortOrder())
                 .build();
 
         collectionsRepository.save(collection);
@@ -77,7 +79,7 @@ public class CollectionsService {
             return cacheForAllService.allCollections(page);
         }
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("sortOrder").ascending());
 
         return collectionsRepository.findAllByAnyNameLikeIgnoreCase("%" + name + "%", pageable).map(CollectionsDTO::new);
     }
@@ -111,6 +113,7 @@ public class CollectionsService {
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);
             Optional.ofNullable(collectionsRequest.getNameRu()).ifPresent(collection::setNameRu);
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);
+            Optional.ofNullable(collectionsRequest.getSortOrder()).ifPresent(collection::setSortOrder);
         }
 
         if (image != null && !image.isEmpty()) {

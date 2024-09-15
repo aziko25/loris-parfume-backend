@@ -64,7 +64,7 @@ public class CacheForAllService {
     )
     public Page<ItemsDTO> allItems(Integer page, String collectionSlug, String categorySlug) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz").ascending());
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("barcode").descending());
 
         if (collectionSlug == null) {
 
@@ -92,7 +92,7 @@ public class CacheForAllService {
     )
     public Page<CollectionsDTO> allCollections(Integer page) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("nameUz"));
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("sortOrder").ascending());
 
         return collectionsRepository.findAll(pageable).map(CollectionsDTO::new);
     }

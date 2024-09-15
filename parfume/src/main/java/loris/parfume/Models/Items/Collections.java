@@ -37,6 +37,8 @@ public class Collections {
 
     private String bannerImage;
 
+    private Integer sortOrder;
+
     @OneToMany(mappedBy = "collection")
     private List<Collections_Items> collectionsItemsList;
 

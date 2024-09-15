@@ -61,6 +61,7 @@ public class CollectionsService {
                 .nameRu(collectionsRequest.getNameRu())
                 .nameEng(collectionsRequest.getNameEng())
                 .sortOrder(collectionsRequest.getSortOrder())
+                .isFiftyPercentSaleApplied(collectionsRequest.getIsFiftyPercentSaleApplied())
                 .build();
 
         collectionsRepository.save(collection);

@@ -34,6 +34,7 @@ public class CollectionsDTO implements Serializable {
     private String bannerImage;
 
     private Integer sortOrder;
+    private Boolean isFiftyPercentSaleApplied;
 
     private List<Map<String, Object>> categoriesList;
 
@@ -47,6 +48,7 @@ public class CollectionsDTO implements Serializable {
         nameEng = collection.getNameEng();
         bannerImage = collection.getBannerImage();
         sortOrder = collection.getSortOrder();
+        isFiftyPercentSaleApplied = collection.getIsFiftyPercentSaleApplied();
 
         categoriesList = new ArrayList<>();
         if (collection.getCategoriesList() != null && !collection.getCategoriesList().isEmpty()) {

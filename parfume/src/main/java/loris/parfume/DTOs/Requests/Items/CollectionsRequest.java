@@ -14,4 +14,5 @@ public class CollectionsRequest {
     private String nameEng;
 
     private Integer sortOrder;
+    private Boolean isFiftyPercentSaleApplied;
 }

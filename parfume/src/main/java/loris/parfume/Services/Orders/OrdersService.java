@@ -135,6 +135,7 @@ public class OrdersService {
 
             double itemPrice = collectionsItem.getItem().getPrice();
             Integer discountPercent = collectionsItem.getItem().getDiscountPercent();
+            Boolean isFiftyPercentSaleApplied = collectionsItem.getCollection().getIsFiftyPercentSaleApplied();
 
             if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
 
@@ -189,13 +190,17 @@ public class OrdersService {
 
             while (remainingQuantity > 0) {
 
-                if (currentCount % 2 == 0) {
+                if (Boolean.TRUE.equals(isFiftyPercentSaleApplied)) {
 
-                    totalItemPrice += itemPrice;
+                    if (currentCount % 2 == 0) {
+                        totalItemPrice += itemPrice;
+                    }
+                    else {
+                        totalItemPrice += itemPrice * 0.5;
+                    }
                 }
                 else {
-
-                    totalItemPrice += itemPrice * 0.5;
+                    totalItemPrice += itemPrice;  // No sale if isFiftyPercentSaleAvailable is false or null
                 }
 
                 currentCount++;

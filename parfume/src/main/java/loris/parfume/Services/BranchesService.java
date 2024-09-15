@@ -11,8 +11,10 @@ import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
+import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -144,24 +146,55 @@ public class BranchesService {
                 - B / 6 * cos2SigmaM * (-3 + 4 * Math.pow(sinSigma, 2)) * (-3 + 4 * Math.pow(cos2SigmaM, 2))));
 
         double distanceMt = SEMI_MINOR_AXIS_MT * A * (sigma - deltaSigma);
-        return distanceMt / 1000;
+
+        return (distanceMt / 1000) + 1.5;
+    }
+
+    public double getRoadDistance(double userLat, double userLon, double branchLat, double branchLon) {
+
+        try {
+
+            String osrmUrl = String.format(Locale.US, "http://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
+                    userLat, userLon, branchLat, branchLon);
+            System.out.println(osrmUrl);
+
+            RestTemplate restTemplate = new RestTemplate();
+            String response = restTemplate.getForObject(osrmUrl, String.class);
+
+            System.out.println("OSRM Response: " + response);
+
+            JSONObject jsonObject = new JSONObject(response);
+            double distanceInMeters = jsonObject.getJSONArray("routes")
+                    .getJSONObject(0)
+                    .getDouble("distance");
+
+            return distanceInMeters / 1000;
+        }
+        catch (Exception e) {
+
+            System.out.println(e.getMessage());
+            return Double.MAX_VALUE;
+        }
     }
 
     public BranchesDTO getNearestBranch(NearestBranchRequest nearestBranchRequest) {
 
-        List<Branches> branchesList = branchesRepository.findAll();
+        List<Branches> branchesList = cacheForAllService.allBranches();
 
         if (branchesList.isEmpty()) {
 
-            throw new IllegalStateException("No branches available");
+            branchesList = branchesRepository.findAll();
         }
 
         Branches nearestBranch = findNearestBranch(nearestBranchRequest, branchesList);
 
-        double distance = calculateDistance(nearestBranchRequest.getLongitude(), nearestBranchRequest.getLatitude(),
-                nearestBranch.getLongitude(), nearestBranch.getLatitude());
+        double distance = getRoadDistance(nearestBranchRequest.getLatitude(), nearestBranchRequest.getLongitude(),
+                nearestBranch.getLatitude(), nearestBranch.getLongitude());
 
-        double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch);
+        //double distance = calculateDistance(nearestBranchRequest.getLongitude(), nearestBranchRequest.getLatitude(),
+          //      nearestBranch.getLongitude(), nearestBranch.getLatitude());
+
+        double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance);
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.00", symbols);
@@ -197,12 +230,14 @@ public class BranchesService {
         return nearestBranch;
     }
 
-    public double calculateDeliverySum(NearestBranchRequest request, Branches branch) {
+    public double calculateDeliverySum(NearestBranchRequest request, Branches branch, Double distance) {
 
         DeliveryRates deliveryRate = deliveryRatesRepository.findFirstByIsActive(true);
 
-        double distance = calculateDistance(request.getLongitude(), request.getLatitude(),
-                branch.getLongitude(), branch.getLatitude());
+        if (distance == null) {
+            distance = getRoadDistance(request.getLatitude(), request.getLongitude(),
+                    branch.getLatitude(), branch.getLongitude());
+        }
 
         if (deliveryRate == null) {
 

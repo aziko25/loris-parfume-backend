@@ -42,7 +42,6 @@ import java.util.*;
 
 import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
 import static loris.parfume.Controllers.Orders.ClickOrdersController.orderDetailsMessage;
-import static loris.parfume.DefaultEntitiesService.DEFAULT_NO_SIZE;
 
 @Service
 @RequiredArgsConstructor
@@ -90,7 +89,7 @@ public class OrdersService {
         NearestBranchRequest nearestBranchRequest =
                 new NearestBranchRequest(ordersRequest.getLongitude(), ordersRequest.getLatitude());
 
-        BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch, null)).setScale(2, RoundingMode.HALF_UP);
         BigDecimal expectedSum = BigDecimal.valueOf(ordersRequest.getDeliverySum()).setScale(2, RoundingMode.HALF_UP);
 
         if (calculatedSum.compareTo(expectedSum) != 0) {
@@ -213,11 +212,13 @@ public class OrdersService {
         if (totalSum >= 500000) {
 
             order.setTotalSum(totalSum);
+            order.setSumForDelivery(0.0);
         }
         else {
 
             order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
-            order.setSumForDelivery(0.0);
+            order.setSumForDelivery(ordersRequest.getDeliverySum());
+            totalSum += ordersRequest.getDeliverySum();
         }
 
         if (ordersRequest.getTotalSum() != totalSum) {

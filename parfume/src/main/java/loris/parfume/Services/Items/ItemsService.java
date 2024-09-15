@@ -61,10 +61,13 @@ public class ItemsService {
             throw new EntityExistsException("Slug Already Exists!");
         }
 
-        Optional<Items> existingBarcode = itemsRepository.findByBarcode(itemsRequest.getBarcode());
-        if (existingBarcode.isPresent()) {
+        if (itemsRequest.getBarcode() != null) {
 
-            throw new EntityExistsException("Barcode Already Exists!");
+            Optional<Items> existingBarcode = itemsRepository.findByBarcode(itemsRequest.getBarcode());
+            if (existingBarcode.isPresent()) {
+
+                throw new EntityExistsException("Barcode Already Exists!");
+            }
         }
 
         Items item = Items.builder()

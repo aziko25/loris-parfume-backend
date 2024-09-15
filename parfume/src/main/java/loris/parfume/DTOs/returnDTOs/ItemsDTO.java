@@ -68,9 +68,17 @@ public class ItemsDTO implements Serializable {
 
         createdTime = item.getCreatedTime();
 
-        nameUz = (item.getNameUz() != null) ? item.getBarcode() + " | " + item.getNameUz() : item.getBarcode();
-        nameRu = (item.getNameRu() != null) ? item.getBarcode() + " | " + item.getNameRu() : item.getBarcode();
-        nameEng = (item.getNameEng() != null) ? item.getBarcode() + " | " + item.getNameEng() : item.getBarcode();
+        nameUz = (item.getNameUz() != null)
+                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameUz()
+                : item.getBarcode();
+
+        nameRu = (item.getNameRu() != null)
+                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameRu()
+                : item.getBarcode();
+
+        nameEng = (item.getNameEng() != null)
+                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameEng()
+                : item.getBarcode();
 
         descriptionUz = item.getDescriptionUz();
         descriptionRu = item.getDescriptionRu();
@@ -78,8 +86,6 @@ public class ItemsDTO implements Serializable {
 
         price = item.getPrice();
         discountPercent = item.getDiscountPercent();
-
-
 
         imagesList = new ArrayList<>();
         if (item.getItemsImagesList() != null && !item.getItemsImagesList().isEmpty()) {

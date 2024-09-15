@@ -33,7 +33,7 @@ public class Items implements Serializable {
     @Column(unique = true, nullable = false)
     private String slug;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String barcode;
 
     @JsonFormat(shape = STRING, pattern = "dd-MM-yyyy HH:mm:ss")

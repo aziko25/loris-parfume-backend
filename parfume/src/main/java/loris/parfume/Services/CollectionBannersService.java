@@ -110,6 +110,8 @@ public class CollectionBannersService {
 
     private void updateImages(List<MultipartFile> images, CollectionBanners collectionBanner) {
 
+        deleteImages(collectionBanner);
+
         String[] languages = {"uz", "ru", "eng"};
 
         for (int i = 0; i < images.size(); i++) {

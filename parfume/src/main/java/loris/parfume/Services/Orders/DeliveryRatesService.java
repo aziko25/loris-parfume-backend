@@ -40,8 +40,13 @@ public class DeliveryRatesService {
         else {
 
             deliveryRates.setIsFixed(false);
-            deliveryRates.setFirstFreeKmQuantity(deliveryRatesRequest.getFirstFreeKmQuantity());
-            deliveryRates.setAfterFreeKmSumPerKm(deliveryRatesRequest.getAfterFreeKmSumPerKm());
+
+            Optional.ofNullable(deliveryRatesRequest.getFirstFreeKmQuantity()).ifPresent(deliveryRates::setFirstFreeKmQuantity);
+            Optional.ofNullable(deliveryRatesRequest.getAfterFreeKmSumPerKm()).ifPresent(deliveryRates::setAfterFreeKmSumPerKm);
+
+            Optional.ofNullable(deliveryRatesRequest.getFirstPaidKmQuantity()).ifPresent(deliveryRates::setFirstPaidKmQuantity);
+            Optional.ofNullable(deliveryRatesRequest.getFirstPaidKmQuantityPrice()).ifPresent(deliveryRates::setFirstPaidKmQuantityPrice);
+            Optional.ofNullable(deliveryRatesRequest.getAfterPaidKmSumPerKm()).ifPresent(deliveryRates::setAfterPaidKmSumPerKm);
         }
 
         return deliveryRatesRepository.save(deliveryRates);
@@ -79,6 +84,10 @@ public class DeliveryRatesService {
 
             Optional.ofNullable(deliveryRatesRequest.getFirstFreeKmQuantity()).ifPresent(deliveryRate::setFirstFreeKmQuantity);
             Optional.ofNullable(deliveryRatesRequest.getAfterFreeKmSumPerKm()).ifPresent(deliveryRate::setAfterFreeKmSumPerKm);
+
+            Optional.ofNullable(deliveryRatesRequest.getFirstPaidKmQuantity()).ifPresent(deliveryRate::setFirstPaidKmQuantity);
+            Optional.ofNullable(deliveryRatesRequest.getFirstPaidKmQuantityPrice()).ifPresent(deliveryRate::setFirstPaidKmQuantityPrice);
+            Optional.ofNullable(deliveryRatesRequest.getAfterPaidKmSumPerKm()).ifPresent(deliveryRate::setAfterPaidKmSumPerKm);
         }
 
         Optional.ofNullable(deliveryRatesRequest.getName()).ifPresent(deliveryRate::setName);

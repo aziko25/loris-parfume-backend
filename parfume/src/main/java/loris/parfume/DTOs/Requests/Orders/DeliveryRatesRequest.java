@@ -12,5 +12,10 @@ public class DeliveryRatesRequest {
     private Double sumPerKm;
     private Integer firstFreeKmQuantity;
     private Double afterFreeKmSumPerKm;
+
+    private Integer firstPaidKmQuantity;
+    private Double firstPaidKmQuantityPrice;
+    private Double afterPaidKmSumPerKm;
+
     private Boolean isActive;
 }

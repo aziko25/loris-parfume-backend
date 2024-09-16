@@ -191,9 +191,6 @@ public class BranchesService {
         double distance = getRoadDistance(nearestBranchRequest.getLatitude(), nearestBranchRequest.getLongitude(),
                 nearestBranch.getLatitude(), nearestBranch.getLongitude());
 
-        //double distance = calculateDistance(nearestBranchRequest.getLongitude(), nearestBranchRequest.getLatitude(),
-          //      nearestBranch.getLongitude(), nearestBranch.getLatitude());
-
         double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance);
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
@@ -250,9 +247,27 @@ public class BranchesService {
         }
         else {
 
-            double distanceBeyondFreeKm = distance - deliveryRate.getFirstFreeKmQuantity();
+            if (deliveryRate.getFirstFreeKmQuantity() != null) {
 
-            return Math.max(0, distanceBeyondFreeKm) * deliveryRate.getAfterFreeKmSumPerKm();
+                double distanceBeyondFreeKm = distance - deliveryRate.getFirstFreeKmQuantity();
+
+                return Math.max(0, distanceBeyondFreeKm) * deliveryRate.getAfterFreeKmSumPerKm();
+            }
+
+            if (deliveryRate.getFirstPaidKmQuantity() != null) {
+
+                double sum = deliveryRate.getFirstPaidKmQuantityPrice() *
+                        Math.min(distance, deliveryRate.getFirstPaidKmQuantity());
+
+                if (distance > deliveryRate.getFirstPaidKmQuantity()) {
+                    sum += deliveryRate.getAfterPaidKmSumPerKm() *
+                            (distance - deliveryRate.getFirstPaidKmQuantity());
+                }
+
+                return sum;
+            }
+
+            throw new IllegalArgumentException("Problems With Delivery Rate!");
         }
     }
 }

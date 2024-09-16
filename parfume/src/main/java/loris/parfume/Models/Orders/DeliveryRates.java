@@ -32,6 +32,10 @@ public class DeliveryRates {
     private Integer firstFreeKmQuantity;
     private Double afterFreeKmSumPerKm;
 
+    private Integer firstPaidKmQuantity;
+    private Double firstPaidKmQuantityPrice;
+    private Double afterPaidKmSumPerKm;
+
     private Boolean isActive;
     private Boolean isDefault;
 }

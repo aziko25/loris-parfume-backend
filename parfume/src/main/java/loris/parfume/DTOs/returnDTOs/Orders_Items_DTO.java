@@ -38,6 +38,7 @@ public class Orders_Items_DTO implements Serializable {
     private Integer quantity;
 
     private Long collectionId;
+    private String collectionSlug;
     private String collectionNameUz;
     private String collectionNameRu;
     private String collectionNameEng;
@@ -75,6 +76,7 @@ public class Orders_Items_DTO implements Serializable {
         if (ordersItem.getCollection() != null) {
 
             collectionId = ordersItem.getCollection().getId();
+            collectionSlug = ordersItem.getCollection().getSlug();
             collectionNameUz = ordersItem.getCollection().getNameUz();
             collectionNameRu = ordersItem.getCollection().getNameRu();
             collectionNameEng = ordersItem.getCollection().getNameEng();

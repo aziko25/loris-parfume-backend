@@ -236,38 +236,29 @@ public class BranchesService {
                     branch.getLatitude(), branch.getLongitude());
         }
 
-        if (deliveryRate == null) {
+        if (deliveryRate == null || deliveryRate.getIsFixed()) {
 
-            return DELIVERY_RATE.getSumPerKm() * distance;
+            return Math.floor(DELIVERY_RATE.getSumPerKm() * distance);
         }
 
-        if (deliveryRate.getIsFixed()) {
+        if (deliveryRate.getFirstFreeKmQuantity() != null) {
 
-            return deliveryRate.getSumPerKm() * distance;
+            double distanceBeyondFreeKm = Math.max(0, distance - deliveryRate.getFirstFreeKmQuantity());
+
+            return Math.floor(distanceBeyondFreeKm * deliveryRate.getAfterFreeKmSumPerKm());
         }
-        else {
 
-            if (deliveryRate.getFirstFreeKmQuantity() != null) {
+        if (deliveryRate.getFirstPaidKmQuantity() != null) {
 
-                double distanceBeyondFreeKm = distance - deliveryRate.getFirstFreeKmQuantity();
+            double initialKmSum = Math.min(distance, deliveryRate.getFirstPaidKmQuantity()) *
+                    deliveryRate.getFirstPaidKmQuantityPrice();
 
-                return Math.max(0, distanceBeyondFreeKm) * deliveryRate.getAfterFreeKmSumPerKm();
-            }
+            double extraDistance = Math.max(0, distance - deliveryRate.getFirstPaidKmQuantity());
+            double additionalKmSum = extraDistance * deliveryRate.getAfterPaidKmSumPerKm();
 
-            if (deliveryRate.getFirstPaidKmQuantity() != null) {
-
-                double sum = deliveryRate.getFirstPaidKmQuantityPrice() *
-                        Math.min(distance, deliveryRate.getFirstPaidKmQuantity());
-
-                if (distance > deliveryRate.getFirstPaidKmQuantity()) {
-                    sum += deliveryRate.getAfterPaidKmSumPerKm() *
-                            (distance - deliveryRate.getFirstPaidKmQuantity());
-                }
-
-                return sum;
-            }
-
-            throw new IllegalArgumentException("Problems With Delivery Rate!");
+            return Math.floor(initialKmSum + additionalKmSum);
         }
+
+        throw new IllegalArgumentException("Problems With Delivery Rate!");
     }
 }

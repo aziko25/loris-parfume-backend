@@ -71,9 +71,19 @@ public class BasketDTO {
         slug = sizeItem.getItem().getSlug();
         barcode = sizeItem.getItem().getBarcode();
         createdTime = sizeItem.getItem().getCreatedTime();
-        nameUz = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameUz();
-        nameRu = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameRu();
-        nameEng = sizeItem.getItem().getBarcode() + " | " + sizeItem.getItem().getNameEng();
+
+        nameUz = (sizeItem.getItem().getNameUz() != null)
+                ? ((sizeItem.getItem().getBarcode() != null) ? sizeItem.getItem().getBarcode() + " | " : "") + sizeItem.getItem().getNameUz()
+                : sizeItem.getItem().getBarcode();
+
+        nameRu = (sizeItem.getItem().getNameRu() != null)
+                ? ((sizeItem.getItem().getBarcode() != null) ? sizeItem.getItem().getBarcode() + " | " : "") + sizeItem.getItem().getNameRu()
+                : sizeItem.getItem().getBarcode();
+
+        nameEng = (sizeItem.getItem().getNameEng() != null)
+                ? ((sizeItem.getItem().getBarcode() != null) ? sizeItem.getItem().getBarcode() + " | " : "") + sizeItem.getItem().getNameEng()
+                : sizeItem.getItem().getBarcode();
+
         descriptionUz = sizeItem.getItem().getDescriptionUz();
         descriptionRu = sizeItem.getItem().getDescriptionRu();
         descriptionEng = sizeItem.getItem().getDescriptionEng();

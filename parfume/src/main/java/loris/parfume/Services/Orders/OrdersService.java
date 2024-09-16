@@ -106,7 +106,7 @@ public class OrdersService {
         Orders order = Orders.builder()
                 .createdTime(LocalDateTime.now())
                 .address(ordersRequest.getAddress())
-                .addressLocationLink(ordersRequest.getAddressLocationLink())
+                .addressLocationLink(ordersRequest.getAddressLocationLink() + "&z=19")
                 .distance(ordersRequest.getDistance())
                 .fullName(ordersRequest.getFullName())
                 .phone(ordersRequest.getPhone())
@@ -139,20 +139,7 @@ public class OrdersService {
 
             if (!collectionsItem.getItem().getSizesItemsList().isEmpty() && ordersItemsRequest.getSizeId() == null) {
 
-                /*boolean sizeFound = false;
-
-                for (Sizes_Items sizesItem : collectionsItem.getItem().getSizesItemsList()) {
-
-                    if (sizesItem.getSize().getId().equals(DEFAULT_NO_SIZE)) {
-
-                        sizeFound = true;
-                        break;
-                    }
-                }
-
-                if (!sizeFound) {*/
-                    throw new EntityNotFoundException("Select Item's Size!");
-                //}
+                throw new EntityNotFoundException("Select Item's Size!");
             }
 
             Sizes size;

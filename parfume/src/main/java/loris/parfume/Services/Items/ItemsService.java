@@ -166,7 +166,8 @@ public class ItemsService {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        if (itemFilters == null) {
+        if (itemFilters.getSearch() == null && itemFilters.getFirstA() == null && itemFilters.getFirstZ() == null &&
+            itemFilters.getFirstExpensive() == null && itemFilters.getFirstCheap() == null) {
 
             return cacheForAllService.allItems(page, collectionSlug, categorySlug);
         }

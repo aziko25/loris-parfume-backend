@@ -152,7 +152,7 @@ public class ItemsService {
             Items_Images itemsImage = new Items_Images();
 
             itemsImage.setItem(item);
-            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + 1 + "_" + System.currentTimeMillis(), images.getFirst()));
+            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + 1 + "_" + System.currentTimeMillis(), images.get(0)));
 
             itemsImagesRepository.save(itemsImage);
         }

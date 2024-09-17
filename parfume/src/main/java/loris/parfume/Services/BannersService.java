@@ -125,7 +125,7 @@ public class BannersService {
         for (int i = 0; i < images.size(); i++) {
 
             String imageName = fileUploadUtilService.handleMediaUpload(
-                    banner.getId() + "_" + (i + 1) + "_banner_" + type, images.get(i));
+                    banner.getId() + "_" + (i + 1) + "_banner_" + type + "_" + System.currentTimeMillis(), images.get(i));
 
             switch (languages[i]) {
 

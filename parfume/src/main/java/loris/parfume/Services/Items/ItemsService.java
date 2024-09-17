@@ -125,7 +125,7 @@ public class ItemsService {
 
                 Items_Images itemsImage = Items_Images.builder()
                         .item(item)
-                        .imageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image))
+                        .imageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count + "_" + System.currentTimeMillis(), image))
                         .build();
 
                 imagesList.add(itemsImage);
@@ -252,7 +252,7 @@ public class ItemsService {
             int count = 1;
             for (MultipartFile image : images) {
 
-                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count, image);
+                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count + "_" + System.currentTimeMillis(), image);
 
                 if (!imagesNamesList.contains(imageName)) {
 

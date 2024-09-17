@@ -68,7 +68,7 @@ public class CategoriesService {
 
         if (image != null && !image.isEmpty()) {
 
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner", image));
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner_" + System.currentTimeMillis(), image));
         }
 
         return new CategoriesDTO(categoriesRepository.save(category));
@@ -132,7 +132,7 @@ public class CategoriesService {
                 fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
             }
 
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner", image));
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner_" + System.currentTimeMillis(), image));
         }
         else {
             if (category.getBannerImage() != null) {

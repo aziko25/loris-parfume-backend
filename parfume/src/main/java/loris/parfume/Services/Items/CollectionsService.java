@@ -68,7 +68,7 @@ public class CollectionsService {
         collectionsRepository.save(collection);
 
         if (image != null && !image.isEmpty()) {
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner_" + System.currentTimeMillis(), image));
         }
 
         return new CollectionsDTO(collectionsRepository.save(collection));
@@ -125,7 +125,7 @@ public class CollectionsService {
                 fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
             }
 
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner", image));
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner_" + System.currentTimeMillis(), image));
         }
         else {
             collection.setBannerImage(null);

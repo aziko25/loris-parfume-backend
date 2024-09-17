@@ -60,6 +60,7 @@ public class CategoriesService {
                 .nameUz(categoriesRequest.getNameUz())
                 .nameRu(categoriesRequest.getNameRu())
                 .nameEng(categoriesRequest.getNameEng())
+                .isRecommendedInMainPage(categoriesRequest.getIsRecommendedInMainPage())
                 .collection(collection)
                 .build();
 
@@ -112,6 +113,7 @@ public class CategoriesService {
         Optional.ofNullable(categoriesRequest.getNameUz()).ifPresent(category::setNameUz);
         Optional.ofNullable(categoriesRequest.getNameRu()).ifPresent(category::setNameRu);
         Optional.ofNullable(categoriesRequest.getNameEng()).ifPresent(category::setNameEng);
+        Optional.ofNullable(categoriesRequest.getIsRecommendedInMainPage()).ifPresent(category::setIsRecommendedInMainPage);
 
         if (categoriesRequest.getCollectionId() != null) {
 

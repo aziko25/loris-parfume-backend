@@ -15,4 +15,5 @@ public class CollectionsRequest {
 
     private Integer sortOrder;
     private Boolean isFiftyPercentSaleApplied;
+    private Boolean isRecommendedInMainPage;
 }

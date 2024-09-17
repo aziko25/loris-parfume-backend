@@ -26,6 +26,7 @@ public class ItemsRequest {
 
     private Long categoryId;
     private List<Long> collectionIds;
+    private Boolean isRecommendedInMainPage;
 
     private List<Map<String, Object>> sizesMap;
 }

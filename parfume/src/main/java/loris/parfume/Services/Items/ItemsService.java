@@ -82,6 +82,7 @@ public class ItemsService {
                 .descriptionEng(itemsRequest.getDescriptionEng())
                 .price(itemsRequest.getPrice())
                 .discountPercent(itemsRequest.getDiscountPercent() != null ? itemsRequest.getDiscountPercent() : 0)
+                .isRecommendedInMainPage(itemsRequest.getIsRecommendedInMainPage())
                 .build();
 
         itemsRepository.save(item);
@@ -202,6 +203,7 @@ public class ItemsService {
 
         Optional.ofNullable(itemsRequest.getPrice()).ifPresent(item::setPrice);
         Optional.ofNullable(itemsRequest.getDiscountPercent()).ifPresent(item::setDiscountPercent);
+        Optional.ofNullable(itemsRequest.getIsRecommendedInMainPage()).ifPresent(item::setIsRecommendedInMainPage);
 
         if (itemsRequest.getCollectionIds() != null && !itemsRequest.getCollectionIds().isEmpty()) {
 

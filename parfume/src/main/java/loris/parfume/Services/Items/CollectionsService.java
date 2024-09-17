@@ -62,6 +62,7 @@ public class CollectionsService {
                 .nameEng(collectionsRequest.getNameEng())
                 .sortOrder(collectionsRequest.getSortOrder())
                 .isFiftyPercentSaleApplied(collectionsRequest.getIsFiftyPercentSaleApplied())
+                .isRecommendedInMainPage(collectionsRequest.getIsRecommendedInMainPage())
                 .build();
 
         collectionsRepository.save(collection);
@@ -115,6 +116,7 @@ public class CollectionsService {
             Optional.ofNullable(collectionsRequest.getNameRu()).ifPresent(collection::setNameRu);
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);
             Optional.ofNullable(collectionsRequest.getSortOrder()).ifPresent(collection::setSortOrder);
+            Optional.ofNullable(collectionsRequest.getIsRecommendedInMainPage()).ifPresent(collection::setIsRecommendedInMainPage);
         }
 
         if (image != null && !image.isEmpty()) {

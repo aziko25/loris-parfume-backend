@@ -138,6 +138,28 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
+    public String setPhotoToCollection(List<MultipartFile> images, Long collectionId, Long categoryId) {
+
+        Collections collection = collectionsRepository.findById(collectionId).orElseThrow();
+        Categories category = categoriesRepository.findById(categoryId).orElseThrow();
+
+        List<Items> itemsList = itemsRepository.findAllByCollectionsItemsList_CollectionAndCategory(collection, category);
+
+        for (Items item : itemsList) {
+
+            fileUploadUtilService.handleMultipleMediaDeletion(item.getItemsImagesList().stream().map(Items_Images::getImageName).toList());
+
+            Items_Images itemsImage = new Items_Images();
+
+            itemsImage.setItem(item);
+            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + 1 + "_" + System.currentTimeMillis(), images.getFirst()));
+
+            itemsImagesRepository.save(itemsImage);
+        }
+
+        return "Done";
+    }
+
     public Page<ItemsDTO> all(Integer page, String collectionSlug, String categorySlug, ItemFilters itemFilters) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);

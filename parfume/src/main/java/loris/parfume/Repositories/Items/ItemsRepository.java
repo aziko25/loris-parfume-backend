@@ -49,6 +49,7 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     List<Items> findAllByCategory(Categories category);
 
     Page<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category, Pageable pageable);
+    List<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category);
 
     Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
     List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(Boolean isRecommended, Collections collection);

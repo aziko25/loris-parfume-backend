@@ -129,14 +129,18 @@ public class CategoriesService {
         if (image != null && !image.isEmpty()) {
 
             if (category.getBannerImage() != null) {
+
                 fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
             }
 
             category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner_" + System.currentTimeMillis(), image));
         }
         else {
+
             if (category.getBannerImage() != null) {
+
                 fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
+                category.setBannerImage(null);
             }
         }
 

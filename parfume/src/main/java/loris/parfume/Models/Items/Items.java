@@ -50,6 +50,8 @@ public class Items implements Serializable {
     private Double price;
     private Integer discountPercent;
 
+    private Boolean isRecommendedInMainPage;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Categories category;

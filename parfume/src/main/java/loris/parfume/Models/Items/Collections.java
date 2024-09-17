@@ -40,6 +40,8 @@ public class Collections {
     private Integer sortOrder;
     private Boolean isFiftyPercentSaleApplied;
 
+    private Boolean isRecommendedInMainPage;
+
     @OneToMany(mappedBy = "collection")
     private List<Collections_Items> collectionsItemsList;
 

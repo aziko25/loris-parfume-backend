@@ -36,6 +36,8 @@ public class Categories {
 
     private String bannerImage;
 
+    private Boolean isRecommendedInMainPage;
+
     @ManyToOne
     @JoinColumn(name = "collection_id")
     private Collections collection;

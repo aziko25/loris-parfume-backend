@@ -35,6 +35,13 @@ public class RecommendedItemsController {
         return ResponseEntity.ok(recommendedItemsService.getById(id));
     }
 
+    @GetMapping("/main-page-recommendations")
+    public ResponseEntity<?> mainPageRecommendations(@RequestParam Long collectionId,
+                                                     @RequestParam(required = false) Long categoryId) {
+
+        return ResponseEntity.ok(recommendedItemsService.getByCollectionAndCategory(collectionId, categoryId));
+    }
+
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody(required = false) RecommendedItemsRequest recommendedItemsRequest) {

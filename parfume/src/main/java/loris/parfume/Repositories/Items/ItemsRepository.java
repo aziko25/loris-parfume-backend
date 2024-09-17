@@ -51,8 +51,29 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     Page<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category, Pageable pageable);
 
     Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
+    List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(Boolean isRecommended, Collections collection);
+    List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_CollectionAndCategory(boolean b, Collections collection, Categories category);
 
     Optional<Items> findBySlug(String slug);
 
     Optional<Items> findByBarcode(String barcode);
+
+    @Query(value = "SELECT i.* FROM items i " +
+            "JOIN collections_items ci ON ci.item_id = i.id " +
+            "WHERE ci.collection_id = :collectionId AND i.category_id = :categoryId " +
+            "AND (:excludedIds IS NULL OR i.id NOT IN (:excludedIds)) " +
+            "ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
+    List<Items> findRandomByCollectionAndCategoryExcludeItems(@Param("collectionId") Long collectionId,
+                                                              @Param("categoryId") Long categoryId,
+                                                              @Param("excludedIds") List<Long> excludedIds,
+                                                              @Param("limit") int limit);
+
+    @Query(value = "SELECT i.* FROM Items i " +
+            "JOIN collections_items ci ON ci.item_id = i.id " +
+            "WHERE ci.collection_id = :collectionId " +
+            "AND (:excludedIds IS NULL OR i.id NOT IN (:excludedIds)) " +
+            "ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
+    List<Items> findRandomByCollectionExcludeItems(@Param("collectionId") Long collectionId,
+                                                   @Param("excludedIds") List<Long> excludedIds,
+                                                   @Param("limit") int limit);
 }

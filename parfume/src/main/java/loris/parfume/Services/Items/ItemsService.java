@@ -148,6 +148,7 @@ public class ItemsService {
         for (Items item : itemsList) {
 
             fileUploadUtilService.handleMultipleMediaDeletion(item.getItemsImagesList().stream().map(Items_Images::getImageName).toList());
+            itemsImagesRepository.deleteAllByItem(item);
 
             Items_Images itemsImage = new Items_Images();
 

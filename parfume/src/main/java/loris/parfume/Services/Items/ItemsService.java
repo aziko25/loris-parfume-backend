@@ -138,6 +138,7 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
+    @Transactional
     public String setPhotoToCollection(List<MultipartFile> images, Long collectionId, Long categoryId) {
 
         Collections collection = collectionsRepository.findById(collectionId).orElseThrow();

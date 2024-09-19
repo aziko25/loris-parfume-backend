@@ -31,6 +31,8 @@ public class CategoriesDTO implements Serializable {
 
     private String bannerImage;
 
+    private Boolean isRecommendedInMainPage;
+
     private Long collectionId;
     private String collectionNameUz;
     private String collectionNameRu;
@@ -47,6 +49,7 @@ public class CategoriesDTO implements Serializable {
         nameEng = category.getNameEng();
 
         bannerImage = category.getBannerImage();
+        isRecommendedInMainPage = category.getIsRecommendedInMainPage();
 
         if (category.getCollection() != null) {
 

@@ -263,16 +263,16 @@ public class ItemsService {
             item.setSizesItemsList(null);
         }
 
+        List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
+        List<String> imagesNamesList = itemsImagesList.stream()
+                .map(Items_Images::getImageName)
+                .toList();
+
+        fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
+        itemsImagesRepository.deleteAllByItem(item);
+        item.setItemsImagesList(null);
+
         if (images != null && !images.isEmpty()) {
-
-            List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
-
-            List<String> imagesNamesList = itemsImagesList.stream()
-                    .map(Items_Images::getImageName)
-                    .toList();
-
-            fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
-            itemsImagesRepository.deleteAllByItem(item);
 
             int count = 1;
             for (MultipartFile image : images) {
@@ -291,17 +291,6 @@ public class ItemsService {
                     count++;
                 }
             }
-        }
-        else {
-
-            List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
-
-            List<String> imagesNamesList = itemsImagesList.stream()
-                    .map(Items_Images::getImageName)
-                    .toList();
-
-            fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
-            itemsImagesRepository.deleteAllByItem(item);
         }
 
         return new ItemsDTO(itemsRepository.save(item));

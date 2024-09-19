@@ -10,6 +10,7 @@ import loris.parfume.Models.Items.Collections;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.Recommended_Items_Repository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -74,7 +75,7 @@ public class Recommended_Items_Service {
 
     public Recommended_Items_DTO getMainPageRecommendations() {
 
-        List<Collections> collections = collectionsRepository.findAllByIsRecommendedInMainPage(true);
+        List<Collections> collections = collectionsRepository.findAllByIsRecommendedInMainPage(true, Sort.by("sortOrder").ascending());
         List<Items> itemsList = new ArrayList<>();
 
         for (Collections collection : collections) {

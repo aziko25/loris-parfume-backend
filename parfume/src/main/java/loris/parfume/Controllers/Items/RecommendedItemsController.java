@@ -36,10 +36,9 @@ public class RecommendedItemsController {
     }
 
     @GetMapping("/main-page-recommendations")
-    public ResponseEntity<?> mainPageRecommendations(@RequestParam Long collectionId,
-                                                     @RequestParam(required = false) Long categoryId) {
+    public ResponseEntity<?> mainPageRecommendations() {
 
-        return ResponseEntity.ok(recommendedItemsService.getByCollectionAndCategory(collectionId, categoryId));
+        return ResponseEntity.ok(recommendedItemsService.getMainPageRecommendations());
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

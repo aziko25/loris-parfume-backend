@@ -52,8 +52,16 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
     List<Items> findAllByCollectionsItemsList_CollectionAndCategory(Collections collection, Categories category);
 
     Page<Items> findAllByCollectionsItemsList_Collection(Collections collection, Pageable pageable);
-    List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(Boolean isRecommended, Collections collection);
+
+    //List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(Boolean isRecommended, Collections collection);
     List<Items> findAllByIsRecommendedInMainPageAndCollectionsItemsList_CollectionAndCategory(boolean b, Collections collection, Categories category);
+
+    @Query(value = "SELECT * FROM items i "
+            + "JOIN collections_items ci ON i.id = ci.item_id "
+            + "WHERE ci.collection_id = :collectionId "
+            + "ORDER BY RANDOM() "
+            + "LIMIT 8", nativeQuery = true)
+    List<Items> findTop8RandomItemsByCollection(@Param("collectionId") Long collectionId);
 
     Optional<Items> findBySlug(String slug);
 

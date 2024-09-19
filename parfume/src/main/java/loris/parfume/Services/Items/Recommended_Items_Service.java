@@ -7,7 +7,6 @@ import loris.parfume.DTOs.Requests.Items.RecommendedItemsRequest;
 import loris.parfume.DTOs.returnDTOs.Recommended_Items_DTO;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Items.Collections;
-import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import loris.parfume.Repositories.Items.Recommended_Items_Repository;
@@ -22,7 +21,6 @@ public class Recommended_Items_Service {
 
     private final Recommended_Items_Repository recommendedItemsRepository;
     private final ItemsRepository itemsRepository;
-    private final CategoriesRepository categoriesRepository;
 
     private final CollectionsRepository collectionsRepository;
 
@@ -74,58 +72,20 @@ public class Recommended_Items_Service {
         return new Recommended_Items_DTO(recommendedItemsList);
     }
 
-    public Recommended_Items_DTO getByCollectionAndCategory(Long collectionId, Long categoryId) {
+    public Recommended_Items_DTO getMainPageRecommendations() {
 
-        Collections collection = collectionsRepository.findById(collectionId).orElse(null);
+        List<Collections> collections = collectionsRepository.findAllByIsRecommendedInMainPage(true);
+        List<Items> itemsList = new ArrayList<>();
 
-        if (collection == null) {
+        for (Collections collection : collections) {
 
-            return null;
-        }
-
-        List<Items> itemsList;
-
-        if (categoryId != null) {
-
-            Categories category = categoriesRepository.findById(categoryId).orElse(null);
-
-            if (category == null) {
-
-                itemsList = itemsRepository.findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(true, collection);
-            }
-            else {
-
-                itemsList = itemsRepository.findAllByIsRecommendedInMainPageAndCollectionsItemsList_CollectionAndCategory(true, collection, category);
-            }
-        }
-        else {
-
-            itemsList = itemsRepository.findAllByIsRecommendedInMainPageAndCollectionsItemsList_Collection(true, collection);
-        }
-
-        if (itemsList.size() < 10) {
-
-            List<Long> existingItemIds = itemsList.stream().map(Items::getId).collect(Collectors.toList());
-
-            List<Items> randomItems;
-
-            if (categoryId != null) {
-
-                Categories category = categoriesRepository.findById(categoryId).orElse(null);
-                assert category != null;
-
-                randomItems = itemsRepository.findRandomByCollectionAndCategoryExcludeItems(collection.getId(), category.getId(), existingItemIds, 10 - itemsList.size());
-            }
-            else {
-
-                randomItems = itemsRepository.findRandomByCollectionExcludeItems(collection.getId(), existingItemIds, 10 - itemsList.size());
-            }
-
+            List<Items> randomItems = itemsRepository.findTop8RandomItemsByCollection(collection.getId());
             itemsList.addAll(randomItems);
         }
 
         return new Recommended_Items_DTO(itemsList);
     }
+
 
     @Transactional
     public List<Recommended_Items_DTO> update(RecommendedItemsRequest recommendedItemsRequest) {

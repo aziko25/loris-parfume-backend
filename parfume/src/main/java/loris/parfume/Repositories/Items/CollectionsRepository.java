@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,4 +21,6 @@ public interface CollectionsRepository extends JpaRepository<Collections, Long> 
     Page<Collections> findAllByAnyNameLikeIgnoreCase(@Param("name") String name, Pageable pageable);
 
     Optional<Collections> findBySlug(String slug);
+
+    List<Collections> findAllByIsRecommendedInMainPage(boolean b);
 }

@@ -230,17 +230,14 @@ public class ItemsService {
         Optional.ofNullable(itemsRequest.getDiscountPercent()).ifPresent(item::setDiscountPercent);
         Optional.ofNullable(itemsRequest.getIsRecommendedInMainPage()).ifPresent(item::setIsRecommendedInMainPage);
 
+        collectionsItemsRepository.deleteAllByItem(item);
+        item.setCollectionsItemsList(null);
         if (itemsRequest.getCollectionIds() != null && !itemsRequest.getCollectionIds().isEmpty()) {
-
-            collectionsItemsRepository.deleteAllByItem(item);
 
             item.setCollectionsItemsList(setItemsCollections(itemsRequest, item));
         }
-        else {
-            collectionsItemsRepository.deleteAllByItem(item);
-            item.setCollectionsItemsList(null);
-        }
 
+        item.setCategory(null);
         if (itemsRequest.getCategoryId() != null) {
 
             Categories category = categoriesRepository.findById(itemsRequest.getCategoryId())
@@ -248,19 +245,12 @@ public class ItemsService {
 
             item.setCategory(category);
         }
-        else {
-            item.setCategory(null);
-        }
 
+        sizesItemsRepository.deleteAllByItem(item);
+        item.setSizesItemsList(null);
         if (itemsRequest.getSizesMap() != null && !itemsRequest.getSizesMap().isEmpty()) {
 
-            sizesItemsRepository.deleteAllByItem(item);
-
             item.setSizesItemsList(setItemsSizes(itemsRequest, item));
-        }
-        else {
-            sizesItemsRepository.deleteAllByItem(item);
-            item.setSizesItemsList(null);
         }
 
         List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
@@ -275,6 +265,7 @@ public class ItemsService {
         if (images != null && !images.isEmpty()) {
 
             int count = 1;
+            List<Items_Images> imagesList = new ArrayList<>();
             for (MultipartFile image : images) {
 
                 String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count + "_" + System.currentTimeMillis(), image);
@@ -286,11 +277,13 @@ public class ItemsService {
                             .imageName(imageName)
                             .build();
 
-                    itemsImagesRepository.save(itemsImage);
+                    imagesList.add(itemsImage);
 
                     count++;
                 }
             }
+
+            item.setItemsImagesList(itemsImagesRepository.saveAll(imagesList));
         }
 
         return new ItemsDTO(itemsRepository.save(item));

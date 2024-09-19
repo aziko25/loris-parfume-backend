@@ -69,6 +69,7 @@ public class CollectionsDTO implements Serializable {
                 categoryMap.put("categoryNameRu", category.getNameRu());
                 categoryMap.put("categoryNameEng", category.getNameEng());
                 categoryMap.put("categoryBannerImage", category.getBannerImage());
+                categoryMap.put("categoryIsRecommendedInMainPage", category.getIsRecommendedInMainPage());
 
                 categoriesList.add(categoryMap);
             }

@@ -48,9 +48,12 @@ public class CategoriesDTO implements Serializable {
 
         bannerImage = category.getBannerImage();
 
-        collectionId = category.getCollection().getId();
-        collectionNameUz = category.getCollection().getNameUz();
-        collectionNameRu = category.getCollection().getNameRu();
-        collectionNameEng = category.getCollection().getNameEng();
+        if (category.getCollection() != null) {
+
+            collectionId = category.getCollection().getId();
+            collectionNameUz = category.getCollection().getNameUz();
+            collectionNameRu = category.getCollection().getNameRu();
+            collectionNameEng = category.getCollection().getNameEng();
+        }
     }
 }

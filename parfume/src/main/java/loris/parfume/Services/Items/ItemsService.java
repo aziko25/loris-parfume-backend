@@ -287,6 +287,8 @@ public class ItemsService {
                             .build();
 
                     itemsImagesRepository.save(itemsImage);
+
+                    count++;
                 }
             }
         }

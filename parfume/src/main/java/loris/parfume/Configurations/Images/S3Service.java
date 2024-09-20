@@ -38,8 +38,8 @@ public class S3Service {
 
     public void deleteFile(String imageUrl) {
 
-        String keyName = imageUrl.substring(imageUrl.indexOf(bucketName) + bucketName.length() + 1);
+        //String keyName = imageUrl.substring(imageUrl.indexOf(bucketName) + bucketName.length() + 1);
 
-        s3client.deleteObject(bucketName, keyName);
+        //s3client.deleteObject(bucketName, keyName);
     }
 }

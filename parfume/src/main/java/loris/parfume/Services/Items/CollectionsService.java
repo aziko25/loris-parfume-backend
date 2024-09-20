@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class CollectionsService {
     private Integer pageSize;
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) {
+    public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) throws IOException {
 
         Optional<Collections> existingSlug = collectionsRepository.findBySlug(collectionsRequest.getSlug());
         if (existingSlug.isPresent()) {
@@ -68,7 +69,7 @@ public class CollectionsService {
         collectionsRepository.save(collection);
 
         if (image != null && !image.isEmpty()) {
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner_" + System.currentTimeMillis(), image));
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
         }
 
         return new CollectionsDTO(collectionsRepository.save(collection));
@@ -94,7 +95,7 @@ public class CollectionsService {
     }
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public CollectionsDTO update(String slug, CollectionsRequest collectionsRequest, MultipartFile image) {
+    public CollectionsDTO update(String slug, CollectionsRequest collectionsRequest, MultipartFile image) throws IOException {
 
         Collections collection = collectionsRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
@@ -125,7 +126,7 @@ public class CollectionsService {
                 fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
             }
 
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(collection.getId() + "_collBanner_" + System.currentTimeMillis(), image));
+            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
         }
         else {
             collection.setBannerImage(null);

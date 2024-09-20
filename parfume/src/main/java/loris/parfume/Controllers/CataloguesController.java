@@ -1,6 +1,5 @@
 package loris.parfume.Controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -24,7 +24,7 @@ public class CataloguesController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
-                                    @RequestParam("catalogue") String catalogueJson) throws JsonProcessingException {
+                                    @RequestParam("catalogue") String catalogueJson) throws IOException {
 
         CataloguesRequest cataloguesRequest = new ObjectMapper().readValue(catalogueJson, CataloguesRequest.class);
 
@@ -47,7 +47,7 @@ public class CataloguesController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
                                     @RequestParam(value = "media", required = false) List<MultipartFile> media,
-                                    @RequestParam(value = "catalogue") String catalogueJson) throws JsonProcessingException {
+                                    @RequestParam(value = "catalogue") String catalogueJson) throws IOException {
 
         CataloguesRequest cataloguesRequest = new ObjectMapper().readValue(catalogueJson, CataloguesRequest.class);
 

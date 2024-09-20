@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class BannersService {
     @CacheEvict(value = "bannersCache", allEntries = true)
     public Banners create(List<MultipartFile> desktopImages,
                           List<MultipartFile> mobileImages,
-                          BannersRequest bannersRequest) {
+                          BannersRequest bannersRequest) throws IOException {
 
         Banners banner = Banners.builder()
                 .createdTime(LocalDateTime.now())
@@ -72,7 +73,7 @@ public class BannersService {
     @CacheEvict(value = "bannersCache", allEntries = true)
     public Banners update(Long id, List<MultipartFile> desktopImages,
                           List<MultipartFile> mobileImages,
-                          BannersRequest bannersRequest) {
+                          BannersRequest bannersRequest) throws IOException {
 
         Banners banner = getById(id);
 
@@ -118,14 +119,13 @@ public class BannersService {
         return "Banner Deleted Successfully";
     }
 
-    private void updateImages(List<MultipartFile> images, Banners banner, String type) {
+    private void updateImages(List<MultipartFile> images, Banners banner, String type) throws IOException {
 
         String[] languages = {"uz", "ru", "eng"};
 
         for (int i = 0; i < images.size(); i++) {
 
-            String imageName = fileUploadUtilService.handleMediaUpload(
-                    banner.getId() + "_" + (i + 1) + "_banner_" + type + "_" + System.currentTimeMillis(), images.get(i));
+            String imageName = fileUploadUtilService.handleMediaUpload(images.get(i));
 
             switch (languages[i]) {
 

@@ -1,6 +1,5 @@
 package loris.parfume.Controllers.Items;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -25,7 +25,7 @@ public class ItemsController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
-                                    @RequestParam("item") String itemJson) throws JsonProcessingException {
+                                    @RequestParam("item") String itemJson) throws IOException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);
 
@@ -34,7 +34,7 @@ public class ItemsController {
 
     @PostMapping("/setPhotos")
     public ResponseEntity<?> setPhotos(@RequestParam Long collection, @RequestParam Long category,
-                                       @RequestParam(value = "media") List<MultipartFile> media) {
+                                       @RequestParam(value = "media") List<MultipartFile> media) throws IOException {
 
         return ResponseEntity.ok(itemsService.setPhotoToCollection(media, collection, category));
     }
@@ -58,7 +58,7 @@ public class ItemsController {
     @PutMapping("/update/{slug}")
     public ResponseEntity<?> update(@PathVariable String slug,
                                     @RequestParam(value = "media", required = false) List<MultipartFile> media,
-                                    @RequestParam("item") String itemJson) throws JsonProcessingException {
+                                    @RequestParam("item") String itemJson) throws IOException {
 
         ItemsRequest itemsRequest = new ObjectMapper().readValue(itemJson, ItemsRequest.class);
 

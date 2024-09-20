@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public class ItemsService {
 
     @Transactional
     @CacheEvict(value = "itemsCache", allEntries = true)
-    public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) {
+    public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) throws IOException {
 
         Optional<Items> existingSlug = itemsRepository.findBySlug(itemsRequest.getSlug());
         if (existingSlug.isPresent()) {
@@ -118,18 +119,16 @@ public class ItemsService {
 
         if (images != null && !images.isEmpty()) {
 
-            int count = 1;
             List<Items_Images> imagesList = new ArrayList<>();
 
             for (MultipartFile image : images) {
 
                 Items_Images itemsImage = Items_Images.builder()
                         .item(item)
-                        .imageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count + "_" + System.currentTimeMillis(), image))
+                        .imageName(fileUploadUtilService.handleMediaUpload(image))
                         .build();
 
                 imagesList.add(itemsImage);
-                count++;
             }
 
             item.setItemsImagesList(itemsImagesRepository.saveAll(imagesList));
@@ -139,7 +138,7 @@ public class ItemsService {
     }
 
     @Transactional
-    public String setPhotoToCollection(List<MultipartFile> images, Long collectionId, Long categoryId) {
+    public String setPhotoToCollection(List<MultipartFile> images, Long collectionId, Long categoryId) throws IOException {
 
         Collections collection = collectionsRepository.findById(collectionId).orElseThrow();
         Categories category = categoriesRepository.findById(categoryId).orElseThrow();
@@ -154,7 +153,7 @@ public class ItemsService {
             Items_Images itemsImage = new Items_Images();
 
             itemsImage.setItem(item);
-            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + 1 + "_" + System.currentTimeMillis(), images.get(0)));
+            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(images.get(0)));
 
             itemsImagesRepository.save(itemsImage);
         }
@@ -192,7 +191,7 @@ public class ItemsService {
 
     @Transactional
     @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
-    public ItemsDTO update(String slug, List<MultipartFile> images, ItemsRequest itemsRequest) {
+    public ItemsDTO update(String slug, List<MultipartFile> images, ItemsRequest itemsRequest) throws IOException {
 
         Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
@@ -264,11 +263,10 @@ public class ItemsService {
 
         if (images != null && !images.isEmpty()) {
 
-            int count = 1;
             List<Items_Images> imagesList = new ArrayList<>();
             for (MultipartFile image : images) {
 
-                String imageName = fileUploadUtilService.handleMediaUpload(item.getId() + "_item_" + count + "_" + System.currentTimeMillis(), image);
+                String imageName = fileUploadUtilService.handleMediaUpload(image);
 
                 if (!imagesNamesList.contains(imageName)) {
 
@@ -278,8 +276,6 @@ public class ItemsService {
                             .build();
 
                     imagesList.add(itemsImage);
-
-                    count++;
                 }
             }
 

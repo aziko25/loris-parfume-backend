@@ -1,6 +1,5 @@
 package loris.parfume.Controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,7 +26,7 @@ public class BannersController {
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestParam(value = "desktopMedia", required = false) List<MultipartFile> desktopMedia,
                                     @RequestParam(value = "mobileMedia", required = false) List<MultipartFile> mobileMedia,
-                                    @RequestParam("banner") String bannerJson) throws JsonProcessingException {
+                                    @RequestParam("banner") String bannerJson) throws IOException {
 
         BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
 
@@ -50,7 +50,7 @@ public class BannersController {
     public ResponseEntity<?> update(@PathVariable Long id,
                                     @RequestParam(value = "desktopMedia", required = false) List<MultipartFile> desktopMedia,
                                     @RequestParam(value = "mobileMedia", required = false) List<MultipartFile> mobileMedia,
-                                    @RequestParam("banner") String bannerJson) throws JsonProcessingException {
+                                    @RequestParam("banner") String bannerJson) throws IOException {
 
         BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
 

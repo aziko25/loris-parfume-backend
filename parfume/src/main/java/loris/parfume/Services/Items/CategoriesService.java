@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class CategoriesService {
     private Integer pageSize;
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO create(CategoriesRequest categoriesRequest, MultipartFile image) {
+    public CategoriesDTO create(CategoriesRequest categoriesRequest, MultipartFile image) throws IOException {
 
         Collections collection = collectionsRepository.findById(categoriesRequest.getCollectionId())
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
@@ -68,7 +69,7 @@ public class CategoriesService {
 
         if (image != null && !image.isEmpty()) {
 
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner_" + System.currentTimeMillis(), image));
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
         }
 
         return new CategoriesDTO(categoriesRepository.save(category));
@@ -93,7 +94,7 @@ public class CategoriesService {
     }
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO update(String slug, CategoriesRequest categoriesRequest, MultipartFile image) {
+    public CategoriesDTO update(String slug, CategoriesRequest categoriesRequest, MultipartFile image) throws IOException {
 
         Categories category = categoriesRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
@@ -133,7 +134,7 @@ public class CategoriesService {
                 fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
             }
 
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(category.getId() + "_catBanner_" + System.currentTimeMillis(), image));
+            category.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
         }
         else {
 

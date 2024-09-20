@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class CollectionBannersService {
 
     @Transactional
     @CacheEvict(value = "collectionsBannersCache", allEntries = true)
-    public CollectionBanners create(List<MultipartFile> images, BannersRequest bannersRequest) {
+    public CollectionBanners create(List<MultipartFile> images, BannersRequest bannersRequest) throws IOException {
 
         CollectionBanners collectionBanner = CollectionBanners.builder()
                 .createdTime(LocalDateTime.now())
@@ -73,7 +74,7 @@ public class CollectionBannersService {
     }
 
     @CacheEvict(value = "collectionsBannersCache", allEntries = true)
-    public CollectionBanners update(Long id, List<MultipartFile> images, BannersRequest bannersRequest) {
+    public CollectionBanners update(Long id, List<MultipartFile> images, BannersRequest bannersRequest) throws IOException {
 
         CollectionBanners collectionBanner = getById(id);
 
@@ -108,7 +109,7 @@ public class CollectionBannersService {
         return "Collection Banner Deleted Successfully";
     }
 
-    private void updateImages(List<MultipartFile> images, CollectionBanners collectionBanner) {
+    private void updateImages(List<MultipartFile> images, CollectionBanners collectionBanner) throws IOException {
 
         deleteImages(collectionBanner);
 
@@ -116,8 +117,7 @@ public class CollectionBannersService {
 
         for (int i = 0; i < images.size(); i++) {
 
-            String imageName = fileUploadUtilService.handleMediaUpload(
-                    collectionBanner.getId() + "_" + (i + 1) + "_collection_banner", images.get(i));
+            String imageName = fileUploadUtilService.handleMediaUpload(images.get(i));
 
             switch (languages[i]) {
 

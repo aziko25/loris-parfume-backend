@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class CataloguesService {
 
     @Transactional
     @CacheEvict(value = "cataloguesCache", allEntries = true)
-    public Catalogues create(CataloguesRequest cataloguesRequest, List<MultipartFile> files) {
+    public Catalogues create(CataloguesRequest cataloguesRequest, List<MultipartFile> files) throws IOException {
 
         Catalogues catalogues = Catalogues.builder()
                 .createdTime(LocalDateTime.now())
@@ -63,7 +64,7 @@ public class CataloguesService {
 
     @Transactional
     @CacheEvict(value = "cataloguesCache", allEntries = true)
-    public Catalogues update(Long id, CataloguesRequest cataloguesRequest, List<MultipartFile> files) {
+    public Catalogues update(Long id, CataloguesRequest cataloguesRequest, List<MultipartFile> files) throws IOException {
 
         Catalogues catalogues = getById(id);
 
@@ -110,14 +111,13 @@ public class CataloguesService {
         return "Catalogue Deleted";
     }
 
-    private void updateFiles(List<MultipartFile> files, Catalogues catalogue) {
+    private void updateFiles(List<MultipartFile> files, Catalogues catalogue) throws IOException {
 
         String[] languages = {"uz", "ru", "eng"};
 
         for (int i = 0; i < files.size(); i++) {
 
-            String fileName = fileUploadUtilService.handleMediaUpload(
-                    catalogue.getId() + "_" + (i + 1) + "_catalogue_" + System.currentTimeMillis(), files.get(i));
+            String fileName = fileUploadUtilService.handleMediaUpload(files.get(i));
 
             switch (languages[i]) {
 

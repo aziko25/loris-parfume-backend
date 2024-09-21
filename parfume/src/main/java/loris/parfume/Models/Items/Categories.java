@@ -34,7 +34,9 @@ public class Categories {
     private String nameRu;
     private String nameEng;
 
+    @Column(length = 64000)
     private String descriptionUz;
+    @Column(length = 64000)
     private String descriptionRu;
 
     private String bannerImage;

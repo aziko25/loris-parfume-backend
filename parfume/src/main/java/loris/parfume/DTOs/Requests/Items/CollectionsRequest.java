@@ -13,6 +13,9 @@ public class CollectionsRequest {
     private String nameRu;
     private String nameEng;
 
+    private String descriptionUz;
+    private String descriptionRu;
+
     private Integer sortOrder;
     private Boolean isFiftyPercentSaleApplied;
     private Boolean isRecommendedInMainPage;

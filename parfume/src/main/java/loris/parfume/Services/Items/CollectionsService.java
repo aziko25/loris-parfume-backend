@@ -61,6 +61,8 @@ public class CollectionsService {
                 .nameUz(collectionsRequest.getNameUz())
                 .nameRu(collectionsRequest.getNameRu())
                 .nameEng(collectionsRequest.getNameEng())
+                .descriptionUz(collectionsRequest.getDescriptionUz())
+                .descriptionRu(collectionsRequest.getDescriptionRu())
                 .sortOrder(collectionsRequest.getSortOrder())
                 .isFiftyPercentSaleApplied(collectionsRequest.getIsFiftyPercentSaleApplied())
                 .isRecommendedInMainPage(collectionsRequest.getIsRecommendedInMainPage())
@@ -116,6 +118,8 @@ public class CollectionsService {
             Optional.ofNullable(collectionsRequest.getNameUz()).ifPresent(collection::setNameUz);
             Optional.ofNullable(collectionsRequest.getNameRu()).ifPresent(collection::setNameRu);
             Optional.ofNullable(collectionsRequest.getNameEng()).ifPresent(collection::setNameEng);
+            Optional.ofNullable(collectionsRequest.getDescriptionUz()).ifPresent(collection::setDescriptionUz);
+            Optional.ofNullable(collectionsRequest.getDescriptionRu()).ifPresent(collection::setDescriptionRu);
             Optional.ofNullable(collectionsRequest.getSortOrder()).ifPresent(collection::setSortOrder);
             Optional.ofNullable(collectionsRequest.getIsRecommendedInMainPage()).ifPresent(collection::setIsRecommendedInMainPage);
         }

@@ -13,6 +13,9 @@ public class CategoriesRequest {
     private String nameRu;
     private String nameEng;
 
+    private String descriptionUz;
+    private String descriptionRu;
+
     private Boolean isRecommendedInMainPage;
 
     private Long collectionId;

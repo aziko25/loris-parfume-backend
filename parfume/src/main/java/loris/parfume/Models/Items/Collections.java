@@ -35,6 +35,9 @@ public class Collections {
     private String nameRu;
     private String nameEng;
 
+    private String descriptionUz;
+    private String descriptionRu;
+
     private String bannerImage;
 
     private Integer sortOrder;

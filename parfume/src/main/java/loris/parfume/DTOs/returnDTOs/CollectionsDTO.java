@@ -31,6 +31,9 @@ public class CollectionsDTO implements Serializable {
     private String nameRu;
     private String nameEng;
 
+    private String descriptionUz;
+    private String descriptionRu;
+
     private String bannerImage;
 
     private Integer sortOrder;
@@ -48,6 +51,8 @@ public class CollectionsDTO implements Serializable {
         nameUz = collection.getNameUz();
         nameRu = collection.getNameRu();
         nameEng = collection.getNameEng();
+        descriptionUz = collection.getDescriptionUz();
+        descriptionRu = collection.getDescriptionRu();
         bannerImage = collection.getBannerImage();
         sortOrder = collection.getSortOrder();
         isFiftyPercentSaleApplied = collection.getIsFiftyPercentSaleApplied();
@@ -68,6 +73,8 @@ public class CollectionsDTO implements Serializable {
                 categoryMap.put("categoryNameUz", category.getNameUz());
                 categoryMap.put("categoryNameRu", category.getNameRu());
                 categoryMap.put("categoryNameEng", category.getNameEng());
+                categoryMap.put("categoryDescriptionUz", category.getDescriptionUz());
+                categoryMap.put("categoryDescriptionRu", category.getDescriptionRu());
                 categoryMap.put("categoryBannerImage", category.getBannerImage());
                 categoryMap.put("categoryIsRecommendedInMainPage", category.getIsRecommendedInMainPage());
 

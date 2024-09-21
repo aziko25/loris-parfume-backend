@@ -38,40 +38,6 @@ public class S3Service {
         return s3client.getUrl(bucketName, keyName).toString();
     }
 
-    @Bean
-    public void updateMetadataForAllObjects() {
-        // Получаем список всех объектов в bucket
-        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName);
-        ListObjectsV2Result result;
-
-        do {
-            result = s3client.listObjectsV2(req);
-            System.out.println(result.getObjectSummaries());
-            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-                String key = objectSummary.getKey();
-
-                // Получаем существующий объект
-                S3Object s3Object = s3client.getObject(bucketName, key);
-
-                // Установка новых метаданных
-                ObjectMetadata newMetadata = new ObjectMetadata();
-                newMetadata.setContentType(s3Object.getObjectMetadata().getContentType());
-                newMetadata.setCacheControl("public, max-age=2592000");
-
-                // Копируем объект с новыми метаданными
-                CopyObjectRequest copyRequest = new CopyObjectRequest(bucketName, key, bucketName, key)
-                        .withNewObjectMetadata(newMetadata);
-
-                // Копируем объект заново с новыми метаданными
-                s3client.copyObject(copyRequest);
-            }
-            // Устанавливаем продолжение для списка объектов (если их много)
-            String token = result.getNextContinuationToken();
-            req.setContinuationToken(token);
-        } while (result.isTruncated());
-    }
-
-
     public void deleteFile(String imageUrl) {
 
         //String keyName = imageUrl.substring(imageUrl.indexOf(bucketName) + bucketName.length() + 1);

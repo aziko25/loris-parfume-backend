@@ -174,7 +174,7 @@ public class ItemsService {
         if (itemsRequest.getSlug() != null) {
 
             Optional<Items> existingSlug = itemsRepository.findBySlug(itemsRequest.getSlug());
-            if (existingSlug.isPresent()) {
+            if (existingSlug.isPresent() && !item.getSlug().equals(existingSlug.get().getSlug())) {
 
                 throw new EntityExistsException("Slug Already Exists!");
             }

@@ -17,13 +17,11 @@ import loris.parfume.Repositories.Items.CategoriesRepository;
 import loris.parfume.Repositories.Items.CollectionsRepository;
 import loris.parfume.Repositories.Items.ItemsRepository;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -83,7 +81,17 @@ public class CacheForAllService {
                     .map(ItemsDTO::new);
         }
 
-        return itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable).map(ItemsDTO::new);
+        Page<ItemsDTO> itemsDTOList = itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable)
+                .map(ItemsDTO::new);
+
+        // Sort items by categorySortOrderWithinCollection
+        List<ItemsDTO> sortedItems = itemsDTOList.getContent().stream()
+                .sorted(Comparator.comparing(ItemsDTO::getCategorySortOrderWithinCollection, Comparator.nullsLast(Integer::compareTo)))
+                .toList();
+
+        // Return a new Page with the sorted items
+        return new PageImpl<>(sortedItems, pageable, itemsDTOList.getTotalElements());
+        //return itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable).map(ItemsDTO::new);
     }
 
     @Cacheable(

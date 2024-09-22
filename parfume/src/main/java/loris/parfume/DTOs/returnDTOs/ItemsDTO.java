@@ -56,6 +56,7 @@ public class ItemsDTO implements Serializable {
     private String categoryNameUz;
     private String categoryNameRu;
     private String categoryNameEng;
+    private Integer categorySortOrderWithinCollection;
 
     private List<Map<String, Object>> collectionsItemsList;
     private List<Map<String, Object>> sizesItemsList;
@@ -99,6 +100,7 @@ public class ItemsDTO implements Serializable {
                     .collect(Collectors.toList());
         }
 
+        categorySortOrderWithinCollection = null;
         if (item.getCategory() != null) {
 
             categoryId = item.getCategory().getId();
@@ -106,6 +108,7 @@ public class ItemsDTO implements Serializable {
             categoryNameUz = item.getCategory().getNameUz();
             categoryNameRu = item.getCategory().getNameRu();
             categoryNameEng = item.getCategory().getNameEng();
+            categorySortOrderWithinCollection = item.getCategory().getSortOrderWithinCollection();
         }
 
         collectionsItemsList = new ArrayList<>();

@@ -137,30 +137,6 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
-    @Transactional
-    public String setPhotoToCollection(List<MultipartFile> images, Long collectionId, Long categoryId) throws IOException {
-
-        Collections collection = collectionsRepository.findById(collectionId).orElseThrow();
-        Categories category = categoriesRepository.findById(categoryId).orElseThrow();
-
-        List<Items> itemsList = itemsRepository.findAllByCollectionsItemsList_CollectionAndCategory(collection, category);
-
-        for (Items item : itemsList) {
-
-            fileUploadUtilService.handleMultipleMediaDeletion(item.getItemsImagesList().stream().map(Items_Images::getImageName).toList());
-            itemsImagesRepository.deleteAllByItem(item);
-
-            Items_Images itemsImage = new Items_Images();
-
-            itemsImage.setItem(item);
-            itemsImage.setImageName(fileUploadUtilService.handleMediaUpload(images.get(0)));
-
-            itemsImagesRepository.save(itemsImage);
-        }
-
-        return "Done";
-    }
-
     public Page<ItemsDTO> all(Integer page, String collectionSlug, String categorySlug, ItemFilters itemFilters) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);

@@ -21,6 +21,7 @@ import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
+import loris.parfume.Repositories.Orders.PromocodesRepository;
 import loris.parfume.Repositories.Orders.Uzum_Nasiya_Clients_Repository;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.Services.BranchesService;
@@ -61,6 +62,7 @@ public class OrdersService {
     private final BranchesService branchesService;
     private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
     private final PromocodesService promocodesService;
+    private final PromocodesRepository promocodesRepository;
     private final MainTelegramBot mainTelegramBot;
 
     @Value("${pageSize}")
@@ -220,6 +222,9 @@ public class OrdersService {
 
                 totalSum = (totalSum / 100) * promocode.getDiscountPercent();
             }
+
+            promocode.setActivatedQuantity(promocode.getActivatedQuantity() + 1);
+            promocodesRepository.save(promocode);
         }
 
         if (totalSum >= 500000) {

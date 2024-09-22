@@ -62,7 +62,8 @@ public class CollectionsDTO implements Serializable {
         if (collection.getCategoriesList() != null && !collection.getCategoriesList().isEmpty()) {
 
             List<Categories> sortedCategories = collection.getCategoriesList().stream()
-                    .sorted(Comparator.comparing(Categories::getSortOrderWithinCollection))
+                    .sorted(Comparator.comparing(Categories::getSortOrderWithinCollection,
+                            Comparator.nullsLast(Integer::compareTo)))
                     .toList();
 
             for (Categories category : sortedCategories) {

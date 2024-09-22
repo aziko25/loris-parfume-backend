@@ -31,5 +31,7 @@ public class OrdersRequest {
 
     private String returnUrl;
 
+    private String promocode;
+
     private List<Orders_Items_Request> ordersItemsList;
 }

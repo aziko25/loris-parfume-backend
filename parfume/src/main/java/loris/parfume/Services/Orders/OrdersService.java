@@ -13,6 +13,7 @@ import loris.parfume.Models.Branches;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Models.Orders.Orders_Items;
+import loris.parfume.Models.Orders.Promocodes;
 import loris.parfume.Models.Orders.Uzum_Nasiya_Clients;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
@@ -59,6 +60,7 @@ public class OrdersService {
     private final BasketsRepository basketsRepository;
     private final BranchesService branchesService;
     private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
+    private final PromocodesService promocodesService;
     private final MainTelegramBot mainTelegramBot;
 
     @Value("${pageSize}")
@@ -199,6 +201,25 @@ public class OrdersService {
             totalSum += totalItemPrice;
             saveAllOrderItemsList.add(ordersItem);
             collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
+        }
+
+        if (ordersRequest.getPromocode() != null) {
+
+            Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
+
+            if (promocode.getDiscountSum() != null) {
+
+                totalSum = totalSum - promocode.getDiscountSum();
+
+                if (totalSum < 0) {
+                    totalSum = 0;
+                }
+            }
+
+            if (promocode.getDiscountPercent() != null) {
+
+                totalSum = (totalSum / 100) * promocode.getDiscountPercent();
+            }
         }
 
         if (totalSum >= 500000) {

@@ -64,6 +64,12 @@ public class OrdersDTO implements Serializable {
     private String paymentResponseRu;
     private String paymentResponseEng;
 
+    private Long promocodeId;
+    private String promocode;
+    private Integer promocodeDiscountPercent;
+    @JsonSerialize(using = DoubleSerializer.class)
+    private Double promocodeDiscountSum;
+
     private List<Orders_Items_DTO> itemsList;
 
     public OrdersDTO(Orders order) {
@@ -102,6 +108,14 @@ public class OrdersDTO implements Serializable {
         paymentResponseUz = order.getPaymentResponseUz();
         paymentResponseRu = order.getPaymentResponseRu();
         paymentResponseEng = order.getPaymentResponseEng();
+
+        if (order.getPromocode() != null) {
+
+            promocodeId = order.getPromocode().getId();
+            promocode = order.getPromocode().getCode();
+            promocodeDiscountPercent = order.getPromocode().getDiscountPercent();
+            promocodeDiscountSum = order.getPromocode().getDiscountSum();
+        }
 
         if (order.getBranch() != null) {
 

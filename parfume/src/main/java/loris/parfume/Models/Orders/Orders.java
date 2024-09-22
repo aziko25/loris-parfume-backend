@@ -61,6 +61,10 @@ public class Orders {
     @JoinColumn(name = "user_id")
     private Users user;
 
+    @ManyToOne
+    @JoinColumn(name = "promocode_id")
+    private Promocodes promocode;
+
     @OneToMany(mappedBy = "order")
     private List<Orders_Items> itemsList;
 }

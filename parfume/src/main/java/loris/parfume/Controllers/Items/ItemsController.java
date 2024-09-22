@@ -32,13 +32,6 @@ public class ItemsController {
         return new ResponseEntity<>(itemsService.create(media, itemsRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping("/setPhotos")
-    public ResponseEntity<?> setPhotos(@RequestParam Long collection, @RequestParam Long category,
-                                       @RequestParam(value = "media") List<MultipartFile> media) throws IOException {
-
-        return ResponseEntity.ok(itemsService.setPhotoToCollection(media, collection, category));
-    }
-
     @PostMapping("/all")
     public ResponseEntity<?> all(@RequestParam Integer page,
                                  @RequestParam(required = false) String collectionSlug,

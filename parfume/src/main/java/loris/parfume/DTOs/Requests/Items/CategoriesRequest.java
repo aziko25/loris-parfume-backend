@@ -16,6 +16,7 @@ public class CategoriesRequest {
     private String descriptionUz;
     private String descriptionRu;
 
+    private Integer sortOrderWithinCollection;
     private Boolean isRecommendedInMainPage;
 
     private Long collectionId;

@@ -41,6 +41,7 @@ public class Categories {
 
     private String bannerImage;
 
+    private Integer sortOrderWithinCollection;
     private Boolean isRecommendedInMainPage;
 
     @ManyToOne

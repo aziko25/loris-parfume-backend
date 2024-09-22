@@ -63,6 +63,7 @@ public class CategoriesService {
                 .nameEng(categoriesRequest.getNameEng())
                 .descriptionUz(categoriesRequest.getDescriptionUz())
                 .descriptionRu(categoriesRequest.getDescriptionRu())
+                .sortOrderWithinCollection(categoriesRequest.getSortOrderWithinCollection())
                 .isRecommendedInMainPage(categoriesRequest.getIsRecommendedInMainPage())
                 .collection(collection)
                 .build();
@@ -118,6 +119,7 @@ public class CategoriesService {
         Optional.ofNullable(categoriesRequest.getNameEng()).ifPresent(category::setNameEng);
         Optional.ofNullable(categoriesRequest.getDescriptionUz()).ifPresent(category::setDescriptionUz);
         Optional.ofNullable(categoriesRequest.getDescriptionRu()).ifPresent(category::setDescriptionRu);
+        Optional.ofNullable(categoriesRequest.getSortOrderWithinCollection()).ifPresent(category::setSortOrderWithinCollection);
         Optional.ofNullable(categoriesRequest.getIsRecommendedInMainPage()).ifPresent(category::setIsRecommendedInMainPage);
 
         if (categoriesRequest.getCollectionId() != null) {

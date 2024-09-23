@@ -34,6 +34,7 @@ public class PromocodesService {
                 .isActive(promocodeRequest.getIsActive())
                 .discountPercent(promocodeRequest.getDiscountPercent())
                 .discountSum(promocodeRequest.getDiscountSum())
+                .activatedQuantity(0)
                 .build();
 
         promocodes.setIsEndlessQuantity(true);

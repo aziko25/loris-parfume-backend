@@ -220,7 +220,7 @@ public class OrdersService {
 
             if (promocode.getDiscountPercent() != null) {
 
-                totalSum = (totalSum / 100) * promocode.getDiscountPercent();
+                totalSum = totalSum - (totalSum * promocode.getDiscountPercent() / 100);
             }
 
             promocode.setActivatedQuantity(promocode.getActivatedQuantity() + 1);

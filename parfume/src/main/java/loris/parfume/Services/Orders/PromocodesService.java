@@ -30,7 +30,7 @@ public class PromocodesService {
 
         Promocodes promocodes = Promocodes.builder()
                 .createdTime(LocalDateTime.now())
-                .code(promocodeRequest.getCode().toUpperCase())
+                .code(promocodeRequest.getCode().toUpperCase().replace(" ", ""))
                 .isActive(promocodeRequest.getIsActive())
                 .discountPercent(promocodeRequest.getDiscountPercent())
                 .discountSum(promocodeRequest.getDiscountSum())

@@ -5,7 +5,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.Orders.PromocodeRequest;
 import loris.parfume.Models.Orders.Promocodes;
+import loris.parfume.Models.Orders.Users_Promocodes;
+import loris.parfume.Models.Users;
 import loris.parfume.Repositories.Orders.PromocodesRepository;
+import loris.parfume.Repositories.Orders.Users_Promocodes_Repository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,7 @@ import java.util.Optional;
 public class PromocodesService {
 
     private final PromocodesRepository promocodesRepository;
+    private final Users_Promocodes_Repository usersPromocodesRepository;
 
     public Promocodes create(PromocodeRequest promocodeRequest) {
 
@@ -67,7 +71,7 @@ public class PromocodesService {
         return promocodesRepository.findAll(Sort.by("createdTime").descending());
     }
 
-    public Promocodes getByCode(String code) {
+    public Promocodes getByCode(String code, Users user) {
 
         Promocodes promocode = promocodesRepository.findByCodeAndIsActive(code.toUpperCase(), true)
                 .orElseThrow(() -> new EntityNotFoundException("Promocode Doesn't Exist!"));
@@ -80,6 +84,11 @@ public class PromocodesService {
             }
         }
 
+        if (promocode.getActivationQuantity() >= promocode.getActivatedQuantity()) {
+
+            throw new EntityNotFoundException("Promocode Doesn't Exist!");
+        }
+
         if (!promocode.getIsForever()) {
 
             if (LocalDateTime.now().isBefore(promocode.getStartTime()) || LocalDateTime.now().isAfter(promocode.getEndTime())) {
@@ -88,7 +97,20 @@ public class PromocodesService {
             }
         }
 
-        // check users activation
+        if (user != null) {
+
+            List<Users_Promocodes> usersPromocode = usersPromocodesRepository.findAllByUserAndPromocode(user, promocode);
+
+            if (usersPromocode != null && usersPromocode.size() > 1 && promocode.getIsUserActivationOnce()) {
+
+                throw new IllegalArgumentException("Promocode Was Already Activated!");
+            }
+
+            if (usersPromocode != null && usersPromocode.size() >= promocode.getUserActivationQuantity()) {
+
+                throw new IllegalArgumentException("Promocode Was Already Activated!");
+            }
+        }
 
         return promocode;
     }

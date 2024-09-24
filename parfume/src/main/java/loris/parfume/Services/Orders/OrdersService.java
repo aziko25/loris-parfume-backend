@@ -11,18 +11,12 @@ import loris.parfume.DTOs.Requests.Orders.Orders_Items_Request;
 import loris.parfume.DTOs.returnDTOs.OrdersDTO;
 import loris.parfume.Models.Branches;
 import loris.parfume.Models.Items.*;
-import loris.parfume.Models.Orders.Orders;
-import loris.parfume.Models.Orders.Orders_Items;
-import loris.parfume.Models.Orders.Promocodes;
-import loris.parfume.Models.Orders.Uzum_Nasiya_Clients;
+import loris.parfume.Models.Orders.*;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.*;
-import loris.parfume.Repositories.Orders.OrdersRepository;
-import loris.parfume.Repositories.Orders.Orders_Items_Repository;
-import loris.parfume.Repositories.Orders.PromocodesRepository;
-import loris.parfume.Repositories.Orders.Uzum_Nasiya_Clients_Repository;
+import loris.parfume.Repositories.Orders.*;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +58,7 @@ public class OrdersService {
     private final PromocodesService promocodesService;
     private final PromocodesRepository promocodesRepository;
     private final MainTelegramBot mainTelegramBot;
+    private final Users_Promocodes_Repository usersPromocodesRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -207,7 +202,7 @@ public class OrdersService {
 
         if (ordersRequest.getPromocode() != null) {
 
-            Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
+            Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode(), user);
 
             if (promocode.getDiscountSum() != null) {
 
@@ -225,6 +220,12 @@ public class OrdersService {
 
             promocode.setActivatedQuantity(promocode.getActivatedQuantity() + 1);
             promocodesRepository.save(promocode);
+
+            Users_Promocodes usersPromocode = new Users_Promocodes();
+
+            usersPromocode.setPromocode(promocode);
+            usersPromocode.setUser(user);
+            usersPromocodesRepository.save(usersPromocode);
         }
 
         if (totalSum >= 500000) {

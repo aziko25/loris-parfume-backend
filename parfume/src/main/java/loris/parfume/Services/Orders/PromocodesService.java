@@ -9,6 +9,7 @@ import loris.parfume.Models.Orders.Users_Promocodes;
 import loris.parfume.Models.Users;
 import loris.parfume.Repositories.Orders.PromocodesRepository;
 import loris.parfume.Repositories.Orders.Users_Promocodes_Repository;
+import loris.parfume.Repositories.UsersRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static loris.parfume.Configurations.JWT.AuthorizationMethods.USER_ID;
+
 @Service
 @RequiredArgsConstructor
 public class PromocodesService {
 
     private final PromocodesRepository promocodesRepository;
     private final Users_Promocodes_Repository usersPromocodesRepository;
+    private final UsersRepository usersRepository;
 
     public Promocodes create(PromocodeRequest promocodeRequest) {
 
@@ -71,7 +75,7 @@ public class PromocodesService {
         return promocodesRepository.findAll(Sort.by("createdTime").descending());
     }
 
-    public Promocodes getByCode(String code, Users user) {
+    public Promocodes getByCode(String code) {
 
         Promocodes promocode = promocodesRepository.findByCodeAndIsActive(code.toUpperCase(), true)
                 .orElseThrow(() -> new EntityNotFoundException("Promocode Doesn't Exist!"));
@@ -83,8 +87,7 @@ public class PromocodesService {
                 throw new EntityNotFoundException("Promocode Doesn't Exist!");
             }
         }
-
-        if (promocode.getActivationQuantity() >= promocode.getActivatedQuantity()) {
+        else if (promocode.getActivationQuantity() >= promocode.getActivatedQuantity()) {
 
             throw new EntityNotFoundException("Promocode Doesn't Exist!");
         }
@@ -97,19 +100,18 @@ public class PromocodesService {
             }
         }
 
-        if (user != null) {
+        Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Doesn't Exist!"));
 
-            List<Users_Promocodes> usersPromocode = usersPromocodesRepository.findAllByUserAndPromocode(user, promocode);
+        List<Users_Promocodes> usersPromocode = usersPromocodesRepository.findAllByUserAndPromocode(user, promocode);
 
-            if (usersPromocode != null && usersPromocode.size() > 1 && promocode.getIsUserActivationOnce()) {
+        if (usersPromocode != null && usersPromocode.size() > 1 && promocode.getIsUserActivationOnce()) {
 
-                throw new IllegalArgumentException("Promocode Was Already Activated!");
-            }
+            throw new IllegalArgumentException("Promocode Was Already Activated!");
+        }
 
-            if (usersPromocode != null && usersPromocode.size() >= promocode.getUserActivationQuantity()) {
+        if (usersPromocode != null && usersPromocode.size() >= promocode.getUserActivationQuantity()) {
 
-                throw new IllegalArgumentException("Promocode Was Already Activated!");
-            }
+            throw new IllegalArgumentException("Promocode Was Already Activated!");
         }
 
         return promocode;

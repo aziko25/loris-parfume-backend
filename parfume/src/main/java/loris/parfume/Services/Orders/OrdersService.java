@@ -202,7 +202,7 @@ public class OrdersService {
 
         if (ordersRequest.getPromocode() != null) {
 
-            Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode(), user);
+            Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
 
             if (promocode.getDiscountSum() != null) {
 

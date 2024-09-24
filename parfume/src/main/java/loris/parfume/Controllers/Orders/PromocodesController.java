@@ -33,7 +33,7 @@ public class PromocodesController {
     @GetMapping("/{code}")
     public ResponseEntity<?> getByCode(@PathVariable String code) {
 
-        return ResponseEntity.ok(promocodesService.getByCode(code, null));
+        return ResponseEntity.ok(promocodesService.getByCode(code));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

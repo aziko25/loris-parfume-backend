@@ -102,12 +102,12 @@ public class PromocodesService {
 
         if (usersPromocode != null && usersPromocode.size() > 1 && promocode.getIsUserActivationOnce()) {
 
-            throw new IllegalArgumentException("Promocode Was Already Activated!");
+            throw new EntityExistsException("Promocode Was Already Activated!");
         }
 
         if (usersPromocode != null && usersPromocode.size() >= promocode.getUserActivationQuantity()) {
 
-            throw new IllegalArgumentException("Promocode Was Already Activated!");
+            throw new EntityExistsException("Promocode Was Already Activated!");
         }
 
         return promocode;

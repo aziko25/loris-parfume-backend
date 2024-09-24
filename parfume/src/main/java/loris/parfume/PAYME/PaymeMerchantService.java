@@ -120,6 +120,16 @@ public class PaymeMerchantService {
         message.setText(orderDetailsMessage(order, "PAYME"));
 
         mainTelegramBot.sendMessage(message);
+
+        if (order.getBranch().getTgChatId() != null) {
+
+            message = new SendMessage();
+
+            message.setChatId(order.getBranch().getTgChatId());
+            message.setText(orderDetailsMessage(order, "PAYME"));
+
+            mainTelegramBot.sendMessage(message);
+        }
     }
 
     public Map<String, PerformTransactionResult> performTransaction(String id) throws TransactionNotFoundException, UnableCompleteException {

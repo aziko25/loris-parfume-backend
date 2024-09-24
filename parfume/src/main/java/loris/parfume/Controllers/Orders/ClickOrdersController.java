@@ -146,28 +146,37 @@ public class ClickOrdersController {
         SendMessage sendMessage = new SendMessage();
 
         sendMessage.setChatId(chatId);
-
         sendMessage.setText(orderDetailsMessage(order, "CLICK"));
 
         mainTelegramBot.sendMessage(sendMessage);
+
+        if (order.getBranch().getTgChatId() != null) {
+
+            sendMessage = new SendMessage();
+
+            sendMessage.setChatId(order.getBranch().getTgChatId());
+            sendMessage.setText(orderDetailsMessage(order, "CLICK"));
+
+            mainTelegramBot.sendMessage(sendMessage);
+        }
     }
 
     public static String orderDetailsMessage(Orders order, String paymentType) {
 
-        return  "Оплата: " + paymentType + "\n-----------\nИмя: " + order.getUser().getFullName() +
-                "\nТелефон: " + order.getPhone() +
-                "\nАдрес: " + order.getAddress() +
-                "\nСсылка на адрес: " + order.getAddressLocationLink() +
-                "\nКомментарий: " + order.getComments() +
-                "\nФилиал: " + order.getBranch().getName() +
-                "\nОбщая Сумма за заказ: " + order.getTotalSum() +
-                "\nСумма за доставку: " + order.getSumForDelivery() +
-                "\nТовары: " + order.getItemsList().stream()
-                .map(ordersItems -> ordersItems.getItem().getNameRu() + " (" + ordersItems.getQuantity() + " шт., размер: " + ordersItems.getSize().getNameRu() + ")")
+        return  "To'lov: " + paymentType + "\n-----------\nZakaz ID: " + order.getId() + "\nIsm Sharif: " + order.getUser().getFullName() +
+                "\nTelephon Raqami: " + order.getPhone() +
+                "\nAddress: " + order.getAddress() +
+                "\nKartadagi Addressi: " + order.getAddressLocationLink() +
+                "\nIzoh: " + order.getComments() +
+                "\nFilial: " + order.getBranch().getName() +
+                "\nZakazning Summasi: " + order.getTotalSum() +
+                "\nYetkazib Berish Summasi: " + order.getSumForDelivery() +
+                "\nXaridlar: " + order.getItemsList().stream()
+                .map(ordersItems -> ordersItems.getItem().getNameRu() + " (" + ordersItems.getQuantity() + " dona, razmer: " + ordersItems.getSize().getNameRu() + ")")
                 .collect(Collectors.joining(", ")) +
-                "\nТип Заказа: " + (order.getIsDelivery() ? "Доставка" : "Самовывоз") +
-                (order.getIsSoonDeliveryTime() ? "\nДоставка в ближайшее время" : "\nЗапланированное время доставки: " +
-                        (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Не запланировано"));
+                "\nZakaz Turi: " + (order.getIsDelivery() ? "Yetkazib Berish" : "O'zi Olib Ketish") +
+                (order.getIsSoonDeliveryTime() ? "\nTez Orada Yetkazib Berilsin" : "\nShu Vaqtda Yetkazib Berilsin: " +
+                        (order.getScheduledDeliveryTime() != null ? order.getScheduledDeliveryTime().toString() : "Rejalashtirilmagan"));
     }
 
     private ResponseEntity<Map<String, Object>> createErrorResponse(Map<String, Object> response,

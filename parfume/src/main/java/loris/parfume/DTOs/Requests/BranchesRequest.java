@@ -16,4 +16,6 @@ public class BranchesRequest {
     private String redirectTo;
 
     private Integer sortOrder;
+
+    private Long tgChatId;
 }

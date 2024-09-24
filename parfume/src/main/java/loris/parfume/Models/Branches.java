@@ -38,4 +38,6 @@ public class Branches implements Serializable {
     private String redirectTo;
 
     private Integer sortOrder;
+
+    private Long tgChatId;
 }

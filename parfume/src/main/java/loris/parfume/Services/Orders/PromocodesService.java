@@ -87,10 +87,6 @@ public class PromocodesService {
                 throw new EntityNotFoundException("Promocode Doesn't Exist!");
             }
         }
-        else if (promocode.getActivationQuantity() >= promocode.getActivatedQuantity()) {
-
-            throw new EntityNotFoundException("Promocode Doesn't Exist!");
-        }
 
         if (!promocode.getIsForever()) {
 

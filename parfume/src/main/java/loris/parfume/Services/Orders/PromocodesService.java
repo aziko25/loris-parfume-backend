@@ -100,7 +100,7 @@ public class PromocodesService {
 
         List<Users_Promocodes> usersPromocode = usersPromocodesRepository.findAllByUserAndPromocode(user, promocode);
 
-        if (usersPromocode != null && usersPromocode.size() > 1 && promocode.getIsUserActivationOnce()) {
+        if (usersPromocode != null && !usersPromocode.isEmpty() && promocode.getIsUserActivationOnce()) {
 
             throw new EntityExistsException("Promocode Was Already Activated!");
         }

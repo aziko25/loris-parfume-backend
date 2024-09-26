@@ -200,7 +200,7 @@ public class OrdersService {
             collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
         }
 
-        if (ordersRequest.getPromocode() != null) {
+        if (ordersRequest.getPromocode() != null && !ordersRequest.getPromocode().isEmpty()) {
 
             Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
 

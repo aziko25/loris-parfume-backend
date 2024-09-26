@@ -40,4 +40,6 @@ public class Branches implements Serializable {
     private Integer sortOrder;
 
     private Long tgChatId;
+
+    private String city;
 }

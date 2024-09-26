@@ -18,4 +18,5 @@ public class BranchesRequest {
     private Integer sortOrder;
 
     private Long tgChatId;
+    private String city;
 }

@@ -14,6 +14,7 @@ import loris.parfume.Repositories.Orders.OrdersRepository;
 import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static loris.parfume.DefaultEntitiesService.DELIVERY_RATE;
 
@@ -35,6 +37,7 @@ public class BranchesService {
     private final DeliveryRatesRepository deliveryRatesRepository;
     private final OrdersRepository ordersRepository;
     private final CacheForAllService cacheForAllService;
+    private final JdbcTemplate jdbcTemplate;
 
     @CacheEvict(value = "branchesCache", allEntries = true)
     public Branches create(BranchesRequest branchesRequest) {
@@ -48,6 +51,7 @@ public class BranchesService {
                 .redirectTo(branchesRequest.getRedirectTo())
                 .sortOrder(branchesRequest.getSortOrder())
                 .tgChatId(branchesRequest.getTgChatId())
+                .city(branchesRequest.getCity())
                 .build();
 
         return branchesRepository.save(branch);
@@ -80,6 +84,7 @@ public class BranchesService {
         Optional.ofNullable(branchesRequest.getRedirectTo()).ifPresent(branch::setRedirectTo);
         Optional.ofNullable(branchesRequest.getSortOrder()).ifPresent(branch::setSortOrder);
         Optional.ofNullable(branchesRequest.getTgChatId()).ifPresent(branch::setTgChatId);
+        Optional.ofNullable(branchesRequest.getCity()).ifPresent(branch::setCity);
 
         return branchesRepository.save(branch);
     }
@@ -195,7 +200,6 @@ public class BranchesService {
         List<Branches> branchesList = cacheForAllService.allBranches();
 
         if (branchesList.isEmpty()) {
-
             branchesList = branchesRepository.findAll();
         }
 
@@ -205,14 +209,17 @@ public class BranchesService {
                 nearestBranch.getLatitude(), nearestBranch.getLongitude());
 
         if (distance == 0) {
-
             distance = calculateDistance(nearestBranchRequest.getLatitude(), nearestBranchRequest.getLongitude(),
                     nearestBranch.getLatitude(), nearestBranch.getLongitude());
-
             distance += 1.2;
         }
 
         double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance);
+
+        if (isInOtherRegion(nearestBranchRequest.getCity().toLowerCase())) {
+
+            sumForDelivery = 30000.0;
+        }
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.00", symbols);
@@ -221,6 +228,12 @@ public class BranchesService {
         double formattedSumForDelivery = Double.parseDouble(df.format(sumForDelivery));
 
         return new BranchesDTO(nearestBranch, formattedSumForDelivery, formattedDistance);
+    }
+
+    private boolean isInOtherRegion(String city) {
+
+        return !city.equalsIgnoreCase("tashkent") && !city.equalsIgnoreCase("toshkent")
+                && !city.equalsIgnoreCase("ташкент");
     }
 
     private Branches findNearestBranch(NearestBranchRequest request, List<Branches> branches) {
@@ -252,12 +265,10 @@ public class BranchesService {
 
         DeliveryRates deliveryRate = deliveryRatesRepository.findFirstByIsActive(true);
 
-        System.out.println("#1");
         if (distance == null) {
             distance = getRoadDistance(request.getLatitude(), request.getLongitude(),
                     branch.getLatitude(), branch.getLongitude());
         }
-        System.out.println("#3");
 
         if (deliveryRate == null || deliveryRate.getIsFixed()) {
 

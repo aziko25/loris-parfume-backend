@@ -162,7 +162,7 @@ public class BranchesService {
 
         try {
 
-            int timeout = 5000;
+            int timeout = 3000;
 
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
             requestFactory.setConnectTimeout(timeout);

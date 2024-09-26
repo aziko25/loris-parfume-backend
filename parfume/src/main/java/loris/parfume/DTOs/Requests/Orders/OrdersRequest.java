@@ -22,6 +22,7 @@ public class OrdersRequest {
 
     private Double longitude;
     private Double latitude;
+    private String city;
 
     private Double deliverySum;
     private Double totalSum;

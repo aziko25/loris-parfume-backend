@@ -86,7 +86,7 @@ public class OrdersService {
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
 
         NearestBranchRequest nearestBranchRequest =
-                new NearestBranchRequest(ordersRequest.getLongitude(), ordersRequest.getLatitude());
+                new NearestBranchRequest(ordersRequest.getLongitude(), ordersRequest.getLatitude(), ordersRequest.getCity());
 
         BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch, null)).setScale(2, RoundingMode.HALF_UP);
         BigDecimal expectedSum = BigDecimal.valueOf(ordersRequest.getDeliverySum()).setScale(2, RoundingMode.HALF_UP);

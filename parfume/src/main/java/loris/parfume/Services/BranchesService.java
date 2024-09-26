@@ -258,8 +258,11 @@ public class BranchesService {
 
     public double calculateDeliverySum(NearestBranchRequest request, Branches branch, Double distance, String city) {
 
+        System.out.println("calculateDeliverySum is called");
+
         if (isInOtherRegion(city)) {
 
+            System.out.println("isInOtherRegion is called");
             return 30000.0;
         }
 

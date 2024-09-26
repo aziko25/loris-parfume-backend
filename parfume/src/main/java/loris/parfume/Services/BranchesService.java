@@ -214,12 +214,7 @@ public class BranchesService {
             distance += 1.2;
         }
 
-        double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance);
-
-        if (isInOtherRegion(nearestBranchRequest.getCity().toLowerCase())) {
-
-            sumForDelivery = 30000.0;
-        }
+        double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance, nearestBranchRequest.getCity());
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         DecimalFormat df = new DecimalFormat("#.00", symbols);
@@ -261,7 +256,12 @@ public class BranchesService {
         return nearestBranch;
     }
 
-    public double calculateDeliverySum(NearestBranchRequest request, Branches branch, Double distance) {
+    public double calculateDeliverySum(NearestBranchRequest request, Branches branch, Double distance, String city) {
+
+        if (isInOtherRegion(city)) {
+
+            return 30000.0;
+        }
 
         DeliveryRates deliveryRate = deliveryRatesRepository.findFirstByIsActive(true);
 

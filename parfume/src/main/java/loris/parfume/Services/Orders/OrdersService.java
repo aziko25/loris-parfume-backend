@@ -88,7 +88,7 @@ public class OrdersService {
         NearestBranchRequest nearestBranchRequest =
                 new NearestBranchRequest(ordersRequest.getLongitude(), ordersRequest.getLatitude(), ordersRequest.getCity());
 
-        BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch, null)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch, null, ordersRequest.getCity())).setScale(2, RoundingMode.HALF_UP);
         BigDecimal expectedSum = BigDecimal.valueOf(ordersRequest.getDeliverySum()).setScale(2, RoundingMode.HALF_UP);
 
         if (calculatedSum.compareTo(expectedSum) != 0 && ordersRequest.getTotalSum() < 500000.00) {

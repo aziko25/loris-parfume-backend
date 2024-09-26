@@ -13,6 +13,7 @@ import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -156,27 +157,35 @@ public class BranchesService {
 
         try {
 
-            System.out.println("#2");
+            int timeout = 5000;
 
-            String osrmUrl = String.format(Locale.US, "http://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(timeout);
+            requestFactory.setReadTimeout(timeout);
+
+            RestTemplate restTemplate = new RestTemplate(requestFactory);
+
+            // Construct the OSRM URL
+            String osrmUrl = String.format(Locale.US,
+                    "http://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
                     userLat, userLon, branchLat, branchLon);
             System.out.println(osrmUrl);
 
-            RestTemplate restTemplate = new RestTemplate();
+            // Make the request
             String response = restTemplate.getForObject(osrmUrl, String.class);
-
             System.out.println("OSRM Response: " + response);
 
+            // Parse the response
             JSONObject jsonObject = new JSONObject(response);
             double distanceInMeters = jsonObject.getJSONArray("routes")
                     .getJSONObject(0)
                     .getDouble("distance");
 
+            // Return the distance in kilometers
             return distanceInMeters / 1000;
-        }
-        catch (Exception e) {
-
-            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            // Handle any exception (including timeout) by returning 0
+            System.out.println("Error: " + e.getMessage());
             return 0;
         }
     }

@@ -156,6 +156,8 @@ public class BranchesService {
 
         try {
 
+            System.out.println("#2");
+
             String osrmUrl = String.format(Locale.US, "http://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=false",
                     userLat, userLon, branchLat, branchLon);
             System.out.println(osrmUrl);
@@ -175,7 +177,7 @@ public class BranchesService {
         catch (Exception e) {
 
             System.out.println(e.getMessage());
-            return Double.MAX_VALUE;
+            return 0;
         }
     }
 
@@ -192,6 +194,14 @@ public class BranchesService {
 
         double distance = getRoadDistance(nearestBranchRequest.getLatitude(), nearestBranchRequest.getLongitude(),
                 nearestBranch.getLatitude(), nearestBranch.getLongitude());
+
+        if (distance == 0) {
+
+            distance = calculateDistance(nearestBranchRequest.getLatitude(), nearestBranchRequest.getLongitude(),
+                    nearestBranch.getLatitude(), nearestBranch.getLongitude());
+
+            distance += 1.2;
+        }
 
         double sumForDelivery = calculateDeliverySum(nearestBranchRequest, nearestBranch, distance);
 
@@ -233,10 +243,12 @@ public class BranchesService {
 
         DeliveryRates deliveryRate = deliveryRatesRepository.findFirstByIsActive(true);
 
+        System.out.println("#1");
         if (distance == null) {
             distance = getRoadDistance(request.getLatitude(), request.getLongitude(),
                     branch.getLatitude(), branch.getLongitude());
         }
+        System.out.println("#3");
 
         if (deliveryRate == null || deliveryRate.getIsFixed()) {
 

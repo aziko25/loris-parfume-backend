@@ -91,9 +91,6 @@ public class OrdersService {
         BigDecimal calculatedSum = BigDecimal.valueOf(branchesService.calculateDeliverySum(nearestBranchRequest, branch, null, ordersRequest.getCity())).setScale(2, RoundingMode.HALF_UP);
         BigDecimal expectedSum = BigDecimal.valueOf(ordersRequest.getDeliverySum()).setScale(2, RoundingMode.HALF_UP);
 
-        System.out.println("calculatedSum: " + calculatedSum);
-        System.out.println("expectedSum: " + expectedSum);
-
         if (calculatedSum.compareTo(expectedSum) != 0 && ordersRequest.getTotalSum() < 500000.00) {
 
             throw new IllegalArgumentException("Delivery Sum Is Incorrect. It Should Be " +

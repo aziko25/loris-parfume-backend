@@ -2,10 +2,13 @@ package loris.parfume.Services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Models.B2B_Users;
 import loris.parfume.Repositories.B2B_Users_Repository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +18,10 @@ import java.util.List;
 public class B2B_Users_Service {
 
     private final B2B_Users_Repository b2BUsersRepository;
+    private final MainTelegramBot mainTelegramBot;
+
+    @Value("${payment.chat.id}")
+    private Long chatId;
 
     public B2B_Users create(B2B_Users b2BUser) {
 
@@ -26,6 +33,18 @@ public class B2B_Users_Service {
                 .contactSource(b2BUser.getContactSource())
                 .message(b2BUser.getMessage())
                 .build();
+
+        SendMessage message = new SendMessage();
+
+        message.setChatId(chatId);
+        message.setText("Yangi B2B Shartnoma:" +
+                        "\nTo'liq Ism: " + b2BUser.getFullName() +
+                        "\nEmail: " + b2BUser.getEmail() +
+                        "\nTelefon Raqam: " + b2BUser.getPhone() +
+                        "\nAloqa Kanali: " + b2BUser.getContactSource() +
+                        "\nHabarnoma: " + b2BUser.getMessage());
+
+        mainTelegramBot.sendMessage(message);
 
         return b2BUsersRepository.save(bUSer);
     }

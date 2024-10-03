@@ -44,17 +44,23 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
+        String phone = request.getPhone();
+        if (!phone.startsWith("+")) {
+
+            phone = "+" + phone;
+        }
+
         if (usersRepository.existsByPhone(request.getPhone())) {
 
             throw new EntityExistsException("Phone Already Exists");
         }
 
         String verificationCode = generateVerificationCode();
-        eskizService.sendOtp(request.getPhone(), verificationCode);
+        eskizService.sendOtp(phone, verificationCode);
 
         Users user = Users.builder()
                 .registrationTime(LocalDateTime.now())
-                .phone(request.getPhone())
+                .phone(phone)
                 .fullName(request.getFullName())
                 .password(request.getPassword())
                 .role("USER")
@@ -159,7 +165,12 @@ public class AuthenticationService {
 
     public Map<String, Object> login(LoginRequest request) {
 
-        Users user = usersRepository.findByPhone(request.getPhone());
+        String phone = request.getPhone();
+        if (!phone.startsWith("+")) {
+            phone = "+" + request.getPhone();
+        }
+
+        Users user = usersRepository.findByPhone(phone);
 
         if (user == null) {
 

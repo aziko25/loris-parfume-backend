@@ -53,6 +53,8 @@ public class Orders {
     private String paymentResponseRu;
     private String paymentResponseEng;
 
+    private Boolean isOrderDelivered;
+
     @ManyToOne
     @JoinColumn(name = "branch_id")
     private Branches branch;

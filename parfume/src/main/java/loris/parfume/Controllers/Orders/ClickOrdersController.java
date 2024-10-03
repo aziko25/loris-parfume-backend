@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Models.Orders.Orders;
+import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class ClickOrdersController {
 
     private final OrdersRepository ordersRepository;
     private final MainTelegramBot mainTelegramBot;
+    private final BasketsRepository basketsRepository;
 
     @Value("${payment.chat.id}")
     private String chatId;
@@ -116,6 +118,11 @@ public class ClickOrdersController {
 
         order.setIsPaid(true);
         ordersRepository.save(order);
+
+        if (order.getUser() != null) {
+
+            basketsRepository.deleteAllByUser(order.getUser());
+        }
 
         return ResponseEntity.ok(response);
     }

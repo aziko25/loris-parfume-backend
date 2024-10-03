@@ -10,6 +10,8 @@ import java.util.List;
 @Setter
 public class OrdersRequest {
 
+    private Long userId;
+
     private String address;
     private String addressLocationLink;
     private Double distance;
@@ -33,6 +35,8 @@ public class OrdersRequest {
     private String returnUrl;
 
     private String promocode;
+
+    private Boolean isOrderDelivered;
 
     private List<Orders_Items_Request> ordersItemsList;
 }

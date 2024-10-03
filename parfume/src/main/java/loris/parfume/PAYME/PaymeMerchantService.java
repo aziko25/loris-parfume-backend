@@ -5,6 +5,7 @@ import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.PAYME.Exceptions.*;
 import loris.parfume.PAYME.Result.*;
+import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class PaymeMerchantService {
     private final OrdersRepository ordersRepository;
     private final TransactionRepository transactionRepository;
     private final MainTelegramBot mainTelegramBot;
+    private final BasketsRepository basketsRepository;
 
     @Value("${payment.chat.id}")
     private String paymentChatId;
@@ -160,6 +162,11 @@ public class PaymeMerchantService {
                     result.put("result", performTransactionResult);
 
                     ifTransactionWasSuccessfullyPerformed(transaction.getOrder());
+
+                    if (order.getUser() != null) {
+
+                        basketsRepository.deleteAllByUser(order.getUser());
+                    }
 
                     return result;
                 }

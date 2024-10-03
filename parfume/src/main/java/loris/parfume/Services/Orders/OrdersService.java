@@ -13,7 +13,6 @@ import loris.parfume.Models.Branches;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Orders.*;
 import loris.parfume.Models.Users;
-import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.*;
@@ -52,7 +51,6 @@ public class OrdersService {
     private final Sizes_Items_Repository sizesItemsRepository;
     private final BranchesRepository branchesRepository;
     private final WebSocketController webSocketController;
-    private final BasketsRepository basketsRepository;
     private final BranchesService branchesService;
     private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
     private final PromocodesService promocodesService;
@@ -81,7 +79,13 @@ public class OrdersService {
     @CacheEvict(value = "ordersCache", allEntries = true)
     public OrdersDTO create(OrdersRequest ordersRequest) {
 
-        Users user = usersRepository.findById(USER_ID).orElseThrow(() -> new EntityNotFoundException("User Not Found"));
+        Users user = null;
+        if (ordersRequest.getUserId() != null) {
+
+            user = usersRepository.findById(ordersRequest.getUserId())
+                    .orElseThrow(() -> new EntityNotFoundException("User Not Found"));
+        }
+
         Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
 
@@ -115,6 +119,7 @@ public class OrdersService {
                 .isDelivery(ordersRequest.getIsDelivery())
                 .isSoonDeliveryTime(ordersRequest.getIsSoonDeliveryTime())
                 .scheduledDeliveryTime(ordersRequest.getScheduledDeliveryTime())
+                .isOrderDelivered(false)
                 .user(user)
                 .branch(branch)
                 .build();
@@ -200,6 +205,11 @@ public class OrdersService {
             collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
         }
 
+        if (user == null && ordersRequest.getPromocode() != null && !ordersRequest.getPromocode().isEmpty()) {
+
+            throw new IllegalArgumentException("Authorize To Use Promocode!");
+        }
+
         if (ordersRequest.getPromocode() != null && !ordersRequest.getPromocode().isEmpty()) {
 
             Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
@@ -249,7 +259,7 @@ public class OrdersService {
 
         order.setItemsList(saveAllOrderItemsList);
 
-        basketsRepository.deleteAllByUser(user);
+        //basketsRepository.deleteAllByUser(user);
         ordersRepository.save(order);
 
         if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
@@ -307,7 +317,7 @@ public class OrdersService {
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(paymentChatId);
             sendMessage.setText("UZUM NASIYA\n----------------\nOrder ID: " + order.getId() +
-                    "\nPhone: " + order.getPhone() + "\nFull Name: " + user.getFullName() +
+                    "\nPhone: " + order.getPhone() + "\nFull Name: " + ordersRequest.getFullName() +
                     "\nOrder Sum: " + order.getTotalSum());
 
             InlineKeyboardButton confirmButton = new InlineKeyboardButton();
@@ -358,6 +368,7 @@ public class OrdersService {
     }
 
     @Transactional
+    @CacheEvict(value = "ordersCache", allEntries = true)
     public OrdersDTO update(Long id, OrdersRequest ordersRequest) {
 
         Orders order = ordersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order Not Found"));
@@ -374,6 +385,7 @@ public class OrdersService {
         Optional.ofNullable(ordersRequest.getDeliverySum()).ifPresent(order::setSumForDelivery);
         Optional.ofNullable(ordersRequest.getTotalSum()).ifPresent(order::setTotalSum);
         Optional.ofNullable(ordersRequest.getPaymentType()).ifPresent(order::setPaymentType);
+        Optional.ofNullable(ordersRequest.getIsOrderDelivered()).ifPresent(order::setIsOrderDelivered);
 
         if (ordersRequest.getBranchId() != null) {
 

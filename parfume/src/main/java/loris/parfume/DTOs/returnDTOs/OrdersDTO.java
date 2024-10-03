@@ -64,6 +64,8 @@ public class OrdersDTO implements Serializable {
     private String paymentResponseRu;
     private String paymentResponseEng;
 
+    private Boolean isOrderDelivered;
+
     private Long promocodeId;
     private String promocode;
     private Integer promocodeDiscountPercent;
@@ -108,6 +110,8 @@ public class OrdersDTO implements Serializable {
         paymentResponseUz = order.getPaymentResponseUz();
         paymentResponseRu = order.getPaymentResponseRu();
         paymentResponseEng = order.getPaymentResponseEng();
+
+        isOrderDelivered = order.getIsOrderDelivered();
 
         if (order.getPromocode() != null) {
 

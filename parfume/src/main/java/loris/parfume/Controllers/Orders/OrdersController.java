@@ -16,7 +16,7 @@ public class OrdersController {
 
     private final OrdersService ordersService;
 
-    @Authorization(requiredRoles = {"ADMIN", "USER"})
+    //@Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody OrdersRequest ordersRequest) {
 

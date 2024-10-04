@@ -79,16 +79,19 @@ public class OrdersDTO implements Serializable {
         id = order.getId();
         createdTime = order.getCreatedTime();
 
-        userId = order.getUser().getId();
+        if (order.getUser() != null) {
 
-        phone = order.getUser().getPhone();
-        if (order.getPhone() != null) {
-            phone = order.getPhone();
-        }
+            userId = order.getUser().getId();
 
-        userFullName = order.getUser().getFullName();
-        if (order.getFullName() != null) {
-            userFullName = order.getFullName();
+            phone = order.getUser().getPhone();
+            if (order.getPhone() != null) {
+                phone = order.getPhone();
+            }
+
+            userFullName = order.getUser().getFullName();
+            if (order.getFullName() != null) {
+                userFullName = order.getFullName();
+            }
         }
 
         address = order.getAddress();

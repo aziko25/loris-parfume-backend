@@ -148,7 +148,7 @@ public class OrdersService {
 
             Sizes size;
 
-            if (ordersItemsRequest.getSizeId() != null) {
+            if (ordersItemsRequest.getSizeId() != null && ordersItemsRequest.getSizeId() != 1) {
 
                 size = sizesRepository.findById(ordersItemsRequest.getSizeId())
                         .orElseThrow(() -> new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() + " Not Found"));
@@ -156,6 +156,7 @@ public class OrdersService {
                 Sizes_Items sizesItem = sizesItemsRepository.findByItemAndSize(collectionsItem.getItem(), size);
 
                 if (sizesItem == null) {
+
                     throw new EntityNotFoundException("Size " + ordersItemsRequest.getSizeId() +
                             " For Item " + collectionsItem.getItem().getId() + " Not Found");
                 }

@@ -29,7 +29,7 @@ public class PromocodesService {
 
     public Promocodes create(PromocodeRequest promocodeRequest) {
 
-        Optional<Promocodes> existingCode = promocodesRepository.findByCode(promocodeRequest.getCode().toUpperCase());
+        Optional<Promocodes> existingCode = promocodesRepository.findByCode(promocodeRequest.getCode().toUpperCase().replace(" ", ""));
 
         if (existingCode.isPresent()) {
 

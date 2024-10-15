@@ -170,7 +170,10 @@ public class ClickOrdersController {
 
     public static String orderDetailsMessage(Orders order, String paymentType) {
 
-        return  "To'lov: " + paymentType + "\n-----------\nZakaz ID: " + order.getId() + "\nIsm Sharif: " + order.getUser().getFullName() +
+        String fullName = (order.getUser() != null) ? order.getUser().getFullName() : order.getFullName();
+
+        return  "To'lov: " + paymentType + "\n-----------\nZakaz ID: " + order.getId() +
+                "\nIsm Sharif: " + fullName +
                 "\nTelephon Raqami: " + order.getPhone() +
                 "\nAddress: " + order.getAddress() +
                 "\nKartadagi Addressi: " + order.getAddressLocationLink() +

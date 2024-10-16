@@ -16,6 +16,8 @@ public class CategoriesRequest {
     private String descriptionUz;
     private String descriptionRu;
 
+    private String imageUrl;
+
     private Integer sortOrderWithinCollection;
     private Boolean isRecommendedInMainPage;
 

@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -54,7 +53,7 @@ public class ItemsService {
 
     @Transactional
     @CacheEvict(value = "itemsCache", allEntries = true)
-    public ItemsDTO create(List<MultipartFile> images, ItemsRequest itemsRequest) throws IOException {
+    public ItemsDTO create(ItemsRequest itemsRequest) throws IOException {
 
         Optional<Items> existingSlug = itemsRepository.findBySlug(itemsRequest.getSlug());
         if (existingSlug.isPresent()) {
@@ -117,15 +116,15 @@ public class ItemsService {
             }
         }
 
-        if (images != null && !images.isEmpty()) {
+        if (itemsRequest.getImagesUrl() != null && !itemsRequest.getImagesUrl().isEmpty()) {
 
             List<Items_Images> imagesList = new ArrayList<>();
 
-            for (MultipartFile image : images) {
+            for (String image : itemsRequest.getImagesUrl()) {
 
                 Items_Images itemsImage = Items_Images.builder()
                         .item(item)
-                        .imageName(fileUploadUtilService.handleMediaUpload(image))
+                        .imageName(image)
                         .build();
 
                 imagesList.add(itemsImage);
@@ -167,7 +166,7 @@ public class ItemsService {
 
     @Transactional
     @CacheEvict(value = {"itemsCache", "ordersCache"}, allEntries = true)
-    public ItemsDTO update(String slug, List<MultipartFile> images, ItemsRequest itemsRequest) throws IOException {
+    public ItemsDTO update(String slug, ItemsRequest itemsRequest) throws IOException {
 
         Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
@@ -237,18 +236,16 @@ public class ItemsService {
         itemsImagesRepository.deleteAllByItem(item);
         item.setItemsImagesList(null);
 
-        if (images != null && !images.isEmpty()) {
+        if (itemsRequest.getImagesUrl() != null && !itemsRequest.getImagesUrl().isEmpty()) {
 
             List<Items_Images> imagesList = new ArrayList<>();
-            for (MultipartFile image : images) {
+            for (String image : itemsRequest.getImagesUrl()) {
 
-                String imageName = fileUploadUtilService.handleMediaUpload(image);
-
-                if (!imagesNamesList.contains(imageName)) {
+                if (!imagesNamesList.contains(image)) {
 
                     Items_Images itemsImage = Items_Images.builder()
                             .item(item)
-                            .imageName(imageName)
+                            .imageName(image)
                             .build();
 
                     imagesList.add(itemsImage);

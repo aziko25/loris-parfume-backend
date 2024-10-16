@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -47,7 +46,7 @@ public class CollectionsService {
     private Integer pageSize;
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public CollectionsDTO create(CollectionsRequest collectionsRequest, MultipartFile image) throws IOException {
+    public CollectionsDTO create(CollectionsRequest collectionsRequest) throws IOException {
 
         Optional<Collections> existingSlug = collectionsRepository.findBySlug(collectionsRequest.getSlug());
         if (existingSlug.isPresent()) {
@@ -63,16 +62,11 @@ public class CollectionsService {
                 .nameEng(collectionsRequest.getNameEng())
                 .descriptionUz(collectionsRequest.getDescriptionUz())
                 .descriptionRu(collectionsRequest.getDescriptionRu())
+                .bannerImage(collectionsRequest.getImageUrl())
                 .sortOrder(collectionsRequest.getSortOrder())
                 .isFiftyPercentSaleApplied(collectionsRequest.getIsFiftyPercentSaleApplied())
                 .isRecommendedInMainPage(collectionsRequest.getIsRecommendedInMainPage())
                 .build();
-
-        collectionsRepository.save(collection);
-
-        if (image != null && !image.isEmpty()) {
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
-        }
 
         return new CollectionsDTO(collectionsRepository.save(collection));
     }
@@ -97,7 +91,7 @@ public class CollectionsService {
     }
 
     @CacheEvict(value = {"collectionsCache", "categoriesCache", "itemsCache"}, allEntries = true)
-    public CollectionsDTO update(String slug, CollectionsRequest collectionsRequest, MultipartFile image) throws IOException {
+    public CollectionsDTO update(String slug, CollectionsRequest collectionsRequest) throws IOException {
 
         Collections collection = collectionsRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
@@ -122,22 +116,7 @@ public class CollectionsService {
             Optional.ofNullable(collectionsRequest.getDescriptionRu()).ifPresent(collection::setDescriptionRu);
             Optional.ofNullable(collectionsRequest.getSortOrder()).ifPresent(collection::setSortOrder);
             Optional.ofNullable(collectionsRequest.getIsRecommendedInMainPage()).ifPresent(collection::setIsRecommendedInMainPage);
-        }
-
-        if (image != null && !image.isEmpty()) {
-
-            if (collection.getBannerImage() != null) {
-                fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
-            }
-
-            collection.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
-        }
-        else {
-            collection.setBannerImage(null);
-
-            if (collection.getBannerImage() != null) {
-                fileUploadUtilService.handleMediaDeletion(collection.getBannerImage());
-            }
+            Optional.ofNullable(collectionsRequest.getImageUrl()).ifPresent(collection::setBannerImage);
         }
 
         return new CollectionsDTO(collectionsRepository.save(collection));

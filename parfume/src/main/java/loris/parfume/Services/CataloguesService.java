@@ -11,7 +11,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,7 +28,7 @@ public class CataloguesService {
 
     @Transactional
     @CacheEvict(value = "cataloguesCache", allEntries = true)
-    public Catalogues create(CataloguesRequest cataloguesRequest, List<MultipartFile> files) throws IOException {
+    public Catalogues create(CataloguesRequest cataloguesRequest) throws IOException {
 
         Catalogues catalogues = Catalogues.builder()
                 .createdTime(LocalDateTime.now())
@@ -43,7 +42,7 @@ public class CataloguesService {
 
         cataloguesRepository.save(catalogues);
 
-        updateFiles(files, catalogues);
+        updateFiles(cataloguesRequest.getFilesUrl(), catalogues);
 
         return cataloguesRepository.save(catalogues);
     }
@@ -64,7 +63,7 @@ public class CataloguesService {
 
     @Transactional
     @CacheEvict(value = "cataloguesCache", allEntries = true)
-    public Catalogues update(Long id, CataloguesRequest cataloguesRequest, List<MultipartFile> files) throws IOException {
+    public Catalogues update(Long id, CataloguesRequest cataloguesRequest) throws IOException {
 
         Catalogues catalogues = getById(id);
 
@@ -84,9 +83,9 @@ public class CataloguesService {
 
         fileUploadUtilService.handleMultipleMediaDeletion(fileNames);
 
-        if (files != null && !files.isEmpty()) {
+        if (cataloguesRequest.getFilesUrl() != null && !cataloguesRequest.getFilesUrl().isEmpty()) {
 
-            updateFiles(files, catalogues);
+            updateFiles(cataloguesRequest.getFilesUrl(), catalogues);
         }
 
         return cataloguesRepository.save(catalogues);
@@ -111,13 +110,13 @@ public class CataloguesService {
         return "Catalogue Deleted";
     }
 
-    private void updateFiles(List<MultipartFile> files, Catalogues catalogue) throws IOException {
+    private void updateFiles(List<String> files, Catalogues catalogue) {
 
         String[] languages = {"uz", "ru", "eng"};
 
         for (int i = 0; i < files.size(); i++) {
 
-            String fileName = fileUploadUtilService.handleMediaUpload(files.get(i));
+            String fileName = files.get(i);
 
             switch (languages[i]) {
 

@@ -1,18 +1,15 @@
 package loris.parfume.Controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Filters.BannerFilters;
-import loris.parfume.DTOs.Requests.BannersRequest;
+import loris.parfume.DTOs.Requests.CollectionBannersRequest;
 import loris.parfume.Services.CollectionBannersService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/collection-banners")
@@ -24,12 +21,9 @@ public class CollectionBannersController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
-                                    @RequestParam("banner") String bannerJson) throws IOException {
+    public ResponseEntity<?> create(@RequestBody CollectionBannersRequest collectionBannersRequest) throws IOException {
 
-        BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
-
-        return new ResponseEntity<>(collectionBannersService.create(media, bannersRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(collectionBannersService.create(collectionBannersRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/all")
@@ -48,12 +42,9 @@ public class CollectionBannersController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(value = "media", required = false) List<MultipartFile> media,
-                                    @RequestParam("banner") String bannerJson) throws IOException {
+                                    @RequestBody CollectionBannersRequest collectionBannersRequest) throws IOException {
 
-        BannersRequest bannersRequest = new ObjectMapper().readValue(bannerJson, BannersRequest.class);
-
-        return ResponseEntity.ok(collectionBannersService.update(id, media, bannersRequest));
+        return ResponseEntity.ok(collectionBannersService.update(id, collectionBannersRequest));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

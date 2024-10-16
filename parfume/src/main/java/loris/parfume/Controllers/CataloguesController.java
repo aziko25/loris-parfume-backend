@@ -1,6 +1,5 @@
 package loris.parfume.Controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Requests.CataloguesRequest;
@@ -8,10 +7,8 @@ import loris.parfume.Services.CataloguesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/catalogues")
@@ -23,12 +20,9 @@ public class CataloguesController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media") List<MultipartFile> media,
-                                    @RequestParam("catalogue") String catalogueJson) throws IOException {
+    public ResponseEntity<?> create(@RequestBody CataloguesRequest cataloguesRequest) throws IOException {
 
-        CataloguesRequest cataloguesRequest = new ObjectMapper().readValue(catalogueJson, CataloguesRequest.class);
-
-        return new ResponseEntity<>(cataloguesService.create(cataloguesRequest, media), HttpStatus.CREATED);
+        return new ResponseEntity<>(cataloguesService.create(cataloguesRequest), HttpStatus.CREATED);
     }
 
     @GetMapping("/all")
@@ -46,12 +40,9 @@ public class CataloguesController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestParam(value = "media", required = false) List<MultipartFile> media,
-                                    @RequestParam(value = "catalogue") String catalogueJson) throws IOException {
+                                    @RequestBody CataloguesRequest cataloguesRequest) throws IOException {
 
-        CataloguesRequest cataloguesRequest = new ObjectMapper().readValue(catalogueJson, CataloguesRequest.class);
-
-        return ResponseEntity.ok(cataloguesService.update(id, cataloguesRequest, media));
+        return ResponseEntity.ok(cataloguesService.update(id, cataloguesRequest));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

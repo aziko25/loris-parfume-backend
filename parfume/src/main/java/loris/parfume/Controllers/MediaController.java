@@ -1,55 +1,26 @@
 package loris.parfume.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
+import loris.parfume.Configurations.Images.FileUploadUtilService;
+import loris.parfume.Configurations.JWT.Authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/media")
+@CrossOrigin(maxAge = 3600)
 public class MediaController {
 
-    @Value("${imagesDir}")
-    private String imagesDir;
+    private final FileUploadUtilService fileUploadUtilService;
 
-    @GetMapping(value = "/{mediaName}")
-    public @ResponseBody ResponseEntity<Resource> getImageName(@PathVariable String mediaName) {
+    @Authorization(requiredRoles = {"ADMIN"})
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws IOException {
 
-        try {
-
-            File file = new File(imagesDir + "/" + mediaName);
-
-            if (!file.exists()) {
-
-                return ResponseEntity.notFound().build();
-            }
-
-            Path filePath = file.toPath();
-            String contentType = Files.probeContentType(filePath);
-
-            if (contentType == null) {
-
-                contentType = "application/octet-stream";
-            }
-
-            Resource resource = new FileSystemResource(file);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    //.header("Cache-Control", "public, max-age=3153600")
-                    .body(resource);
-
-        } catch (Exception e) {
-
-            return ResponseEntity.status(500).body(null);
-        }
+        return ResponseEntity.ok(fileUploadUtilService.handleMediaUpload(file));
     }
 }

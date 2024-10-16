@@ -1,6 +1,5 @@
 package loris.parfume.Controllers.Items;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.JWT.Authorization;
 import loris.parfume.DTOs.Requests.Items.CollectionsRequest;
@@ -8,7 +7,6 @@ import loris.parfume.Services.Items.CollectionsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -22,12 +20,9 @@ public class CollectionsController {
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestParam(value = "media", required = false) MultipartFile image,
-                                    @RequestParam("collection") String collectionJson) throws IOException {
+    public ResponseEntity<?> create(@RequestBody CollectionsRequest collectionsRequest) throws IOException {
 
-        CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
-
-        return new ResponseEntity<>(collectionsService.create(collectionsRequest, image), HttpStatus.CREATED);
+        return new ResponseEntity<>(collectionsService.create(collectionsRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/all")
@@ -45,12 +40,9 @@ public class CollectionsController {
     @Authorization(requiredRoles = {"ADMIN"})
     @PutMapping("/update/{slug}")
     public ResponseEntity<?> update(@PathVariable String slug,
-                                    @RequestParam(value = "media", required = false) MultipartFile image,
-                                    @RequestParam("collection") String collectionJson) throws IOException {
+                                    @RequestBody CollectionsRequest collectionsRequest) throws IOException {
 
-        CollectionsRequest collectionsRequest = new ObjectMapper().readValue(collectionJson, CollectionsRequest.class);
-
-        return ResponseEntity.ok(collectionsService.update(slug, collectionsRequest, image));
+        return ResponseEntity.ok(collectionsService.update(slug, collectionsRequest));
     }
 
     @Authorization(requiredRoles = {"ADMIN"})

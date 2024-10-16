@@ -44,7 +44,7 @@ public class CategoriesService {
     private Integer pageSize;
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO create(CategoriesRequest categoriesRequest, MultipartFile image) throws IOException {
+    public CategoriesDTO create(CategoriesRequest categoriesRequest) throws IOException {
 
         Collections collection = collectionsRepository.findById(categoriesRequest.getCollectionId())
                 .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
@@ -65,15 +65,9 @@ public class CategoriesService {
                 .descriptionRu(categoriesRequest.getDescriptionRu())
                 .sortOrderWithinCollection(categoriesRequest.getSortOrderWithinCollection())
                 .isRecommendedInMainPage(categoriesRequest.getIsRecommendedInMainPage())
+                .bannerImage(categoriesRequest.getImageUrl())
                 .collection(collection)
                 .build();
-
-        categoriesRepository.save(category);
-
-        if (image != null && !image.isEmpty()) {
-
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
-        }
 
         return new CategoriesDTO(categoriesRepository.save(category));
     }
@@ -97,7 +91,7 @@ public class CategoriesService {
     }
 
     @CacheEvict(value = {"categoriesCache", "collectionsCache", "itemsCache"}, allEntries = true)
-    public CategoriesDTO update(String slug, CategoriesRequest categoriesRequest, MultipartFile image) throws IOException {
+    public CategoriesDTO update(String slug, CategoriesRequest categoriesRequest) throws IOException {
 
         Categories category = categoriesRepository.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
@@ -121,6 +115,7 @@ public class CategoriesService {
         Optional.ofNullable(categoriesRequest.getDescriptionRu()).ifPresent(category::setDescriptionRu);
         Optional.ofNullable(categoriesRequest.getSortOrderWithinCollection()).ifPresent(category::setSortOrderWithinCollection);
         Optional.ofNullable(categoriesRequest.getIsRecommendedInMainPage()).ifPresent(category::setIsRecommendedInMainPage);
+        Optional.ofNullable(categoriesRequest.getImageUrl()).ifPresent(category::setBannerImage);
 
         if (categoriesRequest.getCollectionId() != null) {
 
@@ -131,24 +126,6 @@ public class CategoriesService {
         }
         else {
             category.setCollection(null);
-        }
-
-        if (image != null && !image.isEmpty()) {
-
-            if (category.getBannerImage() != null) {
-
-                fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
-            }
-
-            category.setBannerImage(fileUploadUtilService.handleMediaUpload(image));
-        }
-        else {
-
-            if (category.getBannerImage() != null) {
-
-                fileUploadUtilService.handleMediaDeletion(category.getBannerImage());
-                category.setBannerImage(null);
-            }
         }
 
         return new CategoriesDTO(categoriesRepository.save(category));

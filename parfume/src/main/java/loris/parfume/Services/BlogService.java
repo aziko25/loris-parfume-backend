@@ -2,13 +2,11 @@ package loris.parfume.Services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import loris.parfume.Configurations.Images.FileUploadUtilService;
 import loris.parfume.DTOs.Requests.BlogsRequest;
 import loris.parfume.Models.Blog;
 import loris.parfume.Repositories.BlogsRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,9 +17,8 @@ import java.util.List;
 public class BlogService {
 
     private final BlogsRepository blogsRepository;
-    private final FileUploadUtilService fileUploadUtilService;
 
-    public Blog create(MultipartFile image, BlogsRequest blogsRequest) throws IOException {
+    public Blog create(BlogsRequest blogsRequest) throws IOException {
 
         Blog blog = Blog.builder()
                 .createdTime(LocalDateTime.now())
@@ -29,7 +26,7 @@ public class BlogService {
                 .titleRu(blogsRequest.getTitleRu())
                 .descriptionUz(blogsRequest.getDescriptionUz())
                 .descriptionRu(blogsRequest.getDescriptionRu())
-                .mainImage(fileUploadUtilService.handleMediaUpload(image))
+                .mainImage(blogsRequest.getImageUrl())
                 .isActive(blogsRequest.getIsActive())
                 .build();
 
@@ -45,6 +42,21 @@ public class BlogService {
         }
 
         return blogsRepository.findAllByIsActiveIsTrue(Sort.by("createdTime").descending());
+    }
+
+    public Blog update(Long id, BlogsRequest blogsRequest) throws IOException {
+
+        Blog blog = blogsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Blog not found"));
+
+        blog.setTitleUz(blogsRequest.getTitleUz());
+        blog.setTitleRu(blogsRequest.getTitleRu());
+        blog.setDescriptionUz(blogsRequest.getDescriptionUz());
+        blog.setDescriptionRu(blogsRequest.getDescriptionRu());
+        blog.setMainImage(blogsRequest.getImageUrl());
+        blog.setIsActive(blogsRequest.getIsActive());
+
+        return blogsRepository.save(blog);
     }
 
     public Blog getById(Long blogId) {

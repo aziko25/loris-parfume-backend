@@ -10,7 +10,6 @@ import loris.parfume.Models.Banners;
 import loris.parfume.Repositories.BannersRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,9 +28,7 @@ public class BannersService {
 
     @Transactional
     @CacheEvict(value = "bannersCache", allEntries = true)
-    public Banners create(List<MultipartFile> desktopImages,
-                          List<MultipartFile> mobileImages,
-                          BannersRequest bannersRequest) throws IOException {
+    public Banners create(BannersRequest bannersRequest) throws IOException {
 
         Banners banner = Banners.builder()
                 .createdTime(LocalDateTime.now())
@@ -44,12 +41,12 @@ public class BannersService {
 
         bannersRepository.save(banner);
 
-        if (desktopImages != null && !desktopImages.isEmpty()) {
-            updateImages(desktopImages, banner, "desktop");
+        if (bannersRequest.getDesktopImagesUrl() != null && !bannersRequest.getDesktopImagesUrl().isEmpty()) {
+            updateImages(bannersRequest.getDesktopImagesUrl(), banner, "desktop");
         }
 
-        if (mobileImages != null && !mobileImages.isEmpty()) {
-            updateImages(mobileImages, banner, "mobile");
+        if (bannersRequest.getMobileImagesUrl() != null && !bannersRequest.getMobileImagesUrl().isEmpty()) {
+            updateImages(bannersRequest.getMobileImagesUrl(), banner, "mobile");
         }
 
         return bannersRepository.save(banner);
@@ -71,26 +68,24 @@ public class BannersService {
     }
 
     @CacheEvict(value = "bannersCache", allEntries = true)
-    public Banners update(Long id, List<MultipartFile> desktopImages,
-                          List<MultipartFile> mobileImages,
-                          BannersRequest bannersRequest) throws IOException {
+    public Banners update(Long id, BannersRequest bannersRequest) throws IOException {
 
         Banners banner = getById(id);
 
-        if (desktopImages != null && !desktopImages.isEmpty()) {
+        if (bannersRequest.getDesktopImagesUrl() != null && !bannersRequest.getDesktopImagesUrl().isEmpty()) {
 
             deleteImages(banner, "desktop");
-            updateImages(desktopImages, banner, "desktop");
+            updateImages(bannersRequest.getDesktopImagesUrl(), banner, "desktop");
         }
         else {
 
             deleteImages(banner, "desktop");
         }
 
-        if (mobileImages != null && !mobileImages.isEmpty()) {
+        if (bannersRequest.getMobileImagesUrl() != null && !bannersRequest.getMobileImagesUrl().isEmpty()) {
 
             deleteImages(banner, "mobile");
-            updateImages(mobileImages, banner, "mobile");
+            updateImages(bannersRequest.getMobileImagesUrl(), banner, "mobile");
         }
         else {
 
@@ -119,13 +114,13 @@ public class BannersService {
         return "Banner Deleted Successfully";
     }
 
-    private void updateImages(List<MultipartFile> images, Banners banner, String type) throws IOException {
+    private void updateImages(List<String> images, Banners banner, String type) {
 
         String[] languages = {"uz", "ru", "eng"};
 
         for (int i = 0; i < images.size(); i++) {
 
-            String imageName = fileUploadUtilService.handleMediaUpload(images.get(i));
+            String imageName = images.get(i);
 
             switch (languages[i]) {
 

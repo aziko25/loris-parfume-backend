@@ -24,6 +24,8 @@ public class ItemsRequest {
     private Double price;
     private Integer discountPercent;
 
+    private List<String> imagesUrl;
+
     private Long categoryId;
     private List<Long> collectionIds;
     private Boolean isRecommendedInMainPage;

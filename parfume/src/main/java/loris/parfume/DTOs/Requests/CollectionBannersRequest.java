@@ -3,17 +3,18 @@ package loris.parfume.DTOs.Requests;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-public class BlogsRequest {
+public class CollectionBannersRequest {
 
     private String titleUz;
     private String titleRu;
+    private String titleEng;
 
-    private String descriptionUz;
-    private String descriptionRu;
+    private List<String> imagesUrl;
 
-    private String imageUrl;
-
+    private String redirectTo;
     private Boolean isActive;
 }

@@ -16,6 +16,8 @@ public class CollectionsRequest {
     private String descriptionUz;
     private String descriptionRu;
 
+    private String imageUrl;
+
     private Integer sortOrder;
     private Boolean isFiftyPercentSaleApplied;
     private Boolean isRecommendedInMainPage;

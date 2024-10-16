@@ -5,7 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Images.FileUploadUtilService;
 import loris.parfume.DTOs.Filters.BannerFilters;
-import loris.parfume.DTOs.Requests.BannersRequest;
+import loris.parfume.DTOs.Requests.CollectionBannersRequest;
 import loris.parfume.Models.CollectionBanners;
 import loris.parfume.Repositories.CollectionBannersRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,20 +36,20 @@ public class CollectionBannersService {
 
     @Transactional
     @CacheEvict(value = "collectionsBannersCache", allEntries = true)
-    public CollectionBanners create(List<MultipartFile> images, BannersRequest bannersRequest) throws IOException {
+    public CollectionBanners create(CollectionBannersRequest collectionBannersRequest) throws IOException {
 
         CollectionBanners collectionBanner = CollectionBanners.builder()
                 .createdTime(LocalDateTime.now())
-                .titleUz(bannersRequest.getTitleUz())
-                .titleRu(bannersRequest.getTitleRu())
-                .titleEng(bannersRequest.getTitleEng())
-                .redirectTo(bannersRequest.getRedirectTo())
-                .isActive(bannersRequest.getIsActive())
+                .titleUz(collectionBannersRequest.getTitleUz())
+                .titleRu(collectionBannersRequest.getTitleRu())
+                .titleEng(collectionBannersRequest.getTitleEng())
+                .redirectTo(collectionBannersRequest.getRedirectTo())
+                .isActive(collectionBannersRequest.getIsActive())
                 .build();
 
         collectionBannersRepository.save(collectionBanner);
 
-        updateImages(images, collectionBanner);
+        updateImages(collectionBannersRequest.getImagesUrl(), collectionBanner);
 
         return collectionBannersRepository.save(collectionBanner);
     }
@@ -74,25 +73,25 @@ public class CollectionBannersService {
     }
 
     @CacheEvict(value = "collectionsBannersCache", allEntries = true)
-    public CollectionBanners update(Long id, List<MultipartFile> images, BannersRequest bannersRequest) throws IOException {
+    public CollectionBanners update(Long id, CollectionBannersRequest collectionBannersRequest) throws IOException {
 
         CollectionBanners collectionBanner = getById(id);
 
-        if (images != null && !images.isEmpty()) {
+        if (collectionBannersRequest.getImagesUrl() != null && !collectionBannersRequest.getImagesUrl().isEmpty()) {
 
             deleteImages(collectionBanner);
-            updateImages(images, collectionBanner);
+            updateImages(collectionBannersRequest.getImagesUrl(), collectionBanner);
         }
         else {
 
             deleteImages(collectionBanner);
         }
 
-        Optional.ofNullable(bannersRequest.getRedirectTo()).ifPresent(collectionBanner::setRedirectTo);
-        Optional.ofNullable(bannersRequest.getTitleUz()).ifPresent(collectionBanner::setTitleUz);
-        Optional.ofNullable(bannersRequest.getTitleRu()).ifPresent(collectionBanner::setTitleRu);
-        Optional.ofNullable(bannersRequest.getTitleEng()).ifPresent(collectionBanner::setTitleEng);
-        Optional.ofNullable(bannersRequest.getIsActive()).ifPresent(collectionBanner::setIsActive);
+        Optional.ofNullable(collectionBannersRequest.getRedirectTo()).ifPresent(collectionBanner::setRedirectTo);
+        Optional.ofNullable(collectionBannersRequest.getTitleUz()).ifPresent(collectionBanner::setTitleUz);
+        Optional.ofNullable(collectionBannersRequest.getTitleRu()).ifPresent(collectionBanner::setTitleRu);
+        Optional.ofNullable(collectionBannersRequest.getTitleEng()).ifPresent(collectionBanner::setTitleEng);
+        Optional.ofNullable(collectionBannersRequest.getIsActive()).ifPresent(collectionBanner::setIsActive);
 
         return collectionBannersRepository.save(collectionBanner);
     }
@@ -109,7 +108,7 @@ public class CollectionBannersService {
         return "Collection Banner Deleted Successfully";
     }
 
-    private void updateImages(List<MultipartFile> images, CollectionBanners collectionBanner) throws IOException {
+    private void updateImages(List<String> images, CollectionBanners collectionBanner) {
 
         deleteImages(collectionBanner);
 
@@ -117,7 +116,7 @@ public class CollectionBannersService {
 
         for (int i = 0; i < images.size(); i++) {
 
-            String imageName = fileUploadUtilService.handleMediaUpload(images.get(i));
+            String imageName = images.get(i);
 
             switch (languages[i]) {
 

@@ -3,6 +3,8 @@ package loris.parfume.DTOs.Requests;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class CataloguesRequest {
@@ -14,4 +16,6 @@ public class CataloguesRequest {
     private String descriptionUz;
     private String descriptionRu;
     private String descriptionEng;
+
+    private List<String> filesUrl;
 }

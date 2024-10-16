@@ -113,6 +113,50 @@ public class PromocodesService {
         return promocode;
     }
 
+    public Promocodes update(Long promocodeId, PromocodeRequest promocodeRequest) {
+
+        Promocodes promocodes = promocodesRepository.findById(promocodeId)
+                .orElseThrow(() -> new EntityNotFoundException("Promocode not found with id: " + promocodeId));
+
+        Optional<Promocodes> existingCode = promocodesRepository.findByCode(promocodeRequest.getCode().toUpperCase().replace(" ", ""));
+        if (existingCode.isPresent() && !existingCode.get().getId().equals(promocodeId)) {
+            throw new EntityExistsException("This Promocode Already Exists!");
+        }
+
+        promocodes.setCode(promocodeRequest.getCode().toUpperCase().replace(" ", ""));
+        promocodes.setIsActive(promocodeRequest.getIsActive());
+        promocodes.setDiscountPercent(promocodeRequest.getDiscountPercent());
+        promocodes.setDiscountSum(promocodeRequest.getDiscountSum());
+
+        // Handle endless quantity
+        promocodes.setIsEndlessQuantity(promocodeRequest.getIsEndlessQuantity());
+        if (!promocodeRequest.getIsEndlessQuantity()) {
+            promocodes.setActivationQuantity(promocodeRequest.getActivationQuantity());
+        } else {
+            promocodes.setActivationQuantity(null);
+        }
+
+        // Handle time-bound validity
+        promocodes.setIsForever(promocodeRequest.getIsForever());
+        if (!promocodeRequest.getIsForever()) {
+            promocodes.setStartTime(promocodeRequest.getStartTime());
+            promocodes.setEndTime(promocodeRequest.getEndTime());
+        } else {
+            promocodes.setStartTime(null);
+            promocodes.setEndTime(null);
+        }
+
+        // Handle user activation limits
+        promocodes.setIsUserActivationOnce(promocodeRequest.getIsUserActivationOnce());
+        if (!promocodeRequest.getIsUserActivationOnce()) {
+            promocodes.setUserActivationQuantity(promocodeRequest.getUserActivationQuantity());
+        } else {
+            promocodes.setUserActivationQuantity(null);
+        }
+
+        return promocodesRepository.save(promocodes);
+    }
+
     public String delete(Long id) {
 
         Promocodes promocode = promocodesRepository.findById(id)

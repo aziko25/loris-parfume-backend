@@ -37,6 +37,13 @@ public class OrdersController {
         return ResponseEntity.ok(ordersService.getById(id));
     }
 
+    @Authorization(requiredRoles = {"ADMIN"})
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody OrdersRequest ordersRequest) {
+
+        return ResponseEntity.ok(ordersService.update(id, ordersRequest));
+    }
+
     @Authorization(requiredRoles = {"ADMIN", "USER"})
     @PostMapping("/allMy")
     public ResponseEntity<?> allMy(@RequestParam Integer page) {

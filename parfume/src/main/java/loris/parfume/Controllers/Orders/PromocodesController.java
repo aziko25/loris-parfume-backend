@@ -37,6 +37,13 @@ public class PromocodesController {
     }
 
     @Authorization(requiredRoles = {"ADMIN"})
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody PromocodeRequest promocodeRequest) {
+
+        return ResponseEntity.ok(promocodesService.update(id, promocodeRequest));
+    }
+
+    @Authorization(requiredRoles = {"ADMIN"})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 

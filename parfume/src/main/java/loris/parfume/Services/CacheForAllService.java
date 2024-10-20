@@ -62,7 +62,7 @@ public class CacheForAllService {
     )
     public Page<ItemsDTO> allItems(Integer page, String collectionSlug, String categorySlug) {
 
-        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("barcode").descending());
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createdTime").descending());
 
         if (collectionSlug == null) {
 

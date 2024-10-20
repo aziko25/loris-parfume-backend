@@ -273,12 +273,15 @@ public class ItemsService {
 
         List<Items_Images> itemsImagesList = itemsImagesRepository.findAllByItem(item);
 
-        List<String> imagesNamesList = itemsImagesList.stream()
-                .map(Items_Images::getImageName)
-                .toList();
+        if (itemsImagesList != null && !itemsImagesList.isEmpty()) {
 
-        fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
-        itemsImagesRepository.deleteAllByItem(item);
+            List<String> imagesNamesList = itemsImagesList.stream()
+                    .map(Items_Images::getImageName)
+                    .toList();
+
+            fileUploadUtilService.handleMultipleMediaDeletion(imagesNamesList);
+            itemsImagesRepository.deleteAllByItem(item);
+        }
 
         itemsRepository.delete(item);
 

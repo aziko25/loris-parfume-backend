@@ -300,7 +300,7 @@ public class ItemsService {
 
             sizesItem.setSize(size);
             sizesItem.setItem(item);
-            sizesItem.setPrice((Double) map.get("price"));
+            sizesItem.setPrice(((Number) map.get("price")).doubleValue());
 
             if (cheapestItemPrice > sizesItem.getPrice()) {
 

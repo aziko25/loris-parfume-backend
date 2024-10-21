@@ -129,8 +129,20 @@ public class ItemsDTO implements Serializable {
                         map.put("collectionNameRu", collection.getCollection().getNameRu());
                         map.put("collectionNameEng", collection.getCollection().getNameEng());
 
-                        if (Boolean.TRUE.equals(collection.getCollection().getIsFiftyPercentSaleApplied())) {
+                        List<Map<String, Object>> collectionCategoriesList = collection.getCollection().getCategoriesList().stream()
+                                .map(category -> {
 
+                                    Map<String, Object> categoryMap = new LinkedHashMap<>();
+
+                                    categoryMap.put("id", category.getId());
+                                    categoryMap.put("nameUz", category.getNameUz());
+                                    categoryMap.put("nameRu", category.getNameRu());
+                                    return categoryMap;
+                                }).collect(Collectors.toList());
+
+                        map.put("collectionCategoriesList", collectionCategoriesList);
+
+                        if (Boolean.TRUE.equals(collection.getCollection().getIsFiftyPercentSaleApplied())) {
                             isFiftyPercentSaleApplied = true;
                         }
 

@@ -17,6 +17,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info().title("API Documentation").version("1.0"))
                 .addServersItem(new Server().url("https://api.lorisparfume.uz"))
+                .addServersItem(new Server().url("http://localhost:888"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()

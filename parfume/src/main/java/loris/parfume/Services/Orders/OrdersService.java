@@ -17,6 +17,7 @@ import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.*;
 import loris.parfume.Repositories.UsersRepository;
+import loris.parfume.SMS_Eskiz.EskizService;
 import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -57,6 +58,7 @@ public class OrdersService {
     private final PromocodesRepository promocodesRepository;
     private final MainTelegramBot mainTelegramBot;
     private final Users_Promocodes_Repository usersPromocodesRepository;
+    private final EskizService eskizService;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -348,6 +350,8 @@ public class OrdersService {
         OrdersDTO orderDTO = new OrdersDTO(order);
 
         webSocketController.sendOrderUpdate(orderDTO);
+
+        eskizService.sendOrderCreatedSms(ordersRequest.getPhone(), order.getId());
 
         return orderDTO;
     }

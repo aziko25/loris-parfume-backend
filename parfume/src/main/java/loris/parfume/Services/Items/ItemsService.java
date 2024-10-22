@@ -184,7 +184,7 @@ public class ItemsService {
         if (itemsRequest.getBarcode() != null) {
 
             Optional<Items> existingBarcode = itemsRepository.findByBarcode(itemsRequest.getBarcode());
-            if (existingBarcode.isPresent()) {
+            if (existingBarcode.isPresent() && !item.getBarcode().equals(existingBarcode.get().getBarcode())) {
 
                 throw new EntityExistsException("Barcode Already Exists!");
             }
@@ -241,15 +241,12 @@ public class ItemsService {
             List<Items_Images> imagesList = new ArrayList<>();
             for (String image : itemsRequest.getImagesUrl()) {
 
-                if (!imagesNamesList.contains(image)) {
+                Items_Images itemsImage = Items_Images.builder()
+                        .item(item)
+                        .imageName(image)
+                        .build();
 
-                    Items_Images itemsImage = Items_Images.builder()
-                            .item(item)
-                            .imageName(image)
-                            .build();
-
-                    imagesList.add(itemsImage);
-                }
+                imagesList.add(itemsImage);
             }
 
             item.setItemsImagesList(itemsImagesRepository.saveAll(imagesList));

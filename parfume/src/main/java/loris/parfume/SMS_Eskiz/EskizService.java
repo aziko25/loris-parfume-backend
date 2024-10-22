@@ -89,6 +89,13 @@ public class EskizService {
         }
     }
 
+    public void sendOrderCreatedSms(String phone, Long orderId) {
+
+        String text = "Assalomu alaykum. Loris Parfum'dan xarid qilganingiz uchun rahmat! Buyurtma ID: " + orderId + ". Xaridingizni tez orada yetkazib beramiz!";
+
+        sendSms(phone, text);
+    }
+
     private void sendSms(String phone, String text) {
 
         String url = "https://notify.eskiz.uz/api/message/sms/send";

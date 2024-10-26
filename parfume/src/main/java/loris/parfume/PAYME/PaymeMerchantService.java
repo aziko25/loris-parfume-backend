@@ -7,6 +7,7 @@ import loris.parfume.PAYME.Exceptions.*;
 import loris.parfume.PAYME.Result.*;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
+import loris.parfume.SMS_Eskiz.EskizService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -26,6 +27,7 @@ public class PaymeMerchantService {
     private final TransactionRepository transactionRepository;
     private final MainTelegramBot mainTelegramBot;
     private final BasketsRepository basketsRepository;
+    private final EskizService eskizService;
 
     @Value("${payment.chat.id}")
     private String paymentChatId;
@@ -167,6 +169,14 @@ public class PaymeMerchantService {
 
                         basketsRepository.deleteAllByUser(order.getUser());
                     }
+
+                    String clientsPhone = order.getPhone();
+                    if (clientsPhone == null && order.getUser() != null) {
+
+                        clientsPhone = order.getUser().getPhone();
+                    }
+
+                    eskizService.sendOrderCreatedSms(clientsPhone, order.getId());
 
                     return result;
                 }

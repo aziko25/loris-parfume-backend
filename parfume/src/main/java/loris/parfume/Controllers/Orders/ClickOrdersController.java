@@ -6,6 +6,7 @@ import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
+import loris.parfume.SMS_Eskiz.EskizService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class ClickOrdersController {
     private final OrdersRepository ordersRepository;
     private final MainTelegramBot mainTelegramBot;
     private final BasketsRepository basketsRepository;
+    private final EskizService eskizService;
 
     @Value("${payment.chat.id}")
     private String chatId;
@@ -123,6 +125,14 @@ public class ClickOrdersController {
 
             basketsRepository.deleteAllByUser(order.getUser());
         }
+
+        String clientsPhone = order.getPhone();
+        if (clientsPhone == null && order.getUser() != null) {
+
+            clientsPhone = order.getUser().getPhone();
+        }
+
+        eskizService.sendOrderCreatedSms(clientsPhone, order.getId());
 
         return ResponseEntity.ok(response);
     }

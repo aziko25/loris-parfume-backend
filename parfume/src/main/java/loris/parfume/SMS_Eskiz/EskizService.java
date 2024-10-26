@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDateTime;
 
@@ -28,11 +30,16 @@ public class EskizService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private final MainTelegramBot mainTelegramBot;
+
     @Value("${eskiz.mail}")
     private String mail;
 
     @Value("${eskiz.password}")
     private String password;
+
+    @Value("${payment.chat.id}")
+    private Long paymentChatId;
 
     @PostConstruct
     public void onStartup() {
@@ -98,30 +105,42 @@ public class EskizService {
 
     private void sendSms(String phone, String text) {
 
-        String url = "https://notify.eskiz.uz/api/message/sms/send";
+        try {
 
-        Sms_Otp smsOtp = Sms_Otp.builder()
-                .createdTime(LocalDateTime.now())
-                .text(text)
-                .phone(phone)
-                .build();
+            String url = "https://notify.eskiz.uz/api/message/sms/send";
 
-        smsOtpRepository.save(smsOtp);
+            Sms_Otp smsOtp = Sms_Otp.builder()
+                    .createdTime(LocalDateTime.now())
+                    .text(text)
+                    .phone(phone)
+                    .build();
 
-        HttpHeaders headers = new HttpHeaders();
+            smsOtpRepository.save(smsOtp);
 
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(ESKIZ_TOKEN);
+            HttpHeaders headers = new HttpHeaders();
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setBearerAuth(ESKIZ_TOKEN);
 
-        body.add("mobile_phone", phone);
-        body.add("message", text);
-        body.add("from", "4546");
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+            body.add("mobile_phone", phone);
+            body.add("message", text);
+            body.add("from", "4546");
 
-        restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+            restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        }
+        catch (Exception e) {
+
+            SendMessage message = new SendMessage();
+
+            message.setChatId(paymentChatId);
+            message.setText("Nomer Notog'ri Kiritilgan!");
+
+            mainTelegramBot.sendMessage(message);
+        }
     }
 }
 

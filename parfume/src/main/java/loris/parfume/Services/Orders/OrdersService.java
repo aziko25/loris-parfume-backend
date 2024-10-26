@@ -351,8 +351,6 @@ public class OrdersService {
 
         webSocketController.sendOrderUpdate(orderDTO);
 
-        eskizService.sendOrderCreatedSms(ordersRequest.getPhone(), order.getId());
-
         return orderDTO;
     }
 
@@ -406,6 +404,7 @@ public class OrdersService {
             Map<Long, Integer> collectionItemCountMap = new HashMap<>();
 
             ordersItemsRepository.deleteAllByOrder(order);
+            order.setItemsList(null);
 
             for (Orders_Items_Request ordersItemsRequest : ordersRequest.getOrdersItemsList()) {
 

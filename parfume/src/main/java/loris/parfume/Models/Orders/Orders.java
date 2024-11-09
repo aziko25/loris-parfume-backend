@@ -28,6 +28,7 @@ public class Orders {
     private LocalDateTime createdTime;
 
     private String address;
+    private String city;
     private String addressLocationLink;
     private Double distance;
     private String fullName;
@@ -55,9 +56,12 @@ public class Orders {
 
     private Boolean isOrderDelivered;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    private OrdersStatuses status;
+
+    /*@ManyToOne
     @JoinColumn(name = "branch_id")
-    private Branches branch;
+    private Branches branch;*/
 
     @ManyToOne
     @JoinColumn(name = "user_id")

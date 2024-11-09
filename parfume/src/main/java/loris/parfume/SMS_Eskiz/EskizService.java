@@ -77,28 +77,22 @@ public class EskizService {
         sendSms(phone, text);
     }
 
-    public void sendPasswordResetOtp(String phone, String link) {
+    public void sendOrderOtp(String phone, String code) {
 
-        String text = "Восстановление пароля для сайта Loris Parfume: " + link;
+        String text = "Код подтверждения для заказа на сайте Loris Parfume: " + code;
         sendSms(phone, text);
-    }
-
-    public void sendUzumNasiyaOrderStatus(String phone, Long orderId, Boolean isApproved) {
-
-        if (isApproved) {
-
-            sendSms(phone, "Ваша заявка по Uzum Nasiya на заказ: " + orderId + " была одобрена на сайте Loris Parfume." +
-                    "\nПроверьте статус вашего заказа в личном кабинете.");
-        }
-        else {
-
-            sendSms(phone, "Ваша заявка по Uzum Nasiya на заказ: " + orderId + " была отклонена на сайте Loris Parfume.");
-        }
     }
 
     public void sendOrderCreatedSms(String phone, Long orderId) {
 
         String text = "Assalomu alaykum. Loris Parfum'dan xarid qilganingiz uchun rahmat! Buyurtma ID: " + orderId + ". Xaridingizni tez orada yetkazib beramiz!";
+
+        sendSms(phone, text);
+    }
+
+    public void sendOrderIsOnTheWaySms(String phone, String deliveryDuration, Long orderId) {
+
+        String text = "Assalomu alaykum. Loris Parfum'dan Buyurtma ID: " + orderId + " " + deliveryDuration + " Yetkazib Beriladi!";
 
         sendSms(phone, text);
     }

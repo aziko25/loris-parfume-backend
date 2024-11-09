@@ -3,41 +3,27 @@ package loris.parfume.Services;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.DTOs.Requests.BranchesRequest;
-import loris.parfume.DTOs.Requests.NearestBranchRequest;
-import loris.parfume.DTOs.returnDTOs.BranchesDTO;
 import loris.parfume.Models.Branches;
-import loris.parfume.Models.Orders.DeliveryRates;
 import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BranchesRepository;
-import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
-import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static loris.parfume.DefaultEntitiesService.DELIVERY_RATE;
 
 @Service
 @RequiredArgsConstructor
 public class BranchesService {
 
     private final BranchesRepository branchesRepository;
-    private final DeliveryRatesRepository deliveryRatesRepository;
+    //private final DeliveryRatesRepository deliveryRatesRepository;
     private final OrdersRepository ordersRepository;
     private final CacheForAllService cacheForAllService;
-    private final JdbcTemplate jdbcTemplate;
+    //private final JdbcTemplate jdbcTemplate;
 
     @CacheEvict(value = "branchesCache", allEntries = true)
     public Branches create(BranchesRequest branchesRequest) {
@@ -108,7 +94,7 @@ public class BranchesService {
         return "Branch Successfully Deleted";
     }
 
-    double SEMI_MAJOR_AXIS_MT = 6378137;
+    /*double SEMI_MAJOR_AXIS_MT = 6378137;
     double SEMI_MINOR_AXIS_MT = 6356752.314245;
     double FLATTENING = 1 / 298.257223563;
     double ERROR_TOLERANCE = 1e-12;
@@ -300,5 +286,5 @@ public class BranchesService {
         }
 
         throw new IllegalArgumentException("Problems With Delivery Rate!");
-    }
+    }*/
 }

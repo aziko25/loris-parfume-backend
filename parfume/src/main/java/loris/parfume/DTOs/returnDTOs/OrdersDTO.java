@@ -64,6 +64,8 @@ public class OrdersDTO implements Serializable {
     private String paymentResponseRu;
     private String paymentResponseEng;
 
+    private String status;
+
     private Boolean isOrderDelivered;
 
     private Long promocodeId;
@@ -114,6 +116,8 @@ public class OrdersDTO implements Serializable {
         paymentResponseRu = order.getPaymentResponseRu();
         paymentResponseEng = order.getPaymentResponseEng();
 
+        status = String.valueOf(order.getStatus());
+
         isOrderDelivered = order.getIsOrderDelivered();
 
         if (order.getPromocode() != null) {
@@ -124,14 +128,14 @@ public class OrdersDTO implements Serializable {
             promocodeDiscountSum = order.getPromocode().getDiscountSum();
         }
 
-        if (order.getBranch() != null) {
+        /*if (order.getBranch() != null) {
 
             branchId = order.getBranch().getId();
             branchName = order.getBranch().getName();
             branchLongitude = order.getBranch().getLongitude();
             branchLatitude = order.getBranch().getLatitude();
             branchRedirectTo = order.getBranch().getRedirectTo();
-        }
+        }*/
 
         itemsList = new ArrayList<>();
         if (order.getItemsList() != null && !order.getItemsList().isEmpty()) {

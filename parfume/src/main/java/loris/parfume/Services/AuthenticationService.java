@@ -39,11 +39,6 @@ public class AuthenticationService {
 
     public UsersDTO signUp(SignupRequest request) {
 
-        if (!request.getPassword().equals(request.getRePassword())) {
-
-            throw new IllegalArgumentException("Passwords do not match");
-        }
-
         String phone = request.getPhone();
         if (!phone.startsWith("+")) {
 
@@ -62,7 +57,6 @@ public class AuthenticationService {
                 .registrationTime(LocalDateTime.now())
                 .phone(phone)
                 .fullName(request.getFullName())
-                .password(request.getPassword())
                 .role("USER")
                 .authVerifyCode(verificationCode)
                 .build();
@@ -177,15 +171,10 @@ public class AuthenticationService {
             throw new EntityNotFoundException("Phone Not Found");
         }
 
-        if (!Objects.equals(user.getPassword(), request.getPassword())) {
-
-            throw new IllegalArgumentException("Password Didn't Match!");
-        }
-
         return generateJwt(user);
     }
 
-    public String generateResetPasswordCode(String phone) {
+    /*public String generateResetPasswordCode(String phone) {
 
         if (!phone.startsWith("+")) {
             phone = "+" + phone;
@@ -263,7 +252,7 @@ public class AuthenticationService {
         resetPasswordCodes.remove(code);
 
         return generateJwt(user);
-    }
+    }*/
 
     private Map<String, Object> generateJwt(Users user) {
 
@@ -289,5 +278,74 @@ public class AuthenticationService {
         response.put("token", token);
 
         return response;
+    }
+
+    private final Map<String, String> orderOtpCodes = new ConcurrentHashMap<>();
+
+    public String initiateOrderOtpVerification(String phone) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
+
+        String orderVerificationCode = generateVerificationCode();
+        eskizService.sendOrderOtp(phone, orderVerificationCode);
+
+        orderOtpCodes.put(phone, orderVerificationCode);
+
+        String finalPhone = phone;
+        scheduler.schedule(() -> orderOtpCodes.remove(finalPhone), 5, TimeUnit.MINUTES);
+
+        return "Order OTP sent successfully";
+    }
+
+    public Map<String, Object> verifyOrderOtp(String phone, String otp) {
+
+        String storedOtp = orderOtpCodes.get(phone);
+
+        if (storedOtp == null) {
+
+            throw new IllegalArgumentException("No OTP found for this phone number or OTP expired");
+        }
+
+        if (!storedOtp.equals(otp)) {
+
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+
+        orderOtpCodes.remove(phone);
+
+        Users user = usersRepository.findByPhone(phone);
+        if (user == null) {
+
+            user = Users.builder()
+                    .registrationTime(LocalDateTime.now())
+                    .role("USER")
+                    .phone(phone)
+                    .build();
+
+            usersRepository.save(user);
+
+            return generateJwt(user);
+        }
+
+        return null;
+    }
+
+    public String resendOrderOtp(String phone) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
+
+        String newOtp = generateVerificationCode();
+        eskizService.sendOrderOtp(phone, newOtp);
+
+        orderOtpCodes.put(phone, newOtp);
+
+        String finalPhone = phone;
+        scheduler.schedule(() -> orderOtpCodes.remove(finalPhone), 5, TimeUnit.MINUTES);
+
+        return "Order OTP successfully resent";
     }
 }

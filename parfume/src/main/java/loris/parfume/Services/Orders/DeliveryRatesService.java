@@ -1,24 +1,13 @@
 package loris.parfume.Services.Orders;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import loris.parfume.DTOs.Requests.Orders.DeliveryRatesRequest;
-import loris.parfume.Models.Orders.DeliveryRates;
-import loris.parfume.Repositories.Orders.DeliveryRatesRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class DeliveryRatesService {
 
-    private final DeliveryRatesRepository deliveryRatesRepository;
+    /*private final DeliveryRatesRepository deliveryRatesRepository;
 
     @Value("${pageSize}")
     private Integer pageSize;
@@ -123,5 +112,5 @@ public class DeliveryRatesService {
         deliveryRatesRepository.delete(deliveryRate);
 
         return "Delivery Rate Deleted";
-    }
+    }*/
 }

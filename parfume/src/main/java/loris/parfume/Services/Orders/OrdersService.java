@@ -5,20 +5,16 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import loris.parfume.Controllers.Orders.WebSocketController;
-import loris.parfume.DTOs.Requests.NearestBranchRequest;
 import loris.parfume.DTOs.Requests.Orders.OrdersRequest;
 import loris.parfume.DTOs.Requests.Orders.Orders_Items_Request;
 import loris.parfume.DTOs.returnDTOs.OrdersDTO;
-import loris.parfume.Models.Branches;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Models.Orders.*;
 import loris.parfume.Models.Users;
-import loris.parfume.Repositories.BranchesRepository;
 import loris.parfume.Repositories.Items.*;
 import loris.parfume.Repositories.Orders.*;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.SMS_Eskiz.EskizService;
-import loris.parfume.Services.BranchesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,11 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -50,9 +42,9 @@ public class OrdersService {
     private final UsersRepository usersRepository;
     private final SizesRepository sizesRepository;
     private final Sizes_Items_Repository sizesItemsRepository;
-    private final BranchesRepository branchesRepository;
+    //private final BranchesRepository branchesRepository;
     private final WebSocketController webSocketController;
-    private final BranchesService branchesService;
+    //private final BranchesService branchesService;
     private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
     private final PromocodesService promocodesService;
     private final PromocodesRepository promocodesRepository;
@@ -75,20 +67,16 @@ public class OrdersService {
     @Value("${payment.chat.id}")
     private String paymentChatId;
 
-    private static final String[] paymentTypesList = {"CLICK", "PAYME", "CASH", "UZUM", "UZUM NASIYA"};
+    private static final String[] paymentTypesList = {"CLICK", "PAYME", "CASH"};
 
     @Transactional
     @CacheEvict(value = "ordersCache", allEntries = true)
     public OrdersDTO create(OrdersRequest ordersRequest) {
 
-        Users user = null;
-        if (ordersRequest.getUserId() != null) {
-
-            user = usersRepository.findById(ordersRequest.getUserId())
+        Users user = usersRepository.findById(USER_ID)
                     .orElseThrow(() -> new EntityNotFoundException("User Not Found"));
-        }
 
-        Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
+        /*Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
 
         NearestBranchRequest nearestBranchRequest =
@@ -101,6 +89,18 @@ public class OrdersService {
 
             throw new IllegalArgumentException("Delivery Sum Is Incorrect. It Should Be " +
                     calculatedSum + " Instead Of " + expectedSum);
+        }*/
+
+        double deliverySum;
+        if (ordersRequest.getCity().equalsIgnoreCase("tashkent")
+                || ordersRequest.getCity().equalsIgnoreCase("toshkent")
+                || ordersRequest.getCity().equalsIgnoreCase("ташкент")) {
+
+            deliverySum =  20000.0;
+        }
+        else {
+
+            deliverySum = 30000.0;
         }
 
         if (!Arrays.asList(paymentTypesList).contains(ordersRequest.getPaymentType().toUpperCase())) {
@@ -111,19 +111,20 @@ public class OrdersService {
         Orders order = Orders.builder()
                 .createdTime(LocalDateTime.now())
                 .address(ordersRequest.getAddress())
+                .city(ordersRequest.getCity())
                 .addressLocationLink(ordersRequest.getAddressLocationLink() + "&z=19")
                 .distance(ordersRequest.getDistance())
-                .fullName(ordersRequest.getFullName())
-                .phone(ordersRequest.getPhone())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
                 .comments(ordersRequest.getComment())
-                .sumForDelivery(ordersRequest.getDeliverySum())
+                .sumForDelivery(deliverySum)
                 .isDelivered(false)
                 .isDelivery(ordersRequest.getIsDelivery())
                 .isSoonDeliveryTime(ordersRequest.getIsSoonDeliveryTime())
                 .scheduledDeliveryTime(ordersRequest.getScheduledDeliveryTime())
                 .isOrderDelivered(false)
+                .status(OrdersStatuses.NEW)
                 .user(user)
-                .branch(branch)
                 .build();
 
         ordersRepository.save(order);
@@ -208,11 +209,6 @@ public class OrdersService {
             collectionItemCountMap.put(collectionsItem.getCollection().getId(), currentCount);
         }
 
-        if (user == null && ordersRequest.getPromocode() != null && !ordersRequest.getPromocode().isEmpty()) {
-
-            throw new IllegalArgumentException("Authorize To Use Promocode!");
-        }
-
         if (ordersRequest.getPromocode() != null && !ordersRequest.getPromocode().isEmpty()) {
 
             Promocodes promocode = promocodesService.getByCode(ordersRequest.getPromocode());
@@ -248,9 +244,9 @@ public class OrdersService {
         }
         else {
 
-            order.setTotalSum(totalSum + ordersRequest.getDeliverySum());
-            order.setSumForDelivery(ordersRequest.getDeliverySum());
-            totalSum += ordersRequest.getDeliverySum();
+            order.setTotalSum(totalSum + deliverySum);
+            order.setSumForDelivery(deliverySum);
+            totalSum += deliverySum;
         }
 
         if (ordersRequest.getTotalSum() != totalSum) {
@@ -259,10 +255,8 @@ public class OrdersService {
         }
 
         ordersItemsRepository.saveAll(saveAllOrderItemsList);
-
         order.setItemsList(saveAllOrderItemsList);
 
-        //basketsRepository.deleteAllByUser(user);
         ordersRepository.save(order);
 
         if (ordersRequest.getPaymentType().equalsIgnoreCase("CLICK")) {
@@ -301,48 +295,8 @@ public class OrdersService {
             message.setChatId(paymentChatId);
             message.setText(orderDetailsMessage(order, "CASH"));
             mainTelegramBot.sendMessage(message);
-        }
-        else if (ordersRequest.getPaymentType().equalsIgnoreCase("UZUM NASIYA")) {
 
-            order.setPaymentLink("UZUM NASIYA");
-            order.setIsPaid(false);
-            order.setPaymentType("UZUM NASIYA");
-
-            Uzum_Nasiya_Clients uzumNasiyaClient = Uzum_Nasiya_Clients.builder()
-                    .phone(ordersRequest.getPhone())
-                    .user(user)
-                    .order(order)
-                    .sum(order.getTotalSum())
-                    .build();
-
-            uzumNasiyaClientsRepository.save(uzumNasiyaClient);
-
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(paymentChatId);
-            sendMessage.setText("UZUM NASIYA\n----------------\nOrder ID: " + order.getId() +
-                    "\nPhone: " + order.getPhone() + "\nFull Name: " + ordersRequest.getFullName() +
-                    "\nOrder Sum: " + order.getTotalSum());
-
-            InlineKeyboardButton confirmButton = new InlineKeyboardButton();
-            confirmButton.setText("Подтвердить");
-            confirmButton.setCallbackData("confirm_" + order.getId());
-
-            InlineKeyboardButton rejectButton = new InlineKeyboardButton();
-            rejectButton.setText("Отказать");
-            rejectButton.setCallbackData("reject_" + order.getId());
-
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            keyboardButtonsRow1.add(confirmButton);
-            keyboardButtonsRow1.add(rejectButton);
-
-            List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>();
-            keyboardRows.add(keyboardButtonsRow1);
-
-            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-            inlineKeyboardMarkup.setKeyboard(keyboardRows);
-            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-
-            mainTelegramBot.sendMessage(sendMessage);
+            eskizService.sendOrderCreatedSms(ordersRequest.getPhone(), order.getId());
         }
 
         ordersRepository.save(order);
@@ -390,10 +344,23 @@ public class OrdersService {
         Optional.ofNullable(ordersRequest.getPaymentType()).ifPresent(order::setPaymentType);
         Optional.ofNullable(ordersRequest.getIsOrderDelivered()).ifPresent(order::setIsOrderDelivered);
 
-        if (ordersRequest.getBranchId() != null) {
+        if (ordersRequest.getStatus() != null) {
 
-            Branches branch = branchesRepository.findById(ordersRequest.getBranchId()).orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
-            order.setBranch(branch);
+            if (ordersRequest.getStatus().equals(OrdersStatuses.ON_THE_WAY)) {
+
+                if (order.getCity().equalsIgnoreCase("tashkent") ||
+                    order.getCity().equalsIgnoreCase("toshkent") ||
+                    order.getCity().equalsIgnoreCase("ташкент")) {
+
+                    eskizService.sendOrderIsOnTheWaySms(order.getPhone(), "Tez Orada", order.getId());
+                }
+                else {
+
+                    eskizService.sendOrderIsOnTheWaySms(order.getPhone(), "3 Kun Ichida", order.getId());
+                }
+            }
+
+            order.setStatus(ordersRequest.getStatus());
         }
 
         if (ordersRequest.getOrdersItemsList() != null && !ordersRequest.getOrdersItemsList().isEmpty()) {

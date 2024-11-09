@@ -58,16 +58,6 @@ public class UsersService {
 
         Optional.ofNullable(usersRequest.getFullName()).ifPresent(user::setFullName);
 
-        if (usersRequest.getPassword() != null) {
-
-            if (!usersRequest.getPassword().equals(usersRequest.getRePassword())) {
-
-                throw new IllegalArgumentException("Passwords Do Not Match!");
-            }
-
-            user.setPassword(usersRequest.getPassword());
-        }
-
         return new UsersDTO(usersRepository.save(user));
     }
 }

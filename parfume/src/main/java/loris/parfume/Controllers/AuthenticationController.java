@@ -23,7 +23,7 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.signUp(signupRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping("/generateResetPasswordCode")
+    /*@PostMapping("/generateResetPasswordCode")
     public ResponseEntity<?> generateResetPasswordCode(@RequestParam String phone) {
 
         return ResponseEntity.ok(authenticationService.generateResetPasswordCode(phone));
@@ -40,7 +40,7 @@ public class AuthenticationController {
                                            @RequestParam String newPassword, @RequestParam String reNewPassword) {
 
         return ResponseEntity.ok(authenticationService.resetPassword(phone, code, newPassword, reNewPassword));
-    }
+    }*/
 
     @PostMapping("/verifyCode")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyAuthCodeRequest verifyAuthCodeRequest) {
@@ -58,5 +58,23 @@ public class AuthenticationController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 
         return ResponseEntity.ok(authenticationService.login(loginRequest));
+    }
+
+    @PostMapping("/create/order-otp")
+    public ResponseEntity<?> createOrderOtp(@RequestParam String phone) {
+
+        return ResponseEntity.ok(authenticationService.initiateOrderOtpVerification(phone));
+    }
+
+    @PostMapping("/verify/order-otp")
+    public ResponseEntity<?> verifyOrderOtp(@RequestParam String phone, @RequestParam String code) {
+
+        return ResponseEntity.ok(authenticationService.verifyOrderOtp(phone, code));
+    }
+
+    @PostMapping("/resend/order-otp")
+    public ResponseEntity<?> resendOrderOtp(@RequestParam String phone) {
+
+        return ResponseEntity.ok(authenticationService.resendOrderOtp(phone));
     }
 }

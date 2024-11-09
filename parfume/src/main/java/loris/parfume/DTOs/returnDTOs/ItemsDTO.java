@@ -70,17 +70,9 @@ public class ItemsDTO implements Serializable {
 
         createdTime = item.getCreatedTime();
 
-        nameUz = (item.getNameUz() != null)
-                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameUz()
-                : item.getBarcode();
-
-        nameRu = (item.getNameRu() != null)
-                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameRu()
-                : item.getBarcode();
-
-        nameEng = (item.getNameEng() != null)
-                ? ((item.getBarcode() != null) ? item.getBarcode() + " | " : "") + item.getNameEng()
-                : item.getBarcode();
+        nameUz = item.getNameUz();
+        nameRu = item.getNameRu();
+        nameEng = item.getNameEng();
 
         descriptionUz = item.getDescriptionUz();
         descriptionRu = item.getDescriptionRu();

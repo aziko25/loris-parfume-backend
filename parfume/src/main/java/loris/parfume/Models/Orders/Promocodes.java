@@ -48,4 +48,6 @@ public class Promocodes {
     private Boolean isActive;
 
     private Integer activatedQuantity;
+
+    private Boolean isDeleted;
 }

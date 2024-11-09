@@ -40,6 +40,7 @@ public class PromocodesService {
                 .createdTime(LocalDateTime.now())
                 .code(promocodeRequest.getCode().toUpperCase().replace(" ", ""))
                 .isActive(promocodeRequest.getIsActive())
+                .isDeleted(false)
                 .discountPercent(promocodeRequest.getDiscountPercent())
                 .discountSum(promocodeRequest.getDiscountSum())
                 .activatedQuantity(0)
@@ -72,12 +73,12 @@ public class PromocodesService {
 
     public List<Promocodes> all() {
 
-        return promocodesRepository.findAll(Sort.by("createdTime").descending());
+        return promocodesRepository.findAllByIsDeleted(false, Sort.by("createdTime").descending());
     }
 
     public Promocodes getByCode(String code) {
 
-        Promocodes promocode = promocodesRepository.findByCodeAndIsActive(code.toUpperCase(), true)
+        Promocodes promocode = promocodesRepository.findByCodeAndIsActiveAndIsDeleted(code.toUpperCase(), true, false)
                 .orElseThrow(() -> new EntityNotFoundException("Promocode Doesn't Exist!"));
 
         if (!promocode.getIsEndlessQuantity()) {
@@ -162,7 +163,8 @@ public class PromocodesService {
         Promocodes promocode = promocodesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Promocode Doesn't Exist!"));
 
-        promocodesRepository.delete(promocode);
+        promocode.setIsDeleted(true);
+        promocodesRepository.save(promocode);
 
         return "Promocode Deleted!";
     }

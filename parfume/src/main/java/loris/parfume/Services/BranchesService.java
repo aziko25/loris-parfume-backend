@@ -80,15 +80,6 @@ public class BranchesService {
 
         Branches branch = getById(id);
 
-        List<Orders> ordersList = ordersRepository.findAllByBranch(branch);
-        List<Orders> batchUpdateOrdersList = new ArrayList<>();
-        for (Orders order : ordersList) {
-
-            order.setBranch(null);
-            batchUpdateOrdersList.add(order);
-        }
-        ordersRepository.saveAll(batchUpdateOrdersList);
-
         branchesRepository.delete(branch);
 
         return "Branch Successfully Deleted";

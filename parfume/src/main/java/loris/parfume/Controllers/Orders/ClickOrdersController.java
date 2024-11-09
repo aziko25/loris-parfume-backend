@@ -166,16 +166,6 @@ public class ClickOrdersController {
         sendMessage.setText(orderDetailsMessage(order, "CLICK"));
 
         mainTelegramBot.sendMessage(sendMessage);
-
-        if (order.getBranch().getTgChatId() != null) {
-
-            sendMessage = new SendMessage();
-
-            sendMessage.setChatId(order.getBranch().getTgChatId());
-            sendMessage.setText(orderDetailsMessage(order, "CLICK"));
-
-            mainTelegramBot.sendMessage(sendMessage);
-        }
     }
 
     public static String orderDetailsMessage(Orders order, String paymentType) {
@@ -188,7 +178,6 @@ public class ClickOrdersController {
                 "\nAddress: " + order.getAddress() +
                 "\nKartadagi Addressi: " + order.getAddressLocationLink() +
                 "\nIzoh: " + order.getComments() +
-                "\nFilial: " + order.getBranch().getName() +
                 "\nZakazning Summasi: " + order.getTotalSum() +
                 "\nYetkazib Berish Summasi: " + order.getSumForDelivery() +
                 "\nXaridlar: " + order.getItemsList().stream()

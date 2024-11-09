@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(maxAge = 3600)
 public class DeliveryRatesController {
 
-    private final DeliveryRatesService deliveryRatesService;
+    /*private final DeliveryRatesService deliveryRatesService;
 
     @Authorization(requiredRoles = {"ADMIN"})
     @PostMapping("/create")
@@ -49,5 +49,5 @@ public class DeliveryRatesController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
 
         return ResponseEntity.ok(deliveryRatesService.delete(id));
-    }
+    }*/
 }

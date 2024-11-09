@@ -157,21 +157,30 @@ public class AuthenticationService {
         return "Code Successfully Resent";
     }
 
-    public Map<String, Object> login(LoginRequest request) {
+    public String login(LoginRequest request) {
 
         String phone = request.getPhone();
         if (!phone.startsWith("+")) {
-            phone = "+" + request.getPhone();
+            phone = "+" + phone;
         }
 
         Users user = usersRepository.findByPhone(phone);
 
         if (user == null) {
-
             throw new EntityNotFoundException("Phone Not Found");
         }
 
-        return generateJwt(user);
+        String verificationCode = generateVerificationCode();
+        user.setAuthVerifyCode(verificationCode);
+        usersRepository.save(user);
+
+        cancelDeletionTask(user.getPhone());
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> deleteUserIfNotVerified(user), 5, TimeUnit.MINUTES);
+        scheduledTasks.put(user.getPhone(), scheduledTask);
+
+        eskizService.sendOtp(user.getPhone(), verificationCode);
+
+        return "Verification code sent to phone. Please verify to complete login.";
     }
 
     /*public String generateResetPasswordCode(String phone) {

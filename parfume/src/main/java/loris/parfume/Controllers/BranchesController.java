@@ -30,11 +30,11 @@ public class BranchesController {
         return ResponseEntity.ok(branchesService.all(search));
     }
 
-    @PostMapping("/nearest")
+    /*@PostMapping("/nearest")
     public ResponseEntity<?> nearest(@RequestBody NearestBranchRequest nearestBranchRequest) {
 
         return ResponseEntity.ok(branchesService.getNearestBranch(nearestBranchRequest));
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {

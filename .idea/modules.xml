@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/parfume.iml" filepath="$PROJECT_DIR$/.idea/parfume.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/loris-parfume-backend.iml" filepath="$PROJECT_DIR$/.idea/loris-parfume-backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parfume/parfume.iml" filepath="$PROJECT_DIR$/parfume/parfume.iml" />
     </modules>
   </component>
 </project>

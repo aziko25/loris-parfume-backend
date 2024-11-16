@@ -2,11 +2,9 @@ package loris.parfume.Services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import loris.parfume.DTOs.Requests.Authentication.LoginRequest;
-import loris.parfume.DTOs.Requests.Authentication.SignupRequest;
+import loris.parfume.DTOs.Requests.Authentication.AuthRequest;
 import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
 import loris.parfume.DTOs.returnDTOs.UsersDTO;
 import loris.parfume.Models.Users;
@@ -37,36 +35,41 @@ public class AuthenticationService {
     @Value("${jwt.token.expired}")
     private Long expired;
 
-    public UsersDTO signUp(SignupRequest request) {
+    public UsersDTO authenticate(AuthRequest request) {
 
-        String phone = request.getPhone();
-        if (!phone.startsWith("+")) {
+        String phone = null;
+        if (!request.getPhone().startsWith("+")) {
 
-            phone = "+" + phone;
-        }
-
-        if (usersRepository.existsByPhone(request.getPhone())) {
-
-            throw new EntityExistsException("Phone Already Exists");
+            phone = "+" + request.getPhone();
         }
 
         String verificationCode = generateVerificationCode();
-        eskizService.sendOtp(phone, verificationCode);
 
-        Users user = Users.builder()
-                .registrationTime(LocalDateTime.now())
-                .phone(phone)
-                .fullName(request.getFullName())
-                .role("USER")
-                .authVerifyCode(verificationCode)
-                .build();
+        Users user = usersRepository.findByPhone(phone);
+
+        if (user != null) {
+
+            user.setAuthVerifyCode(verificationCode);
+        }
+        else {
+
+            user = Users.builder()
+                    .registrationTime(LocalDateTime.now())
+                    .phone(phone)
+                    .fullName(request.getFullName())
+                    .role("USER")
+                    .authVerifyCode(verificationCode)
+                    .build();
+        }
 
         usersRepository.save(user);
 
         scheduler.schedule(() -> resetPasswordCodes.remove(verificationCode), 5, TimeUnit.MINUTES);
         scheduleDeletionTask(user);
-        
-        return new UsersDTO(usersRepository.save(user));
+
+        eskizService.sendOtp(request.getPhone(), verificationCode);
+
+        return new UsersDTO(user);
     }
 
     private void scheduleDeletionTask(Users user) {
@@ -155,32 +158,6 @@ public class AuthenticationService {
         eskizService.sendOtp(user.getPhone(), user.getAuthVerifyCode());
 
         return "Code Successfully Resent";
-    }
-
-    public String login(LoginRequest request) {
-
-        String phone = request.getPhone();
-        if (!phone.startsWith("+")) {
-            phone = "+" + phone;
-        }
-
-        Users user = usersRepository.findByPhone(phone);
-
-        if (user == null) {
-            throw new EntityNotFoundException("Phone Not Found");
-        }
-
-        String verificationCode = generateVerificationCode();
-        user.setAuthVerifyCode(verificationCode);
-        usersRepository.save(user);
-
-        cancelDeletionTask(user.getPhone());
-        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> deleteUserIfNotVerified(user), 5, TimeUnit.MINUTES);
-        scheduledTasks.put(user.getPhone(), scheduledTask);
-
-        eskizService.sendOtp(user.getPhone(), verificationCode);
-
-        return "Verification code sent to phone. Please verify to complete login.";
     }
 
     /*public String generateResetPasswordCode(String phone) {

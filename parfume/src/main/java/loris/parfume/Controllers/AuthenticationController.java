@@ -1,11 +1,9 @@
 package loris.parfume.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import loris.parfume.DTOs.Requests.Authentication.LoginRequest;
-import loris.parfume.DTOs.Requests.Authentication.SignupRequest;
+import loris.parfume.DTOs.Requests.Authentication.AuthRequest;
 import loris.parfume.DTOs.Requests.Authentication.VerifyAuthCodeRequest;
 import loris.parfume.Services.AuthenticationService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +15,10 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/signUp")
-    public ResponseEntity<?> signUp(@RequestBody SignupRequest signupRequest) {
+    @PostMapping
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequest authRequest) {
 
-        return new ResponseEntity<>(authenticationService.signUp(signupRequest), HttpStatus.CREATED);
+        return ResponseEntity.ok(authenticationService.authenticate(authRequest));
     }
 
     /*@PostMapping("/generateResetPasswordCode")
@@ -52,12 +50,6 @@ public class AuthenticationController {
     public ResponseEntity<?> resendCode(@RequestBody VerifyAuthCodeRequest verifyAuthCodeRequest) {
 
         return ResponseEntity.ok(authenticationService.resendCode(verifyAuthCodeRequest));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-
-        return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
     @PostMapping("/create/order-otp")

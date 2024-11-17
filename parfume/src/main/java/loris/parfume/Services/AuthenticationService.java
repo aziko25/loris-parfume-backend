@@ -37,10 +37,10 @@ public class AuthenticationService {
 
     public UsersDTO authenticate(AuthRequest request) {
 
-        String phone = null;
-        if (!request.getPhone().startsWith("+")) {
+        String phone = request.getPhone();
+        if (!phone.startsWith("+")) {
 
-            phone = "+" + request.getPhone();
+            phone = "+" + phone;
         }
 
         String verificationCode = generateVerificationCode();
@@ -106,7 +106,13 @@ public class AuthenticationService {
 
     public Map<String, Object> verifyCode(VerifyAuthCodeRequest verifyAuthCodeRequest) {
 
-        Users user = usersRepository.findByPhone(verifyAuthCodeRequest.getPhone());
+        String phone = verifyAuthCodeRequest.getPhone();
+        if (!phone.startsWith("+")) {
+
+            phone = "+" + phone;
+        }
+
+        Users user = usersRepository.findByPhone(phone);
 
         if (user == null) {
 
@@ -140,7 +146,13 @@ public class AuthenticationService {
 
     public String resendCode(VerifyAuthCodeRequest verifyAuthCodeRequest) {
 
-        Users user = usersRepository.findByPhone(verifyAuthCodeRequest.getPhone());
+        String phone = verifyAuthCodeRequest.getPhone();
+        if (!phone.startsWith("+")) {
+
+            phone = "+" + phone;
+        }
+
+        Users user = usersRepository.findByPhone(phone);
 
         if (user == null) {
 
@@ -286,6 +298,10 @@ public class AuthenticationService {
     }
 
     public Map<String, Object> verifyOrderOtp(String phone, String otp) {
+
+        if (!phone.startsWith("+")) {
+            phone = "+" + phone;
+        }
 
         String storedOtp = orderOtpCodes.get(phone);
 

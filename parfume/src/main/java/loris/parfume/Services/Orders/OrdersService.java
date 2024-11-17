@@ -76,6 +76,13 @@ public class OrdersService {
         Users user = usersRepository.findById(USER_ID)
                     .orElseThrow(() -> new EntityNotFoundException("User Not Found"));
 
+        if (ordersRequest.getFullName() != null && !ordersRequest.getFullName().isEmpty()) {
+
+            user.setFullName(ordersRequest.getFullName());
+
+            usersRepository.save(user);
+        }
+
         /*Branches branch = branchesRepository.findById(ordersRequest.getBranchId())
                 .orElseThrow(() -> new EntityNotFoundException("Branch Not Found"));
 
@@ -114,8 +121,8 @@ public class OrdersService {
                 .city(ordersRequest.getCity())
                 .addressLocationLink(ordersRequest.getAddressLocationLink() + "&z=19")
                 .distance(ordersRequest.getDistance())
-                .fullName(user.getFullName())
-                .phone(user.getPhone())
+                .fullName(ordersRequest.getFullName())
+                .phone(ordersRequest.getPhone())
                 .comments(ordersRequest.getComment())
                 .sumForDelivery(deliverySum)
                 .isDelivered(false)

@@ -85,4 +85,34 @@ public class AuthorizationMethods {
 
         return true;
     }
+
+    public static boolean isJwtValid(String authorizationHeader) {
+
+        if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer ")) {
+
+            String token = authorizationHeader.substring("Bearer ".length()).trim();
+
+            try {
+
+                Claims claims = Jwts.parserBuilder()
+                        .setSigningKey(getSecretKey())
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+
+                Date expiration = claims.getExpiration();
+
+                USER_ID = ((Number) claims.get("id")).longValue();
+                ROLE = claims.get("role").toString();
+
+                return expiration == null || !expiration.before(new Date()); // Token is expired
+            }
+            catch (Exception e) {
+
+                return false; // Invalid token
+            }
+        }
+
+        return false;
+    }
 }

@@ -48,6 +48,7 @@ public class ItemsDTO implements Serializable {
 
     private Integer discountPercent;
     private Boolean isFiftyPercentSaleApplied;
+    private Boolean isActive;
 
     private List<String> imagesList;
 
@@ -81,6 +82,9 @@ public class ItemsDTO implements Serializable {
         price = item.getPrice();
         discountPercent = item.getDiscountPercent();
 
+        isFiftyPercentSaleApplied = false;
+        isActive = item.getIsActive();
+
         imagesList = new ArrayList<>();
         if (item.getItemsImagesList() != null && !item.getItemsImagesList().isEmpty()) {
 
@@ -104,7 +108,6 @@ public class ItemsDTO implements Serializable {
         }
 
         collectionsItemsList = new ArrayList<>();
-        isFiftyPercentSaleApplied = false;
         if (item.getCollectionsItemsList() != null && !item.getCollectionsItemsList().isEmpty()) {
 
             Set<Collections_Items> collectionsItems = new HashSet<>(item.getCollectionsItemsList());

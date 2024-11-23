@@ -58,9 +58,44 @@ public class CacheForAllService {
 
     @Cacheable(
             value = "itemsCache",
-            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionSlug-').concat(#collectionSlug != null ? T(String).valueOf(#collectionSlug) : '').concat('-categorySlug-').concat(#categorySlug != null ? T(String).valueOf(#categorySlug) : '')"
+            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionSlug-').concat(#collectionSlug != null ? T(String).valueOf(#collectionSlug) : '').concat('-categorySlug-').concat(#categorySlug != null ? T(String).valueOf(#categorySlug) : '').concat('-user')"
     )
-    public Page<ItemsDTO> allItems(Integer page, String collectionSlug, String categorySlug) {
+    public Page<ItemsDTO> allUsersItems(Integer page, String collectionSlug, String categorySlug) {
+
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createdTime").descending());
+
+        if (collectionSlug == null) {
+
+            return itemsRepository.findAllByIsActive(true, pageable).map(ItemsDTO::new);
+        }
+
+        Collections collection = collectionsRepository.findBySlug(collectionSlug)
+                .orElseThrow(() -> new EntityNotFoundException("Collection Not Found"));
+
+        if (categorySlug != null) {
+
+            Categories category = categoriesRepository.findBySlugAndCollection(categorySlug, collection)
+                    .orElseThrow(() -> new EntityNotFoundException("Category Not Found"));
+
+            return itemsRepository.findAllByCollectionsItemsList_CollectionAndCategoryAndIsActive(collection, category, true, pageable)
+                    .map(ItemsDTO::new);
+        }
+
+        Page<ItemsDTO> itemsDTOList = itemsRepository.findAllByCollectionsItemsList_CollectionAndIsActive(collection, true, pageable)
+                .map(ItemsDTO::new);
+
+        List<ItemsDTO> sortedItems = itemsDTOList.getContent().stream()
+                .sorted(Comparator.comparing(ItemsDTO::getCategorySortOrderWithinCollection, Comparator.nullsLast(Integer::compareTo)))
+                .toList();
+
+        return new PageImpl<>(sortedItems, pageable, itemsDTOList.getTotalElements());
+    }
+
+    @Cacheable(
+            value = "itemsCache",
+            key = "'page-'.concat(T(String).valueOf(#page)).concat('-collectionSlug-').concat(#collectionSlug != null ? T(String).valueOf(#collectionSlug) : '').concat('-categorySlug-').concat(#categorySlug != null ? T(String).valueOf(#categorySlug) : '').concat('-admin')"
+    )
+    public Page<ItemsDTO> allAdminsItems(Integer page, String collectionSlug, String categorySlug) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createdTime").descending());
 
@@ -84,14 +119,11 @@ public class CacheForAllService {
         Page<ItemsDTO> itemsDTOList = itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable)
                 .map(ItemsDTO::new);
 
-        // Sort items by categorySortOrderWithinCollection
         List<ItemsDTO> sortedItems = itemsDTOList.getContent().stream()
                 .sorted(Comparator.comparing(ItemsDTO::getCategorySortOrderWithinCollection, Comparator.nullsLast(Integer::compareTo)))
                 .toList();
 
-        // Return a new Page with the sorted items
         return new PageImpl<>(sortedItems, pageable, itemsDTOList.getTotalElements());
-        //return itemsRepository.findAllByCollectionsItemsList_Collection(collection, pageable).map(ItemsDTO::new);
     }
 
     @Cacheable(

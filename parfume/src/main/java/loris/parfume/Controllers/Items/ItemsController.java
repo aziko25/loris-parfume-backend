@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+import static loris.parfume.Configurations.JWT.AuthorizationMethods.isJwtValid;
+
 @RestController
 @RequestMapping("/api/v1/items")
 @RequiredArgsConstructor
@@ -27,12 +29,15 @@ public class ItemsController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<?> all(@RequestParam Integer page,
+    public ResponseEntity<?> all(@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+                                 @RequestParam Integer page,
                                  @RequestParam(required = false) String collectionSlug,
                                  @RequestParam(required = false) String categorySlug,
                                  @RequestBody(required = false) ItemFilters itemFilters) {
 
-        return ResponseEntity.ok(itemsService.all(page, collectionSlug, categorySlug, itemFilters));
+        boolean isAuthenticated = isJwtValid(authorizationHeader);
+
+        return ResponseEntity.ok(itemsService.all(isAuthenticated, page, collectionSlug, categorySlug, itemFilters));
     }
 
     @GetMapping("/{slug}")

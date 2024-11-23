@@ -11,11 +11,13 @@ import loris.parfume.DTOs.returnDTOs.ItemsDTO;
 import loris.parfume.Models.Items.*;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Items.*;
+import loris.parfume.Repositories.Items.ElasticSearchRepositories.ItemsElasticSearchRepository;
 import loris.parfume.Repositories.Orders.Orders_Items_Repository;
 import loris.parfume.Repositories.WishlistRepository;
 import loris.parfume.Services.CacheForAllService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static loris.parfume.Configurations.JWT.AuthorizationMethods.ROLE;
 
 @Service
 @RequiredArgsConstructor
@@ -45,11 +49,44 @@ public class ItemsService {
     private final BasketsRepository basketsRepository;
     private final Orders_Items_Repository ordersItemsRepository;
     private final Items_Images_Repository itemsImagesRepository;
+    private final ItemsElasticSearchRepository itemsElasticSearchRepository;
 
     private final FileUploadUtilService fileUploadUtilService;
 
     @Value("${pageSize}")
     private Integer pageSize;
+
+    @Bean
+    public void insertAllItemsToElasticSearch() {
+
+        try {
+
+            itemsElasticSearchRepository.deleteAll();
+
+            List<Items> itemsList = itemsRepository.findAll();
+
+            List<Items_ElasticSearch> elasticSearchItems = itemsList.stream()
+                    .map(item -> Items_ElasticSearch.builder()
+                            .id(item.getId())
+                            .slug(item.getSlug().replace(" ", "-").toLowerCase())
+                            .barcode(item.getBarcode())
+                            .nameUz(item.getNameUz())
+                            .nameRu(item.getNameRu())
+                            .nameEng(item.getNameEng())
+                            .descriptionUz(item.getDescriptionUz())
+                            .descriptionRu(item.getDescriptionRu())
+                            .descriptionEng(item.getDescriptionEng())
+                            .price(item.getPrice())
+                            .discountPercent(item.getDiscountPercent() != null ? item.getDiscountPercent() : 0)
+                            .isActive(item.getIsActive())
+                            .build()
+                    )
+                    .toList();
+
+            itemsElasticSearchRepository.saveAll(elasticSearchItems);
+        }
+        catch (Exception ignored) {}
+    }
 
     @Transactional
     @CacheEvict(value = "itemsCache", allEntries = true)
@@ -83,9 +120,26 @@ public class ItemsService {
                 .price(itemsRequest.getPrice())
                 .discountPercent(itemsRequest.getDiscountPercent() != null ? itemsRequest.getDiscountPercent() : 0)
                 .isRecommendedInMainPage(itemsRequest.getIsRecommendedInMainPage())
+                .isActive(true)
                 .build();
 
         itemsRepository.save(item);
+
+        Items_ElasticSearch itemsElasticSearch = Items_ElasticSearch.builder()
+                .slug(item.getSlug().replace(" ", "-").toLowerCase())
+                .barcode(itemsRequest.getBarcode())
+                .nameUz(itemsRequest.getNameUz())
+                .nameRu(itemsRequest.getNameRu())
+                .nameEng(itemsRequest.getNameEng())
+                .descriptionUz(itemsRequest.getDescriptionUz())
+                .descriptionRu(itemsRequest.getDescriptionRu())
+                .descriptionEng(itemsRequest.getDescriptionEng())
+                .price(itemsRequest.getPrice())
+                .discountPercent(itemsRequest.getDiscountPercent() != null ? itemsRequest.getDiscountPercent() : 0)
+                .isActive(true)
+                .build();
+
+        itemsElasticSearchRepository.save(itemsElasticSearch);
 
         item.setCollectionsItemsList(setItemsCollections(itemsRequest, item));
 
@@ -136,18 +190,57 @@ public class ItemsService {
         return new ItemsDTO(itemsRepository.save(item));
     }
 
-    public Page<ItemsDTO> all(Integer page, String collectionSlug, String categorySlug, ItemFilters itemFilters) {
+    public Page<ItemsDTO> all(boolean isAuthenticated, Integer page, String collectionSlug, String categorySlug, ItemFilters itemFilters) {
 
         Pageable pageable = PageRequest.of(page - 1, pageSize);
+
+        if (isAuthenticated && ROLE != null && ROLE.equalsIgnoreCase("ADMIN")) {
+
+            if (itemFilters.getSearch() == null && itemFilters.getFirstA() == null && itemFilters.getFirstZ() == null &&
+                    itemFilters.getFirstExpensive() == null && itemFilters.getFirstCheap() == null) {
+
+                return cacheForAllService.allAdminsItems(page, collectionSlug, categorySlug);
+            }
+
+            List<Long> foundItemsList = new ArrayList<>();
+            if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
+
+                List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findAllByNameUz(itemFilters.getSearch(), pageSize);
+
+                foundItemsList.addAll(itemsList.stream().map(Items_ElasticSearch::getId).toList());
+
+                System.out.println(foundItemsList);
+            }
+
+            return itemsRepository.findAllItemsByFiltersAndIds(
+                    foundItemsList,
+                    itemFilters.getFirstA(),
+                    itemFilters.getFirstZ(),
+                    itemFilters.getFirstExpensive(),
+                    itemFilters.getFirstCheap(),
+                    collectionSlug,
+                    categorySlug,
+                    pageable
+            ).map(ItemsDTO::new);
+        }
 
         if (itemFilters.getSearch() == null && itemFilters.getFirstA() == null && itemFilters.getFirstZ() == null &&
             itemFilters.getFirstExpensive() == null && itemFilters.getFirstCheap() == null) {
 
-            return cacheForAllService.allItems(page, collectionSlug, categorySlug);
+            return cacheForAllService.allUsersItems(page, collectionSlug, categorySlug);
         }
 
-        return itemsRepository.findAllItemsByFilters(
-                itemFilters.getSearch(),
+        List<Long> foundItemsList = new ArrayList<>();
+        if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
+
+            List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findByMultiMatchAndIsActive(
+                    itemFilters.getSearch(), pageSize);
+
+            foundItemsList.addAll(itemsList.stream().map(Items_ElasticSearch::getId).toList());
+        }
+
+        return itemsRepository.findAllItemsByFiltersAndIdsAndIsActive(
+                foundItemsList,
                 itemFilters.getFirstA(),
                 itemFilters.getFirstZ(),
                 itemFilters.getFirstExpensive(),
@@ -169,6 +262,7 @@ public class ItemsService {
     public ItemsDTO update(String slug, ItemsRequest itemsRequest) throws IOException {
 
         Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Items_ElasticSearch itemElasticSearch = itemsElasticSearchRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
 
         if (itemsRequest.getSlug() != null) {
 
@@ -179,6 +273,7 @@ public class ItemsService {
             }
 
             item.setSlug(itemsRequest.getSlug().replace(" ", "-").toLowerCase());
+            itemElasticSearch.setSlug(itemsRequest.getSlug().replace(" ", "-").toLowerCase());
         }
 
         if (itemsRequest.getBarcode() != null) {
@@ -190,18 +285,33 @@ public class ItemsService {
             }
 
             item.setBarcode(itemsRequest.getBarcode());
+            itemElasticSearch.setBarcode(itemsRequest.getBarcode());
         }
 
         Optional.ofNullable(itemsRequest.getNameUz()).ifPresent(item::setNameUz);
+        Optional.ofNullable(itemsRequest.getNameUz()).ifPresent(itemElasticSearch::setNameUz);
+
         Optional.ofNullable(itemsRequest.getNameRu()).ifPresent(item::setNameRu);
+        Optional.ofNullable(itemsRequest.getNameUz()).ifPresent(itemElasticSearch::setNameRu);
+
         Optional.ofNullable(itemsRequest.getNameEng()).ifPresent(item::setNameEng);
+        Optional.ofNullable(itemsRequest.getNameEng()).ifPresent(itemElasticSearch::setNameEng);
 
         Optional.ofNullable(itemsRequest.getDescriptionUz()).ifPresent(item::setDescriptionUz);
+        Optional.ofNullable(itemsRequest.getDescriptionUz()).ifPresent(itemElasticSearch::setDescriptionUz);
+
         Optional.ofNullable(itemsRequest.getDescriptionRu()).ifPresent(item::setDescriptionRu);
+        Optional.ofNullable(itemsRequest.getDescriptionUz()).ifPresent(itemElasticSearch::setDescriptionRu);
+
         Optional.ofNullable(itemsRequest.getDescriptionEng()).ifPresent(item::setDescriptionEng);
+        Optional.ofNullable(itemsRequest.getDescriptionEng()).ifPresent(itemElasticSearch::setDescriptionEng);
 
         Optional.ofNullable(itemsRequest.getPrice()).ifPresent(item::setPrice);
+        Optional.ofNullable(itemsRequest.getPrice()).ifPresent(itemElasticSearch::setPrice);
+
         Optional.ofNullable(itemsRequest.getDiscountPercent()).ifPresent(item::setDiscountPercent);
+        Optional.ofNullable(itemsRequest.getDiscountPercent()).ifPresent(itemElasticSearch::setDiscountPercent);
+
         Optional.ofNullable(itemsRequest.getIsRecommendedInMainPage()).ifPresent(item::setIsRecommendedInMainPage);
 
         collectionsItemsRepository.deleteAllByItem(item);
@@ -252,6 +362,8 @@ public class ItemsService {
             item.setItemsImagesList(itemsImagesRepository.saveAll(imagesList));
         }
 
+        itemsElasticSearchRepository.save(itemElasticSearch);
+
         return new ItemsDTO(itemsRepository.save(item));
     }
 
@@ -260,6 +372,9 @@ public class ItemsService {
     public String delete(String slug) {
 
         Items item = itemsRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+        Items_ElasticSearch itemElasticSearch = itemsElasticSearchRepository.findBySlug(slug).orElseThrow(() -> new EntityNotFoundException("Item Not Found"));
+
+        itemsElasticSearchRepository.delete(itemElasticSearch);
 
         sizesItemsRepository.deleteAllByItem(item);
         collectionsItemsRepository.deleteAllByItem(item);

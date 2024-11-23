@@ -153,7 +153,7 @@ public class PromocodesService {
         if (!promocodeRequest.getIsUserActivationOnce()) {
             promocodes.setUserActivationQuantity(promocodeRequest.getUserActivationQuantity());
         } else {
-            promocodes.setUserActivationQuantity(null);
+            promocodes.setUserActivationQuantity(1);
         }
 
         return promocodesRepository.save(promocodes);

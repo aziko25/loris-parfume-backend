@@ -62,6 +62,7 @@ public class PromocodesService {
         }
 
         promocodes.setIsUserActivationOnce(true);
+        promocodes.setUserActivationQuantity(1);
         if (!promocodeRequest.getIsUserActivationOnce()) {
 
             promocodes.setIsUserActivationOnce(false);

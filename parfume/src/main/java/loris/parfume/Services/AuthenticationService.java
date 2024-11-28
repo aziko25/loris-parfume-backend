@@ -60,12 +60,15 @@ public class AuthenticationService {
                     .role("USER")
                     .authVerifyCode(verificationCode)
                     .build();
+
+            usersRepository.save(user);
+
+            scheduleDeletionTask(user);
         }
 
         usersRepository.save(user);
 
         scheduler.schedule(() -> resetPasswordCodes.remove(verificationCode), 5, TimeUnit.MINUTES);
-        scheduleDeletionTask(user);
 
         eskizService.sendOtp(request.getPhone(), verificationCode);
 

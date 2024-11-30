@@ -169,4 +169,16 @@ public class PromocodesService {
 
         return "Promocode Deleted!";
     }
+
+    public void activatePromocode(Users user, Promocodes promocode) {
+
+        promocode.setActivatedQuantity(promocode.getActivatedQuantity() + 1);
+        promocodesRepository.save(promocode);
+
+        Users_Promocodes usersPromocode = new Users_Promocodes();
+
+        usersPromocode.setPromocode(promocode);
+        usersPromocode.setUser(user);
+        usersPromocodesRepository.save(usersPromocode);
+    }
 }

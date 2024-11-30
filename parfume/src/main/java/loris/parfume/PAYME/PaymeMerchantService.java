@@ -8,6 +8,7 @@ import loris.parfume.PAYME.Result.*;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.SMS_Eskiz.EskizService;
+import loris.parfume.Services.Orders.PromocodesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,6 +29,7 @@ public class PaymeMerchantService {
     private final MainTelegramBot mainTelegramBot;
     private final BasketsRepository basketsRepository;
     private final EskizService eskizService;
+    private final PromocodesService promocodesService;
 
     @Value("${payment.chat.id}")
     private String paymentChatId;
@@ -167,6 +169,10 @@ public class PaymeMerchantService {
                     }
 
                     eskizService.sendOrderCreatedSms(clientsPhone, order.getId());
+
+                    if (order.getPromocode() != null) {
+                        promocodesService.activatePromocode(order.getUser(), order.getPromocode());
+                    }
 
                     return result;
                 }

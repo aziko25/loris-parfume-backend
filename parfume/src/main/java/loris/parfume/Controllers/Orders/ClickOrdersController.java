@@ -7,6 +7,7 @@ import loris.parfume.Models.Orders.Orders;
 import loris.parfume.Repositories.BasketsRepository;
 import loris.parfume.Repositories.Orders.OrdersRepository;
 import loris.parfume.SMS_Eskiz.EskizService;
+import loris.parfume.Services.Orders.PromocodesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class ClickOrdersController {
     private final MainTelegramBot mainTelegramBot;
     private final BasketsRepository basketsRepository;
     private final EskizService eskizService;
+    private final PromocodesService promocodesService;
 
     @Value("${payment.chat.id}")
     private String chatId;
@@ -133,6 +135,10 @@ public class ClickOrdersController {
         }
 
         eskizService.sendOrderCreatedSms(clientsPhone, order.getId());
+
+        if (order.getPromocode() != null) {
+            promocodesService.activatePromocode(order.getUser(), order.getPromocode());
+        }
 
         return ResponseEntity.ok(response);
     }

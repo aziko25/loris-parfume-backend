@@ -47,9 +47,7 @@ public class OrdersService {
     //private final BranchesService branchesService;
     private final Uzum_Nasiya_Clients_Repository uzumNasiyaClientsRepository;
     private final PromocodesService promocodesService;
-    private final PromocodesRepository promocodesRepository;
     private final MainTelegramBot mainTelegramBot;
-    private final Users_Promocodes_Repository usersPromocodesRepository;
     private final EskizService eskizService;
 
     @Value("${pageSize}")
@@ -233,15 +231,6 @@ public class OrdersService {
 
                 totalSum = totalSum - (totalSum * promocode.getDiscountPercent() / 100);
             }
-
-            promocode.setActivatedQuantity(promocode.getActivatedQuantity() + 1);
-            promocodesRepository.save(promocode);
-
-            Users_Promocodes usersPromocode = new Users_Promocodes();
-
-            usersPromocode.setPromocode(promocode);
-            usersPromocode.setUser(user);
-            usersPromocodesRepository.save(usersPromocode);
         }
 
         if (totalSum >= 500000) {

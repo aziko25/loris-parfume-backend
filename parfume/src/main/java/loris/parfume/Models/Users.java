@@ -28,6 +28,7 @@ public class Users {
     private String phone;
 
     private String fullName;
+    private String password;
     private String authVerifyCode;
     private String role;
 }

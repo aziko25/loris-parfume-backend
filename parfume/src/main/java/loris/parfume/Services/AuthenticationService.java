@@ -11,6 +11,7 @@ import loris.parfume.Models.Users;
 import loris.parfume.Repositories.UsersRepository;
 import loris.parfume.SMS_Eskiz.EskizService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,7 +36,7 @@ public class AuthenticationService {
     @Value("${jwt.token.expired}")
     private Long expired;
 
-    public UsersDTO authenticate(AuthRequest request) {
+    public ResponseEntity<?> authenticate(AuthRequest request) {
 
         String phone = request.getPhone();
         if (!phone.startsWith("+")) {
@@ -46,6 +47,19 @@ public class AuthenticationService {
         String verificationCode = generateVerificationCode();
 
         Users user = usersRepository.findByPhone(phone);
+
+        if (user != null && user.getRole().equalsIgnoreCase("ADMIN")
+                && request.getPassword() != null) {
+
+            if (user.getPassword().equals(request.getPassword())) {
+
+                return ResponseEntity.ok(generateJwt(user));
+            }
+            else {
+
+                throw new IllegalArgumentException("Wrong Password");
+            }
+        }
 
         if (user != null) {
 
@@ -72,7 +86,7 @@ public class AuthenticationService {
 
         eskizService.sendOtp(request.getPhone(), verificationCode);
 
-        return new UsersDTO(user);
+        return ResponseEntity.ok(new UsersDTO(user));
     }
 
     private void scheduleDeletionTask(Users user) {

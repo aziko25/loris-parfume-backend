@@ -14,10 +14,9 @@ public interface ItemsElasticSearchRepository extends ElasticsearchRepository<It
     @Query("{\"bool\": {\"should\": [" +
             "{\"match\": {\"nameUz\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
             "{\"match\": {\"nameRu\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
-            "{\"match\": {\"nameEng\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
             "{\"match\": {\"descriptionUz\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
             "{\"match\": {\"descriptionRu\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
-            "{\"match\": {\"descriptionEng\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}} " +
+            "{\"match\": {\"barcode\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}} " +
             "]}}, \"size\": ?1}")
     List<Items_ElasticSearch> findAllByNameUz(String searchUz, int size);
 
@@ -31,10 +30,9 @@ public interface ItemsElasticSearchRepository extends ElasticsearchRepository<It
               "should": [
                 { "match": { "nameUz": { "query": "?0", "fuzziness": "AUTO" }}},
                 { "match": { "nameRu": { "query": "?0", "fuzziness": "AUTO" }}},
-                { "match": { "nameEng": { "query": "?0", "fuzziness": "AUTO" }}},
                 { "match": { "descriptionUz": { "query": "?0", "fuzziness": "AUTO" }}},
                 { "match": { "descriptionRu": { "query": "?0", "fuzziness": "AUTO" }}},
-                { "match": { "descriptionEng": { "query": "?0", "fuzziness": "AUTO" }}}
+                { "match": { "barcode": { "query": "?0", "fuzziness": "AUTO" }}}
               ]
             }
           }

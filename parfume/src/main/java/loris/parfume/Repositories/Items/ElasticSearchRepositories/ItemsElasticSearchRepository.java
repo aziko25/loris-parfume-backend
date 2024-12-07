@@ -16,7 +16,6 @@ public interface ItemsElasticSearchRepository extends ElasticsearchRepository<It
             "{\"match\": {\"nameRu\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
             "{\"match\": {\"descriptionUz\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
             "{\"match\": {\"descriptionRu\": {\"query\": \"?0\", \"fuzziness\": \"AUTO\"}}}, " +
-            "{\"term\": {\"barcode\": \"?0\" }} " +
             "]}}, \"size\": ?1}")
     List<Items_ElasticSearch> findAllByNameUz(String searchUz, int size);
 
@@ -32,7 +31,6 @@ public interface ItemsElasticSearchRepository extends ElasticsearchRepository<It
                 { "match": { "nameRu": { "query": "?0", "fuzziness": "AUTO" }}},
                 { "match": { "descriptionUz": { "query": "?0", "fuzziness": "AUTO" }}},
                 { "match": { "descriptionRu": { "query": "?0", "fuzziness": "AUTO" }}},
-                { "term": { "barcode": "?0" }}
               ]
             }
           }

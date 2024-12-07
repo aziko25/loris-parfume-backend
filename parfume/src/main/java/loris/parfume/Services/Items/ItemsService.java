@@ -205,11 +205,18 @@ public class ItemsService {
             List<Long> foundItemsList = new ArrayList<>();
             if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
 
-                List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findAllByNameUz(itemFilters.getSearch(), pageSize);
+                Items item = itemsRepository.findByBarcode(itemFilters.getSearch()).orElse(null);
 
-                foundItemsList.addAll(itemsList.stream().map(Items_ElasticSearch::getId).toList());
+                if (item == null) {
 
-                System.out.println(foundItemsList);
+                    List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findAllByNameUz(itemFilters.getSearch(), pageSize);
+
+                    foundItemsList.addAll(itemsList.stream().map(Items_ElasticSearch::getId).toList());
+                }
+                else {
+
+                    foundItemsList.add(item.getId());
+                }
             }
 
             return itemsRepository.findAllItemsByFiltersAndIds(

@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class ItemsService {
     private final Orders_Items_Repository ordersItemsRepository;
     private final Items_Images_Repository itemsImagesRepository;
     private final ItemsElasticSearchRepository itemsElasticSearchRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     private final FileUploadUtilService fileUploadUtilService;
 
@@ -205,9 +207,9 @@ public class ItemsService {
             List<Long> foundItemsList = new ArrayList<>();
             if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
 
-                Items item = itemsRepository.findByBarcode(itemFilters.getSearch()).orElse(null);
+                Long barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ?;", Long.class, itemFilters.getSearch());
 
-                if (item == null) {
+                if (barcodeItemsId == null) {
 
                     List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findAllByNameUz(itemFilters.getSearch(), pageSize);
 
@@ -215,7 +217,7 @@ public class ItemsService {
                 }
                 else {
 
-                    foundItemsList.add(item.getId());
+                    foundItemsList.add(barcodeItemsId);
                 }
             }
 
@@ -240,9 +242,10 @@ public class ItemsService {
         List<Long> foundItemsList = new ArrayList<>();
         if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
 
-            Items item = itemsRepository.findByBarcode(itemFilters.getSearch()).orElse(null);
+            Long barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ? AND is_active = true;", Long.class, itemFilters.getSearch());
 
-            if (item == null) {
+            if (barcodeItemsId == null) {
+
                 List<Items_ElasticSearch> itemsList = itemsElasticSearchRepository.findByMultiMatchAndIsActive(
                         itemFilters.getSearch(), pageSize);
 
@@ -250,7 +253,7 @@ public class ItemsService {
             }
             else {
 
-                foundItemsList.add(item.getId());
+                foundItemsList.add(barcodeItemsId);
             }
         }
 

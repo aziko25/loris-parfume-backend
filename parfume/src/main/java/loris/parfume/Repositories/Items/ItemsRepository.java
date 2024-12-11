@@ -17,18 +17,19 @@ import java.util.Optional;
 public interface ItemsRepository extends JpaRepository<Items, Long> {
 
     @Query("SELECT i FROM Items i " +
-            "JOIN i.collectionsItemsList ci " +
-            "JOIN ci.collection c " +
+            "LEFT JOIN i.collectionsItemsList ci " +
+            "LEFT JOIN ci.collection c " +
             "LEFT JOIN i.category cat " +
             "WHERE " +
             "(:ids IS NULL OR i.id IN :ids) " +
             "AND (:collectionSlug IS NULL OR c.slug = :collectionSlug) " +
             "AND (:categorySlug IS NULL OR cat.slug = :categorySlug) " +
             "ORDER BY " +
-            "CASE WHEN :firstA IS NOT NULL AND :firstA = TRUE THEN i.nameUz END ASC, " +
-            "CASE WHEN :firstZ IS NOT NULL AND :firstZ = TRUE THEN i.nameUz END DESC, " +
-            "CASE WHEN :firstExpensive IS NOT NULL AND :firstExpensive = TRUE THEN i.price END DESC, " +
-            "CASE WHEN :firstCheap IS NOT NULL AND :firstCheap = TRUE THEN i.price END ASC")
+            "CASE WHEN :firstA = TRUE THEN i.nameUz END ASC, " +
+            "CASE WHEN :firstZ = TRUE THEN i.nameUz END DESC, " +
+            "CASE WHEN :firstExpensive = TRUE THEN i.price END DESC, " +
+            "CASE WHEN :firstCheap = TRUE THEN i.price END ASC, " +
+            "i.id") // Default sorting by ID
     Page<Items> findAllItemsByFiltersAndIds(
             @Param("ids") List<Long> ids,
             @Param("firstA") Boolean firstA,
@@ -49,10 +50,11 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             "AND (:collectionSlug IS NULL OR c.slug = :collectionSlug) " +
             "AND (:categorySlug IS NULL OR cat.slug = :categorySlug) " +
             "ORDER BY " +
-            "CASE WHEN :firstA IS NOT NULL AND :firstA = TRUE THEN i.nameUz END ASC, " +
-            "CASE WHEN :firstZ IS NOT NULL AND :firstZ = TRUE THEN i.nameUz END DESC, " +
-            "CASE WHEN :firstExpensive IS NOT NULL AND :firstExpensive = TRUE THEN i.price END DESC, " +
-            "CASE WHEN :firstCheap IS NOT NULL AND :firstCheap = TRUE THEN i.price END ASC")
+            "CASE WHEN :firstA = TRUE THEN i.nameUz END ASC, " +
+            "CASE WHEN :firstZ = TRUE THEN i.nameUz END DESC, " +
+            "CASE WHEN :firstExpensive = TRUE THEN i.price END DESC, " +
+            "CASE WHEN :firstCheap = TRUE THEN i.price END ASC, " +
+            "i.id") // Default sorting by ID
     Page<Items> findAllItemsByFiltersAndIdsAndIsActive(
             @Param("ids") List<Long> ids,
             @Param("firstA") Boolean firstA,
@@ -61,7 +63,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             @Param("firstCheap") Boolean firstCheap,
             @Param("collectionSlug") String collectionSlug,
             @Param("categorySlug") String categorySlug,
-            Pageable pageable);
+            Pageable pageable
+    );
 
     List<Items> findAllByCategory(Categories category);
 

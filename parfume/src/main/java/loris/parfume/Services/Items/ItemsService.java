@@ -221,6 +221,11 @@ public class ItemsService {
                 }
             }
 
+            if (foundItemsList.isEmpty()) {
+
+                foundItemsList = null;
+            }
+
             return itemsRepository.findAllItemsByFiltersAndIds(
                     foundItemsList,
                     itemFilters.getFirstA(),
@@ -255,6 +260,11 @@ public class ItemsService {
 
                 foundItemsList.add(barcodeItemsId);
             }
+        }
+
+        if (foundItemsList.isEmpty()) {
+
+            foundItemsList = null;
         }
 
         return itemsRepository.findAllItemsByFiltersAndIdsAndIsActive(

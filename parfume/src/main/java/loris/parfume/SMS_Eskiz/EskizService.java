@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import loris.parfume.Configurations.Telegram.MainTelegramBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDateTime;
 
@@ -29,8 +27,6 @@ public class EskizService {
     private final Sms_Otp_Repository smsOtpRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
-
-    private final MainTelegramBot mainTelegramBot;
 
     @Value("${eskiz.mail}")
     private String mail;
@@ -126,15 +122,7 @@ public class EskizService {
 
             restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         }
-        catch (Exception e) {
-
-            SendMessage message = new SendMessage();
-
-            message.setChatId(paymentChatId);
-            message.setText("Nomer Notog'ri Kiritilgan!");
-
-            mainTelegramBot.sendMessage(message);
-        }
+        catch (Exception ignored) {}
     }
 }
 

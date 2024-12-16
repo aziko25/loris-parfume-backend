@@ -205,9 +205,13 @@ public class ItemsService {
             }
 
             List<Long> foundItemsList = new ArrayList<>();
+            Long barcodeItemsId = null;
             if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
 
-                Long barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ?;", Long.class, itemFilters.getSearch());
+                try {
+                    barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ?;", Long.class, itemFilters.getSearch());
+                }
+                catch (Exception ignored) {}
 
                 if (barcodeItemsId == null) {
 
@@ -245,9 +249,14 @@ public class ItemsService {
         }
 
         List<Long> foundItemsList = new ArrayList<>();
+        Long barcodeItemsId = null;
         if (itemFilters.getSearch() != null && !itemFilters.getSearch().isEmpty()) {
 
-            Long barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ? AND is_active = true;", Long.class, itemFilters.getSearch());
+            try {
+
+                barcodeItemsId = jdbcTemplate.queryForObject("SELECT id FROM items WHERE barcode = ? AND is_active = true;", Long.class, itemFilters.getSearch());
+            }
+            catch (Exception ignored) {}
 
             if (barcodeItemsId == null) {
 

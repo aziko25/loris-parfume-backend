@@ -41,8 +41,8 @@ public interface ItemsRepository extends JpaRepository<Items, Long> {
             Pageable pageable);
 
     @Query("SELECT i FROM Items i " +
-            "JOIN i.collectionsItemsList ci " +
-            "JOIN ci.collection c " +
+            "LEFT JOIN i.collectionsItemsList ci " +
+            "LEFT JOIN ci.collection c " +
             "LEFT JOIN i.category cat " +
             "WHERE " +
             "(:ids IS NULL OR i.id IN :ids) " +
